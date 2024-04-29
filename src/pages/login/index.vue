@@ -1,10 +1,10 @@
 <script setup>
 import { useRouter } from 'vue-router';
+const emit = defineEmits()
 
-const $router = useRouter()
+// const $router = useRouter()
 const onLogin = () => {
-    console.log("login")
-    $router.push("/")
+    emit('signin-success')
 }
 </script>
 

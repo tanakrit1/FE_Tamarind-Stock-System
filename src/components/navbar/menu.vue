@@ -5,12 +5,12 @@ import { useRouter } from 'vue-router';
 const $router = useRouter()
 const itemNavbar = ref([
     {
-        name: 'Home',
+        name: 'หน้าแรก',
         path: '/',
         menu: []
     },
     {
-        name: 'Stock',
+        name: 'รับสินค้า',
         menu: [
             {
                 name: 'List',
@@ -27,7 +27,24 @@ const itemNavbar = ref([
         ]
     },
     {
-        name: 'Report',
+        name: 'สินค้าออก',
+        menu: [
+            {
+                name: 'List',
+                path: '/xxx'
+            },
+            {
+                name: 'Report',
+                path: '/yyy'
+            },
+            {
+                name: 'Setting',
+                path: '/zzz'
+            }
+        ]
+    },
+    {
+        name: 'รายงาน',
         menu: [
             {
                 name: 'xxxx',
@@ -63,12 +80,12 @@ const onChangePage = (path) => {
     <div class="relative inline-block text-left" >
         <div class="flex space-x-10" >
             <template v-for="(item, index) in itemNavbar" :key="index">
-                <button v-if="item?.menu.length === 0" type="button" class="font-bold text-white hover:text-black text-xl"
+                <button v-if="item?.menu.length === 0" type="button" class="font-bold text-black hover:text-gray-500 text-xl"
                     @click="onChangePage(item?.path)">
                     {{ item.name }}
                 </button>
                 <div v-else class="relative" @mouseover="onHoverItem(item?.menu)" @mouseleave="menuList = []">
-                    <button type="button" class="font-bold text-white hover:text-black text-xl">
+                    <button type="button" class="font-bold text-black hover:text-gray-500 text-xl">
                         {{ item.name }}
                     </button>
                     <div v-if="menuList === item?.menu && menuList.length > 0" class="absolute left-0 z-10 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
