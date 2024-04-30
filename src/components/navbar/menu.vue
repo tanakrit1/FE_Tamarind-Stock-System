@@ -13,33 +13,46 @@ const itemNavbar = ref([
         name: 'รับสินค้า',
         menu: [
             {
-                name: 'List',
-                path: '/xxx'
+                name: 'รับสินค้าจากผู้จัดจำหน่าย',
+                path: '/import-by-supplier'
             },
             {
-                name: 'Report',
-                path: '/yyy'
+                name: 'รับสินค้าจากการฝาก',
+                path: '/import-by-deposit'
             },
-            {
-                name: 'Setting',
-                path: '/zzz'
-            }
         ]
     },
     {
         name: 'สินค้าออก',
         menu: [
             {
-                name: 'List',
+                name: 'ขายสินค้า',
                 path: '/xxx'
             },
             {
-                name: 'Report',
+                name: 'นำสินค้าออก (จากการฝาก)',
                 path: '/yyy'
             },
+        ]
+    },
+    {
+        name: 'ข้อมูลพื้นฐาน',
+        menu: [
             {
-                name: 'Setting',
-                path: '/zzz'
+                name: 'พนักงาน',
+                path: '/master/employee'
+            },
+            {
+                name: 'สินค้า',
+                path: '/master/product'
+            },
+            {
+                name: 'ผู้จัดจำหน่าย',
+                path: '/master/supplier'
+            },
+            {
+                name: 'ลูกค้า',
+                path: '/master/customer'
             }
         ]
     },
@@ -91,7 +104,7 @@ const onChangePage = (path) => {
                     <div v-if="menuList === item?.menu && menuList.length > 0" class="absolute left-0 z-10 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                         <div class="py-1" role="none">
                             <template v-for="(menuItem, key) in item.menu" :key="key">
-                                <a @click="onChangePage(menuItem.path)" class="text-gray-700 block px-4 py-2 text-sm hover:bg-gray-100" >{{ menuItem.name }}</a>
+                                <a @click="onChangePage(menuItem.path)" class="text-gray-700 block px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer" >{{ menuItem.name }}</a>
                             </template>
                         </div>
                     </div>

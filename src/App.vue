@@ -23,8 +23,7 @@ onMounted(() => {
     <loader :status="$store.state.statusLoading" />
     <div v-if="loginMode">
         <navbar />
-        <div class="h-screen overflow-y-auto pt-20">
-            99
+        <div class="h-screen overflow-y-auto pt-24" style="background-color: #F1D6CF;">
             <router-view />
         </div>
     </div>
