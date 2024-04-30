@@ -4,7 +4,7 @@
 <template>
         <table class="table rounded-xl">
             <thead>
-                <tr style="background-color: #A2422C" >
+                <tr style="background-color: #A2422C" class="rounded-xl">
                     <th class="text-white text-lg">รหัสสินค้า</th>
                     <th class="text-white text-lg" >ชื่อสินค้า</th>
                     <th class="text-white text-lg">ประเภทสินค้า</th>

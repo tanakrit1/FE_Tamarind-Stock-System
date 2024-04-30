@@ -58,8 +58,8 @@ import TableHistory from './table-history.vue';
 
             </div>
 
-            <div class="pt-8 rounded-xl mb-10 overflow-auto">
-                <TableHistory />
+            <div class="pt-8 rounded-xl mb-10 overflow-auto rounded-xl">
+                <TableHistory/>
             </div>
             
         </div>
