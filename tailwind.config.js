@@ -11,7 +11,7 @@ export default {
     themes: [
       {
         garden: {
-          ...require("daisyui/src/theming/themes")["retro"],
+          ...require("daisyui/src/theming/themes")["light"],
           primary: "#A2422C",
           warning: "#f6d860",
           accent: "#37cdbe",
