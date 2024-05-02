@@ -5,8 +5,8 @@ const router = createRouter({
     routes: [
         {
             path: "/",
-            name: "Home",
-            component: () => import("./pages/home/index.vue"),
+            name: "dashboard",
+            component: () => import("./pages/dashboard/index.vue"),
             props: true 
         },
         {
