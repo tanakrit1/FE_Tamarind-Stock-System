@@ -1,5 +1,10 @@
 <script setup>
 import TableHistory from './table-history.vue';
+import buttonPrimaryOutline from '../../../components/buttons/button-primary-outline.vue';
+
+const onSubmit = () => {
+    console.log("***onSubmit***")
+}
 
 </script>
 
@@ -75,8 +80,9 @@ import TableHistory from './table-history.vue';
 
 
                     <div class="flex justify-center my-6">
-                        <button type="button"
-                            class="font-semibold px-8 py-2 outline outline-red-700 rounded-full text-red-800 hover:bg-red-100">บันทึกข้อมูล</button>
+                        <buttonPrimaryOutline label="บันทึกข้อมูล" @onClick="onSubmit" />
+                        <!-- <button type="button"
+                            class="font-semibold px-8 py-2 outline outline-red-700 rounded-full text-red-800 hover:bg-red-100">บันทึกข้อมูล</button> -->
                     </div>
 
                 </div>

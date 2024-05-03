@@ -78,12 +78,10 @@ const itemNavbar = ref([
 const menuList = ref([])
 
 const onHoverItem = (menu) => {
-    console.log("--> ", menu)
     menuList.value = menu
 }
 
 const onChangePage = (path) => {
-    console.log("path--> ", path)
     $router.push(path)
 }
 
