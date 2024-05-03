@@ -1,16 +1,177 @@
+<script setup>
+// import { createVNode, h } from "vue";
+import tableBasic from "../../../components/tables/table-basic.vue";
+
+const columns = [
+  { field: "id", label: "รายการสินค้า", width: "15%" },
+  { field: "name", label: "หมายเลขเบิก", width: "17%" },
+  { field: "type", label: "ผู้เบิกสินค้า", width: "17%" },
+  { field: "quantity", label: "ปริมาณคงคลัง", width: "17%" },
+  { field: "price", label: "ปริมาณการเบิก", width: "17%" },
+  { field: "date", label: "ปริมาณคงเหลือ", width: "17%" },
+//   { field: "status", label: "สถานะ", width: "17%" },
+];
+
+const rows = [
+  {
+    id: "0000",
+    name: "AAAAA",
+    type: "BBBBB",
+    quantity: "CCCCC",
+    price: "DDDDD",
+    date: "EEEEEE",
+    // status: createVNode('button', null, 'สถานะ'),
+  },
+  {
+    id: "0000",
+    name: "AAAAA",
+    type: "BBBBB",
+    quantity: "CCCCC",
+    price: "DDDDD",
+    date: "EEEEEE",
+  },
+  {
+    id: "0000",
+    name: "AAAAA",
+    type: "BBBBB",
+    quantity: "CCCCC",
+    price: "DDDDD",
+    date: "EEEEEE",
+  },
+  {
+    id: "0000",
+    name: "AAAAA",
+    type: "BBBBB",
+    quantity: "CCCCC",
+    price: "DDDDD",
+    date: "EEEEEE",
+  },
+  {
+    id: "0000",
+    name: "AAAAA",
+    type: "BBBBB",
+    quantity: "CCCCC",
+    price: "DDDDD",
+    date: "EEEEEE",
+  },
+];
+</script>
 <template>
-    <div class="flex md:justify-center">
-        <div class="sm:w-1/1 md:w-2/3 flex flex-col mb-10 space-y-10">
-            <div class="space-y-3">
-                <div class="flex space-x-3">
-                    <svg width="33" height="33" viewBox="0 0 33 33" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path fill-rule="evenodd" clip-rule="evenodd"
-                            d="M0.995833 19.0804C1.41009 21.1629 3.14804 22.9008 6.6239 26.3766C10.0998 29.8525 11.8377 31.5906 13.9203 32.0048C14.8219 32.1842 15.75 32.1842 16.6515 32.0048C18.7342 31.5906 20.4721 29.8527 23.948 26.3766L28.057 22.2678C30.2972 20.0276 31.4172 18.9075 31.949 17.47C32.4806 16.0327 32.3592 14.4533 32.1163 11.2945L31.8328 7.6103C31.6132 4.75558 31.5034 3.32821 30.5878 2.4127C29.6724 1.49719 28.2449 1.38739 25.3903 1.16778L21.7061 0.884389C18.5473 0.641407 16.9679 0.519916 15.5305 1.05165C14.0931 1.58337 12.973 2.70348 10.7328 4.94365L6.6239 9.05258C3.14804 12.5285 1.41009 14.2664 0.995833 16.349C0.816493 17.2506 0.816493 18.1788 0.995833 19.0804ZM20.2357 12.7647C21.6025 14.1316 23.8185 14.1316 25.1854 12.7647C26.5522 11.3979 26.5522 9.18182 25.1854 7.81498C23.8185 6.44816 21.6025 6.44816 20.2357 7.81498C18.8688 9.18182 18.8688 11.3979 20.2357 12.7647Z"
-                            fill="#A2422C" />
-                    </svg>
-                    <span class="text-2xl font-bold text-red-800">รับสินค้า (ผู้ฝาก)</span>
-                </div>
-                </div>
+  <div class="flex md:justify-center">
+    <div class="sm:w-1/1 md:w-2/3 flex flex-col mb-5 space-y-2">
+      <div class="flex justify-between">
+        <div class="flex">
+                    <svg width="33" height="33" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path fill-rule="evenodd" clip-rule="evenodd" d="M10.9436 1.25H13.0564C14.8942 1.24998 16.3498 1.24997 17.489 1.40314C18.6614 1.56076 19.6104 1.89288 20.3588 2.64124C21.1071 3.38961 21.4392 4.33856 21.5969 5.51098C21.75 6.65019 21.75 8.10583 21.75 9.94359V14.0564C21.75 15.8942 21.75 17.3498 21.5969 18.489C21.4392 19.6614 21.1071 20.6104 20.3588 21.3588C19.6104 22.1071 18.6614 22.4392 17.489 22.5969C16.3498 22.75 14.8942 22.75 13.0564 22.75H10.9436C9.10583 22.75 7.65019 22.75 6.51098 22.5969C5.33856 22.4392 4.38961 22.1071 3.64124 21.3588C2.89288 20.6104 2.56076 19.6614 2.40314 18.489C2.24997 17.3498 2.24998 15.8942 2.25 14.0564V9.94358C2.24998 8.10582 2.24997 6.65019 2.40314 5.51098C2.56076 4.33856 2.89288 3.38961 3.64124 2.64124C4.38961 1.89288 5.33856 1.56076 6.51098 1.40314C7.65019 1.24997 9.10582 1.24998 10.9436 1.25ZM6.71085 2.88976C5.70476 3.02502 5.12511 3.27869 4.7019 3.7019C4.27869 4.12511 4.02502 4.70476 3.88976 5.71085C3.75159 6.73851 3.75 8.09318 3.75 10V14C3.75 15.9068 3.75159 17.2615 3.88976 18.2892C4.02502 19.2952 4.27869 19.8749 4.7019 20.2981C5.12511 20.7213 5.70476 20.975 6.71085 21.1102C7.73851 21.2484 9.09318 21.25 11 21.25H13C14.9068 21.25 16.2615 21.2484 17.2892 21.1102C18.2952 20.975 18.8749 20.7213 19.2981 20.2981C19.7213 19.8749 19.975 19.2952 20.1102 18.2892C20.2484 17.2615 20.25 15.9068 20.25 14V10C20.25 8.09318 20.2484 6.73851 20.1102 5.71085C19.975 4.70476 19.7213 4.12511 19.2981 3.7019C18.8749 3.27869 18.2952 3.02502 17.2892 2.88976C16.2615 2.75159 14.9068 2.75 13 2.75H11C9.09318 2.75 7.73851 2.75159 6.71085 2.88976ZM7.25 8C7.25 7.58579 7.58579 7.25 8 7.25H16C16.4142 7.25 16.75 7.58579 16.75 8C16.75 8.41421 16.4142 8.75 16 8.75H8C7.58579 8.75 7.25 8.41421 7.25 8ZM7.25 12C7.25 11.5858 7.58579 11.25 8 11.25H16C16.4142 11.25 16.75 11.5858 16.75 12C16.75 12.4142 16.4142 12.75 16 12.75H8C7.58579 12.75 7.25 12.4142 7.25 12ZM7.25 16C7.25 15.5858 7.58579 15.25 8 15.25H13C13.4142 15.25 13.75 15.5858 13.75 16C13.75 16.4142 13.4142 16.75 13 16.75H8C7.58579 16.75 7.25 16.4142 7.25 16Z" fill="#A2422C"></path> </g></svg>
+
+          <span class="text-2xl font-bold text-red-800"
+            >รายการสินค้านำออก (จากการฝาก)</span
+          >
         </div>
+        <div class="flex">
+          <button
+            class="outline outline-2 outline-red-800 px-6 py-1 bg-red-800 hover:bg-red-100 hover:text-red-800 hover:outline-red-800 rounded-full text-white"
+          >
+            <div class="flex space-x-2 items-center">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 35 35"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  fill-rule="evenodd"
+                  clip-rule="evenodd"
+                  d="M17.5 0C10.9003 0 7.60051 0 5.55025 2.05025C3.5 4.10051 3.5 7.40033 3.5 14V21C3.5 27.5996 3.5 30.8996 5.55025 32.9497C7.60051 35 10.9003 35 17.5 35C24.0996 35 27.3996 35 29.4497 32.9497C31.5 30.8996 31.5 27.5996 31.5 21V14C24.9004 14 21.6004 14 19.5503 11.9498C17.5 9.89949 17.5 6.59967 17.5 0Z"
+                  fill="#F1D6CF"
+                />
+                <path
+                  fill-rule="evenodd"
+                  clip-rule="evenodd"
+                  d="M17.5002 17.5874C18.225 17.5874 18.8127 18.1751 18.8127 18.8999V21.4376H21.35C22.0749 21.4376 22.6625 22.0251 22.6625 22.7501C22.6625 23.4749 22.0749 24.0626 21.35 24.0626H18.8127V26.5999C18.8127 27.3249 18.225 27.9124 17.5002 27.9124C16.7752 27.9124 16.1876 27.3249 16.1876 26.5999V24.0626H13.65C12.9252 24.0626 12.3375 23.4749 12.3375 22.7501C12.3375 22.0251 12.9252 21.4376 13.65 21.4376H16.1876V18.8999C16.1876 18.1751 16.7752 17.5874 17.5002 17.5874Z"
+                  fill="#C2796A"
+                />
+                <path
+                  d="M20.3 1.45099C20.3 0.771493 21.0023 0.31927 21.6209 0.600452C25.7338 2.46994 29.0299 5.76629 30.8994 9.87909C31.1807 10.4977 30.7285 11.2 30.0489 11.2H24.85C22.3372 11.2 20.3 9.16292 20.3 6.65003V1.45099Z"
+                  fill="#C2796A"
+                />
+              </svg>
+              <span class="text-sm">เพิ่มสินค้านำออก</span>
+            </div>
+          </button>
+        </div>
+      </div>
+      <div role="tablist" class="tabs tabs-bordered w-full space-y-5">
+        <input
+          type="radio"
+          name="my_tabs_1"
+          role="tab"
+          class="tab"
+          aria-label="รายการสั่งซื้อ"
+          checked
+        />
+        <div role="tabpanel" class="tab-content p-5 space-y-4">
+          <div class="flex justify-end">
+            <button
+              class="outline outline-2 outline-red-800 px-6 py-1 bg-red-100 rounded-full text-red-800"
+            >
+              <div class="flex space-x-16 items-start">
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                  <g
+                    id="SVGRepo_tracerCarrier"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  ></g>
+                  <g id="SVGRepo_iconCarrier">
+                    <path
+                      d="M10 17C13.866 17 17 13.866 17 10C17 6.13401 13.866 3 10 3C6.13401 3 3 6.13401 3 10C3 13.866 6.13401 17 10 17Z"
+                      stroke="#A2422C"
+                      stroke-width="1.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    ></path>
+                    <path
+                      d="M20.9992 21L14.9492 14.95"
+                      stroke="#A2422C"
+                      stroke-width="1.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    ></path>
+                  </g>
+                </svg>
+                <span class="text-sm text-thin">ค้นหา</span>
+              </div>
+            </button>
+          </div>
+          <div class="rounded-xl mb-10 overflow-auto">
+            <tableBasic :columns="columns" :rows="rows" />
+            <div class="flex justify-end py-5">
+            <div class="join">
+                <input class="join-item btn btn-square" type="radio" name="options" aria-label="1" checked />
+                <input class="join-item btn btn-square" type="radio" name="options" aria-label="2" />
+                <input class="join-item btn btn-square" type="radio" name="options" aria-label="3" />
+                <input class="join-item btn btn-square" type="radio" name="options" aria-label="4" />
+            </div>
+        </div>
+          </div>
+        </div>
+
+        <input
+          type="radio"
+          name="my_tabs_1"
+          role="tab"
+          class="tab"
+          aria-label="รายการเบิก"
+        />
+        <div role="tabpanel" class="tab-content p-10">Tab content 2</div>
+      </div>
     </div>
+  </div>
 </template>

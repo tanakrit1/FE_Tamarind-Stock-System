@@ -15,7 +15,9 @@ const props = defineProps(['columns', 'rows'])
                 <td v-for="(column, index) in props.columns" :key="index">{{ row[column.field] }}</td>
             </tr>
         </tbody>
+        
     </table>
+    
 </template>
 
 
