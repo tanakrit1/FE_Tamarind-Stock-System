@@ -1,5 +1,15 @@
 <script setup>
+import tabVersion1 from '../../components/tabs/tab-version1.vue';
 // import outlineBlueBtn from '../../components/button/btn-blue-outline.vue'
+import testTabs1 from './test-tab1.vue';
+import testTab2 from './test-tab2.vue';
+const tabs = [
+    { label: "รายการสั่งซื้อ", component: testTabs1 },
+    { label: "รายการเบิก", component: testTab2 },
+]
+
+
+
 </script>
 
 <template>
@@ -21,6 +31,11 @@
                 <span class="text-5xl font-bold text-white ml-3">คน</span>
             </div>
         </div>
+
+        <div class="mt-6">
+            <tabVersion1 :tabs="tabs"/>
+        </div>
+       
     </div>
     <!-- <div class="rounded-xl bg-white px-6 ">
         <span class="text-3xl font-bold text-lime-500">Testttt</span>

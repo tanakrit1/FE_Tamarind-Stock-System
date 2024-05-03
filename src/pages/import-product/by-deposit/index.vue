@@ -1,5 +1,27 @@
 <script setup>
-import TableHistory from './table-history.vue';
+import tableBasic from '../../../components/tables/table-basic.vue';
+import buttonPrimaryOutline from '../../../components/buttons/button-primary-outline.vue';
+
+const columns = [
+    { field: "id", label: "รหัสสินค้า", width: "15%" },
+    { field: "name", label: "ชื่อสินค้า", width: "17%" },
+    { field: "type", label: "ประเภทสินค้า", width: "17%" },
+    { field: "quantity", label: "ปริมาณ", width: "17%" },
+    { field: "price", label: "ราคา", width: "17%" },
+    { field: "date", label: "วันที่รับ", width: "17%" },
+]
+
+const rows = [
+    { id: "0000", name: "AAAAA", type: "BBBBB", quantity: "CCCCC", price: "DDDDD", date: "EEEEEE" },
+    { id: "0000", name: "AAAAA", type: "BBBBB", quantity: "CCCCC", price: "DDDDD", date: "EEEEEE" },
+    { id: "0000", name: "AAAAA", type: "BBBBB", quantity: "CCCCC", price: "DDDDD", date: "EEEEEE" },
+    { id: "0000", name: "AAAAA", type: "BBBBB", quantity: "CCCCC", price: "DDDDD", date: "EEEEEE" },
+    { id: "0000", name: "AAAAA", type: "BBBBB", quantity: "CCCCC", price: "DDDDD", date: "EEEEEE" },
+]
+
+const onSubmit = () => {
+    console.log("***onSubmit***")
+}
 
 </script>
 
@@ -17,33 +39,33 @@ import TableHistory from './table-history.vue';
                 </div>
                 <div class="w-full bg-white rounded-xl py-3 ">
                     <div class="px-6">
-                        <span class="text-lg font-semibold">ข้อมูลสินค้า</span>
+                        <span class="text-lg font-semibold text-red-800">ข้อมูลสินค้า</span>
                     </div>
                     <hr class="mt-2 mx-6" style="border: 1px solid #C2796A">
                     <div class="px-12 flex flex-wrap pt-10">
                         <div class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6">
-                            <span class="w-1/4">รหัสสินค้า</span>
+                            <span class="w-1/4 text-red-800 font-semibold">รหัสสินค้า</span>
                             <input
                                 class="h-8 w-3/4 outline outline-red-300 focus:outline-red-400 rounded bg-red-100 px-3"
                                 type="text" />
                         </div>
 
                         <div class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6">
-                            <span class="w-1/4">ชื่อสินค้า</span>
+                            <span class="w-1/4 text-red-800 font-semibold">ชื่อสินค้า</span>
                             <input
                                 class="h-8 w-3/4 outline outline-red-300 focus:outline-red-400 rounded bg-red-100 px-3"
                                 type="text" />
                         </div>
 
                         <div class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6">
-                            <span class="w-1/4">ประเภทสินค้า</span>
+                            <span class="w-1/4 text-red-800 font-semibold">ประเภทสินค้า</span>
                             <input
                                 class="h-8 w-3/4 outline outline-red-300 focus:outline-red-400 rounded bg-red-100 px-3"
                                 type="text" />
                         </div>
 
                         <div class="lg:basis-1/2  basis-full space-x-3 flex items-center px-6 mb-6">
-                            <span class="w-1/4">รายละเอียด</span>
+                            <span class="w-1/4 text-red-800 font-semibold">รายละเอียด</span>
                             <textarea
                                 class="w-3/4 outline outline-red-300 focus:outline-red-400 rounded bg-red-100 px-3 py-2"
                                 rows="1" type="text"></textarea>
@@ -51,21 +73,21 @@ import TableHistory from './table-history.vue';
                         </div>
 
                         <div class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6">
-                            <span class="w-1/4">วันที่รับสินค้าเข้าคลัง</span>
+                            <span class="w-1/4 text-red-800 font-semibold">วันที่รับสินค้าเข้าคลัง</span>
                             <input
                                 class="h-8 w-3/4 outline outline-red-300 focus:outline-red-400 rounded bg-red-100 px-3"
                                 type="date" />
                         </div>
 
                         <div class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6">
-                            <span class="w-1/4">ราคา</span>
+                            <span class="w-1/4 text-red-800 font-semibold">ราคา</span>
                             <input
                                 class="h-8 w-3/4 outline outline-red-300 focus:outline-red-400 rounded bg-red-100 px-3"
                                 type="text" />
                         </div>
 
                         <div class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6">
-                            <span class="w-1/4">ปริมาณ</span>
+                            <span class="w-1/4 text-red-800 font-semibold">ปริมาณ</span>
                             <input
                                 class="h-8 w-3/4 outline outline-red-300 focus:outline-red-400 rounded bg-red-100 px-3"
                                 type="text" />
@@ -75,15 +97,16 @@ import TableHistory from './table-history.vue';
 
 
                     <div class="flex justify-center my-6">
-                        <button type="button"
-                            class="px-8 py-2 outline outline-red-700 rounded-full hover:bg-red-100">บันทึกข้อมูล</button>
+                        <buttonPrimaryOutline label="บันทึกข้อมูล" @onClick="onSubmit" />
+                        <!-- <button type="button"
+                            class="font-semibold px-8 py-2 outline outline-red-700 rounded-full text-red-800 hover:bg-red-100">บันทึกข้อมูล</button> -->
                     </div>
 
                 </div>
             </div>
 
             <div class="rounded-xl mb-10 overflow-auto ">
-                <TableHistory />
+                <tableBasic :columns="columns" :rows="rows"/>
             </div>
 
         </div>
