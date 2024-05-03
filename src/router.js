@@ -27,6 +27,18 @@ const router = createRouter({
             component: () => import("./pages/import-product/by-deposit/index.vue"),
             props: true 
         },
+        {
+            path: "/export-by-deposit",
+            name: "export-by-deposit",
+            component: () => import("./pages/export-product/ex-by-deposit/index.vue"),
+            props: true 
+        },
+        {
+            path: "/export-by-deposit",
+            name: "export-by-deposit",
+            component: () => import("./pages/export-product/ex-by-deposit/index.vue"),
+            props: true 
+        },
     ],
 });
 

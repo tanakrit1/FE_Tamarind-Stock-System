@@ -27,11 +27,11 @@ const itemNavbar = ref([
         menu: [
             {
                 name: 'ขายสินค้า',
-                path: '/xxx'
+                path: '/export-by-supplier'
             },
             {
                 name: 'นำสินค้าออก (จากการฝาก)',
-                path: '/yyy'
+                path: '/export-by-deposit'
             },
         ]
     },
