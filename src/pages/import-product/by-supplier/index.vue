@@ -1,6 +1,23 @@
 <script setup>
-import TableHistory from './table-history.vue';
+import tableBasic from '../../../components/tables/table-basic.vue';
 import buttonPrimaryOutline from '../../../components/buttons/button-primary-outline.vue';
+
+const columns = [
+    { field: "id", label: "รหัสสินค้า", width: "15%" },
+    { field: "name", label: "ชื่อสินค้า", width: "17%" },
+    { field: "type", label: "ประเภทสินค้า", width: "17%" },
+    { field: "quantity", label: "ปริมาณ", width: "17%" },
+    { field: "price", label: "ราคา", width: "17%" },
+    { field: "date", label: "วันที่รับ", width: "17%" },
+]
+
+const rows = [
+    { id: "0000", name: "AAAAA", type: "BBBBB", quantity: "CCCCC", price: "DDDDD", date: "EEEEEE" },
+    { id: "0000", name: "AAAAA", type: "BBBBB", quantity: "CCCCC", price: "DDDDD", date: "EEEEEE" },
+    { id: "0000", name: "AAAAA", type: "BBBBB", quantity: "CCCCC", price: "DDDDD", date: "EEEEEE" },
+    { id: "0000", name: "AAAAA", type: "BBBBB", quantity: "CCCCC", price: "DDDDD", date: "EEEEEE" },
+    { id: "0000", name: "AAAAA", type: "BBBBB", quantity: "CCCCC", price: "DDDDD", date: "EEEEEE" },
+]
 
 const onSubmit = () => {
     console.log("***onSubmit***")
@@ -89,7 +106,7 @@ const onSubmit = () => {
             </div>
 
             <div class="rounded-xl mb-10 overflow-auto ">
-                <TableHistory />
+                <tableBasic :columns="columns" :rows="rows"/>
             </div>
 
         </div>
