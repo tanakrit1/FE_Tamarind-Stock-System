@@ -7,11 +7,11 @@ export default {
       }
     },
 
-    onLogin(parm, sucess) {
-        Axios.post(`/auth/sign-in`, parm, this.config_authen()).then((response) => {
-          sucess(response.data)
+    async onLogin(param, result) {
+        await Axios.post(`/auth/sign-in`, param, this.config_authen()).then((response) => {
+            result(response.data)
         }).catch((response) => {
-          sucess(response)
+            result(response.response)
         })
     },
 

@@ -1,5 +1,10 @@
 6+3<script setup>
 import menuItem from './menu.vue'
+const emit = defineEmits()
+
+const onLogOut = () => {
+    emit("logout-success")
+}
 
 </script>
 
@@ -15,11 +20,11 @@ import menuItem from './menu.vue'
                 <span class="font-bold text-white">ธนกฤต  ครุฑอ่ำ</span>
                 <span class="font-bold text-white">ผู้ดูแลระบบ</span>
             </div>
-            <div class="avatar">
-                <div class="w-12 rounded-full">
-                    <img src="https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" />
-                </div>
-            </div>
+            <button class="flex items-center space-x-3 px-6  text-white hover:text-black" @click="onLogOut">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 8 8">
+                    <path fill="currentColor" d="M3 0v1h4v5H3v1h5V0zm1 2v1H0v1h4v1l2-1.5z" />
+                </svg>
+            </button>
         </div>
     </div>
 </template>

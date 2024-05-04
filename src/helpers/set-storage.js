@@ -1,15 +1,17 @@
-const setLoginStorage = (val) => {
-    localStorage.setItem("sessionInfo", val);
-
+const setLoginStorage = (profile, token) => {
+    sessionStorage.setItem("profile", JSON.stringify(profile));
+    sessionStorage.setItem("token", token);
 };
 
 const getLoginStorage = () => {
-    const sessionInfo = localStorage?.getItem("sessionInfo");
-    return { sessionInfo: JSON.parse(sessionInfo)}
+    const profile = sessionStorage?.getItem("profile");
+    const token = sessionStorage?.getItem("token");
+    return { profile: JSON.parse(profile), token: token}
 }
 
 const removeLoginStorage = () => {
-    localStorage.removeItem("sessionInfo");
+    sessionStorage.removeItem("profile");
+    sessionStorage.removeItem("token");
 }
 
 export { setLoginStorage, getLoginStorage, removeLoginStorage }
