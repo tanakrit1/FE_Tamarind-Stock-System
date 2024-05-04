@@ -28,17 +28,24 @@ const router = createRouter({
             props: true 
         },
         {
-            path: "/export-by-deposit",
-            name: "export-by-deposit",
-            component: () => import("./pages/export-product/ex-by-deposit/index.vue"),
+            path: "/export-product",
+            name: "export-product",
+            component: () => import("./pages/export-product/index.vue"),
             props: true 
         },
         {
-            path: "/export-by-deposit",
-            name: "export-by-deposit",
-            component: () => import("./pages/export-product/ex-by-deposit/index.vue"),
+            path: "/add-list-deposit",
+            name: "add-list-deposit",
+            component: () => import("./pages/export-product/add-list-deposit/index.vue"),
             props: true 
         },
+        {
+            path: "/add-list-supplier",
+            name: "add-list-supplier",
+            component: () => import("./pages/export-product/add-list-supplier/index.vue"),
+            props: true 
+        },
+        
     ],
 });
 
