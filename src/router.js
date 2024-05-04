@@ -28,9 +28,15 @@ const router = createRouter({
             props: true 
         },
         {
-            path: "/export-product",
-            name: "export-product",
-            component: () => import("./pages/export-product/index.vue"),
+            path: "/report/order-list",
+            name: "order-list",
+            component: () => import("./pages/report/order-list.vue"),
+            props: true 
+        },
+        {
+            path: "/report/withdrawal-list",
+            name: "withdrawal-list",
+            component: () => import("./pages/report/withdrawal-list.vue"),
             props: true 
         },
         {

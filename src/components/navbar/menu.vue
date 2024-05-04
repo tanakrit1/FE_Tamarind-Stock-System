@@ -24,7 +24,6 @@ const itemNavbar = ref([
     },
     {
         name: 'สินค้าออก',
-        path: '/export-product',
         menu: [
             {
                 name: 'ขายสินค้า',
@@ -62,11 +61,11 @@ const itemNavbar = ref([
         menu: [
             {
                 name: 'รายงานการนำเข้าสินค้า',
-                path: '/xxx'
+                path: '/report/order-list'
             },
             {
                 name: 'รายงานการนำออกสินค้า',
-                path: '/yyy'
+                path: '/report/withdrawal-list'
             },
             {
                 name: 'zzzz',
