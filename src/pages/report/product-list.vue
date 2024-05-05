@@ -104,14 +104,14 @@ const rows = [
             <div class="flex flex-col">
               <span class="text-red-800 font-semibold">รหัสสินค้า</span>
               <input
-                class="h-8 w-50 outline-red-300 focus:outline-red-400 rounded bg-red-100 px-3"
+                class="h-8 w-50 focus:outline-red-400 rounded bg-red-100 px-3"
                 type="text"
               />
             </div>
             <div class="flex flex-col">
               <span class="text-red-800 font-semibold">ชื่อสินค้า</span>
               <input
-                class="h-8 w-50 outline-red-300 focus:outline-red-400 rounded bg-red-100 px-3"
+                class="h-8 w-50 focus:outline-red-400 rounded bg-red-100 px-3"
                 type="text"
               />
             </div>
@@ -120,7 +120,7 @@ const rows = [
             <div class="flex flex-col">
               <span class="text-red-800 font-semibold">ประเภทนำเข้าสินค้า</span>
               <select
-                class="h-8 w-50 outline-red-300 focus:outline-red-400 rounded bg-red-100 px-3"
+                class="h-8 w-50 focus:outline-red-400 rounded bg-red-100 px-3"
               >
                 <option disabled selected>ผู้จัดจำหน่าย</option>
                 <option>จากการฝาก</option>
@@ -131,7 +131,7 @@ const rows = [
                 >วันที่สั่งซื้อ/เบิก</span
               >
               <input
-                class="h-8 w-50 outline-red-300 focus:outline-red-400 rounded bg-red-100 px-3"
+                class="h-8 w-50 focus:outline-red-400 rounded bg-red-100 px-3"
                 type="date"
               />
             </div>
@@ -140,7 +140,7 @@ const rows = [
                 >ราคา</span
               >
               <input
-                class="h-8 w-50 outline-red-300 focus:outline-red-400 rounded bg-red-100 px-3"
+                class="h-8 w-50 focus:outline-red-400 rounded bg-red-100 px-3"
                 type="text"
               />
             </div>
@@ -149,7 +149,7 @@ const rows = [
                 >ปริมาณ</span
               >
               <input
-                class="h-8 w-50 outline-red-300 focus:outline-red-400 rounded bg-red-100 px-3"
+                class="h-8 w-50 focus:outline-red-400 rounded bg-red-100 px-3"
                 type="text"
               />
             </div>
