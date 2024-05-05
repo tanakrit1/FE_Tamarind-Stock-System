@@ -58,7 +58,7 @@ import buttonPrimaryOutline from "../../../components/buttons/button-primary-out
           <div class="flex flex-col">
             <span class="text-red-800 font-semibold">ชื่อสินค้า</span>
             <input
-              class="h-8 w-50 outline outline-red-300 focus:outline-red-400 rounded bg-red-100 px-3"
+              class="h-8 w-50 focus:outline-red-400 rounded bg-red-100 px-3"
               type="text"
             />
           </div>
@@ -66,14 +66,14 @@ import buttonPrimaryOutline from "../../../components/buttons/button-primary-out
           <div class="flex flex-col">
             <span class="text-red-800 font-semibold">วันที่ขอเบิกสินค้า</span>
             <input
-              class="h-8 w-50 outline outline-red-300 focus:outline-red-400 rounded bg-red-100 px-3"
+              class="h-8 w-50 focus:outline-red-400 rounded bg-red-100 px-3"
               type="date"
             />
           </div>
           <div class="flex flex-col">
             <span class="text-red-800 font-semibold">ปริมาณสินค้าคงคลัง</span>
             <input
-              class="h-8 w-50 outline outline-red-300 focus:outline-red-400 rounded bg-red-100 px-3"
+              class="h-8 w-50 focus:outline-red-400 rounded bg-red-100 px-3"
               type="text"
             />
           </div>
@@ -81,7 +81,7 @@ import buttonPrimaryOutline from "../../../components/buttons/button-primary-out
           <div class="flex flex-col">
             <span class="text-red-800 font-semibold">ปริมาณการเบิกสินค้า</span>
             <input
-              class="h-8 w-50 outline outline-red-300 focus:outline-red-400 rounded bg-red-100 px-3"
+              class="h-8 w-50 focus:outline-red-400 rounded bg-red-100 px-3"
               type="text"
             />
           </div>
@@ -99,7 +99,7 @@ import buttonPrimaryOutline from "../../../components/buttons/button-primary-out
             <div class="flex flex-col my-3 space-y-2">
               <span class="text-red-800 font-semibold">ชื่อ - สกุล</span>
               <input
-                class="h-8 w-50 outline outline-red-300 focus:outline-red-400 rounded bg-red-100 px-3"
+                class="h-8 w-50 focus:outline-red-400 rounded bg-red-100 px-3"
                 type="text"
               />
             </div>
@@ -108,7 +108,7 @@ import buttonPrimaryOutline from "../../../components/buttons/button-primary-out
             <div class="flex flex-col my-3 space-y-2">
               <span class="text-red-800 font-semibold">เบอร์โทร</span>
               <input
-                class="h-8 w-50 outline outline-red-300 focus:outline-red-400 rounded bg-red-100 px-3"
+                class="h-8 w-50 focus:outline-red-400 rounded bg-red-100 px-3"
                 type="text"
               />
             </div>
@@ -117,7 +117,7 @@ import buttonPrimaryOutline from "../../../components/buttons/button-primary-out
             <div class="flex flex-col my-3 space-y-2">
               <span class="text-red-800 font-semibold">ที่อยู่</span>
               <textarea
-                class="outline outline-red-300 focus:outline-red-400 rounded bg-red-100 px-3 py-2"
+                class="focus:outline-red-400 rounded bg-red-100 px-3 py-2"
                 rows="5"
                 type="text"
               ></textarea>
@@ -127,7 +127,7 @@ import buttonPrimaryOutline from "../../../components/buttons/button-primary-out
             <div class="flex flex-col my-3 space-y-2">
               <span class="text-red-800 font-semibold">จังหวัด</span>
               <input
-                class="h-8 w-50 outline outline-red-300 focus:outline-red-400 rounded bg-red-100 px-3"
+                class="h-8 w-50 focus:outline-red-400 rounded bg-red-100 px-3"
                 type="text"
               />
             </div>
@@ -136,7 +136,7 @@ import buttonPrimaryOutline from "../../../components/buttons/button-primary-out
             <div class="flex flex-col my-3 space-y-2">
               <span class="text-red-800 font-semibold">รหัสไปรษณีย์</span>
               <input
-                class="h-8 w-50 outline outline-red-300 focus:outline-red-400 rounded bg-red-100 px-3"
+                class="h-8 w-50 focus:outline-red-400 rounded bg-red-100 px-3"
                 type="text"
               />
             </div>
