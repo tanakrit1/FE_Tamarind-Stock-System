@@ -4,13 +4,14 @@ import { useRouter } from "vue-router";
 const $router = useRouter();
 
 const columns = [
-  { field: "id", label: "รายการสินค้า", width: "30%" },
-  { field: "name", label: "หมายเลขเบิก", width: "17%" },
-  { field: "type", label: "ผู้เบิกสินค้า", width: "17%" },
-  { field: "quantity", label: "ปริมาณคงคลัง", width: "17%" },
-  { field: "price", label: "ปริมาณการเบิก", width: "17%" },
-  { field: "date", label: "ปริมาณคงเหลือ", width: "17%" },
-  { field: "status", label: "สถานะ", width: "30%" },
+  { field: "id", label: "รหัสสินค้า", width: "auto" },
+  { field: "name", label: "ชื่อสินค้า", width: "auto" },
+  { field: "type", label: "ประเภทสินค้า", width: "auto" },
+  { field: "detail", label: "รายละเอียด", width: "auto" },
+  { field: "quantity", label: "ปริมาณ", width: "auto" },
+  { field: "price", label: "ราคา", width: "auto" },
+  { field: "date", label: "วันที่รับสินค้าเข้าคลัง", width: "auto" },
+  { field: "status", label: "สถานะ", width: "auto" },
 ];
 
 const rows = [
@@ -18,52 +19,57 @@ const rows = [
     id: "0000",
     name: "AAAAA",
     type: "BBBBB",
-    quantity: "CCCCC",
-    price: "DDDDD",
-    date: "EEEEEE",
+    detail: "CCCCC",
+    quantity: "FFFFF",
+    price: "GGGGG",
+    date: "HHHHH",
     status: "เสร็จสิ้น",
   },
   {
     id: "0000",
     name: "AAAAA",
     type: "BBBBB",
-    quantity: "CCCCC",
-    price: "DDDDD",
-    date: "EEEEEE",
+    detail: "CCCCC",
+    quantity: "FFFFF",
+    price: "GGGGG",
+    date: "HHHHH",
     status: "กําลังดําเนินการ",
   },
   {
     id: "0000",
     name: "AAAAA",
     type: "BBBBB",
-    quantity: "CCCCC",
-    price: "DDDDD",
-    date: "EEEEEE",
+    detail: "CCCCC",
+    quantity: "FFFFF",
+    price: "GGGGG",
+    date: "HHHHH",
     status: "กําลังดําเนินการ",
   },
   {
     id: "0000",
     name: "AAAAA",
     type: "BBBBB",
-    quantity: "CCCCC",
-    price: "DDDDD",
-    date: "EEEEEE",
+    detail: "CCCCC",
+    quantity: "FFFFF",
+    price: "GGGGG",
+    date: "HHHHH",
     status: "กําลังดําเนินการ",
   },
   {
     id: "0000",
     name: "AAAAA",
     type: "BBBBB",
-    quantity: "CCCCC",
-    price: "DDDDD",
-    date: "EEEEEE",
+    detail: "CCCCC",
+    quantity: "FFFFF",
+    price: "GGGGG",
+    date: "HHHHH",
     status: "กําลังดําเนินการ",
   },
 ];
 </script>
 <template>
   <div class="flex md:justify-center">
-    <div class="sm:w-1/1 md:w-2/3 flex flex-col mb-5 space-y-2">
+    <div class="sm:w-1/1 md:w-4/5 flex flex-col mb-5 space-y-2">
       <div class="flex justify-start">
         <div class="flex">
           <svg
@@ -89,12 +95,19 @@ const rows = [
             </g>
           </svg>
 
-          <span class="text-2xl font-bold text-red-800">รายการสินค้านำออก</span>
+          <span class="text-2xl font-bold text-red-800">รายการนำเข้าสินค้า</span>
         </div>
       </div>
       <div class="flex justify-center pb-5">
         <div class="w-full bg-white rounded-xl py-5">
-          <div class="grid grid-cols-2 gap-4 px-6 mt-3">
+          <div class="grid grid-cols-3 gap-4 px-6 mt-3">
+            <div class="flex flex-col">
+              <span class="text-red-800 font-semibold">รหัสสินค้า</span>
+              <input
+                class="h-8 w-50 outline outline-red-300 focus:outline-red-400 rounded bg-red-100 px-3"
+                type="text"
+              />
+            </div>
             <div class="flex flex-col">
               <span class="text-red-800 font-semibold">ชื่อสินค้า</span>
               <input
@@ -103,30 +116,51 @@ const rows = [
               />
             </div>
 
+            
             <div class="flex flex-col">
-              <span class="text-red-800 font-semibold">วันที่ขอเบิกสินค้า</span>
+              <span class="text-red-800 font-semibold">ประเภทนำเข้าสินค้า</span>
+              <select
+                class="h-8 w-50 outline outline-red-300 focus:outline-red-400 rounded bg-red-100 px-3"
+              >
+                <option disabled selected>ผู้จัดจำหน่าย</option>
+                <option>จากการฝาก</option>
+              </select>
+            </div>
+            <div class="flex flex-col">
+              <span class="text-red-800 font-semibold"
+                >วันที่สั่งซื้อ/เบิก</span
+              >
               <input
                 class="h-8 w-50 outline outline-red-300 focus:outline-red-400 rounded bg-red-100 px-3"
                 type="date"
               />
             </div>
             <div class="flex flex-col">
-              <span class="text-red-800 font-semibold">ปริมาณสินค้าคงคลัง</span>
-              <input
-                class="h-8 w-50 outline outline-red-300 focus:outline-red-400 rounded bg-red-100 px-3"
-                type="text"
-              />
-            </div>
-
-            <div class="flex flex-col">
               <span class="text-red-800 font-semibold"
-                >ปริมาณการเบิกสินค้า</span
+                >ราคา</span
               >
               <input
                 class="h-8 w-50 outline outline-red-300 focus:outline-red-400 rounded bg-red-100 px-3"
                 type="text"
               />
             </div>
+            <div class="flex flex-col">
+              <span class="text-red-800 font-semibold"
+                >ปริมาณ</span
+              >
+              <input
+                class="h-8 w-50 outline outline-red-300 focus:outline-red-400 rounded bg-red-100 px-3"
+                type="text"
+              />
+            </div>
+            
+          </div>
+          <div class="flex justify-center py-5">
+            <button
+              class="h-10 w-40 btn btn-outline btn-error btn-wide text-xl font-semibold"
+            >
+              ค้นหา
+            </button>
           </div>
         </div>
       </div>

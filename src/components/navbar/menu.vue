@@ -61,11 +61,11 @@ const itemNavbar = ref([
         menu: [
             {
                 name: 'รายงานการนำเข้าสินค้า',
-                path: '/report/order-list'
+                path: '/report/product-list'
             },
             {
                 name: 'รายงานการนำออกสินค้า',
-                path: '/report/withdrawal-list'
+                path: '/report/order-list'
             },
             {
                 name: 'zzzz',

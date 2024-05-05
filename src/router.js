@@ -28,15 +28,15 @@ const router = createRouter({
             props: true 
         },
         {
-            path: "/report/order-list",
-            name: "order-list",
-            component: () => import("./pages/report/order-list.vue"),
+            path: "/report/product-list",
+            name: "product-list",
+            component: () => import("./pages/report/product-list.vue"),
             props: true 
         },
         {
-            path: "/report/withdrawal-list",
-            name: "withdrawal-list",
-            component: () => import("./pages/report/withdrawal-list.vue"),
+            path: "/report/order-list",
+            name: "order-list",
+            component: () => import("./pages/report/order-list.vue"),
             props: true 
         },
         {

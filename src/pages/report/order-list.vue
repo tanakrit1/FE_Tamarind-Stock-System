@@ -4,66 +4,78 @@ import { useRouter } from "vue-router";
 const $router = useRouter();
 
 const columns = [
-  { field: "id", label: "รายการสินค้า", width: "30%" },
-  { field: "name", label: "หมายเลขคำสั่งซื้อ", width: "17%" },
-  { field: "type", label: "ลูกค้า", width: "17%" },
-  { field: "quantity", label: "ที่อยู่", width: "17%" },
-  { field: "price", label: "เบอร์โทรศัพท์", width: "17%" },
-  { field: "date", label: "ปริมาณ", width: "17%" },
-  { field: "status", label: "สถานะ", width: "30%" },
+  { field: "id", label: "หมายเลขคำสั่งซื้อ/เบิก", width: "auto" },
+  { field: "name", label: "รายการสินค้า", width: "auto" },
+  { field: "type", label: "ประเภทสินค้า", width: "auto" },
+  { field: "customer", label: "ลูกค้า", width: "auto" },
+  { field: "address", label: "ที่อยู่", width: "auto" },
+  { field: "phone", label: "เบอร์โทรศัพท์", width: "auto" },
+  { field: "quantity", label: "ปริมาณ", width: "auto" },
+  { field: "date", label: "วันที่สั่งซื้อ/เบิก", width: "auto" },
+  { field: "status", label: "สถานะ", width: "auto" },
 ];
 
 const rows = [
-  {
+  { 
     id: "0000",
     name: "AAAAA",
     type: "BBBBB",
-    quantity: "CCCCC",
-    price: "DDDDD",
-    date: "EEEEEE",
+    customer: "CCCCC",
+    address: "DDDDD",
+    phone: "EEEEEE",
+    quantity: "FFFFF",
+    date: "GGGGG",
     status: "เสร็จสิ้น",
   },
   {
     id: "0000",
     name: "AAAAA",
     type: "BBBBB",
-    quantity: "CCCCC",
-    price: "DDDDD",
-    date: "EEEEEE",
+    customer: "CCCCC",
+    address: "DDDDD",
+    phone: "EEEEEE",
+    quantity: "FFFFF",
+    date: "GGGGG",
     status: "กําลังดําเนินการ",
   },
   {
     id: "0000",
     name: "AAAAA",
     type: "BBBBB",
-    quantity: "CCCCC",
-    price: "DDDDD",
-    date: "EEEEEE",
+    customer: "CCCCC",
+    address: "DDDDD",
+    phone: "EEEEEE",
+    quantity: "FFFFF",
+    date: "GGGGG",
     status: "กําลังดําเนินการ",
   },
   {
     id: "0000",
     name: "AAAAA",
     type: "BBBBB",
-    quantity: "CCCCC",
-    price: "DDDDD",
-    date: "EEEEEE",
+    customer: "CCCCC",
+    address: "DDDDD",
+    phone: "EEEEEE",
+    quantity: "FFFFF",
+    date: "GGGGG",
     status: "กําลังดําเนินการ",
   },
   {
     id: "0000",
     name: "AAAAA",
     type: "BBBBB",
-    quantity: "CCCCC",
-    price: "DDDDD",
-    date: "EEEEEE",
+    customer: "CCCCC",
+    address: "DDDDD",
+    phone: "EEEEEE",
+    quantity: "FFFFF",
+    date: "GGGGG", 
     status: "กําลังดําเนินการ",
   },
 ];
 </script>
 <template>
   <div class="flex md:justify-center">
-    <div class="sm:w-1/1 md:w-2/3 flex flex-col mb-5 space-y-2">
+    <div class="sm:w-1/1 md:w-4/5 flex flex-col mb-5 space-y-2">
       <div class="flex justify-start">
         <div class="flex">
           <svg
@@ -89,14 +101,21 @@ const rows = [
             </g>
           </svg>
 
-          <span class="text-2xl font-bold text-red-800">รายการสินค้านำออก</span>
+          <span class="text-2xl font-bold text-red-800">รายการนำออกสินค้า</span>
         </div>
       </div>
       <div class="flex justify-center pb-5">
         <div class="w-full bg-white rounded-xl py-5">
-          <div class="grid grid-cols-2 gap-4 px-6 mt-3">
+          <div class="grid grid-cols-3 gap-4 px-6 mt-3">
             <div class="flex flex-col">
-              <span class="text-red-800 font-semibold">ชื่อสินค้า</span>
+              <span class="text-red-800 font-semibold">รหัสสินค้า</span>
+              <input
+                class="h-8 w-50 outline outline-red-300 focus:outline-red-400 rounded bg-red-100 px-3"
+                type="text"
+              />
+            </div>
+            <div class="flex flex-col">
+              <span class="text-red-800 font-semibold">รายการสินค้า</span>
               <input
                 class="h-8 w-50 outline outline-red-300 focus:outline-red-400 rounded bg-red-100 px-3"
                 type="text"
@@ -104,29 +123,48 @@ const rows = [
             </div>
 
             <div class="flex flex-col">
-              <span class="text-red-800 font-semibold">วันที่ขอเบิกสินค้า</span>
+              <span class="text-red-800 font-semibold">หมายเลขคำสั่งซื้อ/เบิก</span>
+              <input
+                class="h-8 w-50 outline outline-red-300 focus:outline-red-400 rounded bg-red-100 px-3"
+                type="text"
+              />
+            </div>
+            
+            <div class="flex flex-col">
+              <span class="text-red-800 font-semibold">ประเภทสินค้านำออก</span>
+              <select
+                class="h-8 w-50 outline outline-red-300 focus:outline-red-400 rounded bg-red-100 px-3"
+              >
+                <option disabled selected>ผู้จัดจำหน่าย</option>
+                <option>จากการฝาก</option>
+              </select>
+            </div>
+            <div class="flex flex-col">
+              <span class="text-red-800 font-semibold"
+                >วันที่สั่งซื้อ/เบิก</span
+              >
               <input
                 class="h-8 w-50 outline outline-red-300 focus:outline-red-400 rounded bg-red-100 px-3"
                 type="date"
               />
             </div>
             <div class="flex flex-col">
-              <span class="text-red-800 font-semibold">ปริมาณสินค้าคงคลัง</span>
-              <input
+              <span class="text-red-800 font-semibold">สถานะ</span>
+              <select
                 class="h-8 w-50 outline outline-red-300 focus:outline-red-400 rounded bg-red-100 px-3"
-                type="text"
-              />
-            </div>
-
-            <div class="flex flex-col">
-              <span class="text-red-800 font-semibold"
-                >ปริมาณการเบิกสินค้า</span
               >
-              <input
-                class="h-8 w-50 outline outline-red-300 focus:outline-red-400 rounded bg-red-100 px-3"
-                type="text"
-              />
+                <option disabled selected>ดำเนินการเสร็จสิ้น</option>
+                <option>กำลังดำเนินการ</option>
+                <option>ยกเลิก</option>
+              </select>
             </div>
+          </div>
+          <div class="flex justify-center py-5">
+            <button
+              class="h-10 w-40 btn btn-outline btn-error btn-wide text-xl font-semibold"
+            >
+              ค้นหา
+            </button>
           </div>
         </div>
       </div>
