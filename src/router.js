@@ -51,6 +51,31 @@ const router = createRouter({
             component: () => import("./pages/export-product/add-list-supplier/index.vue"),
             props: true 
         },
+
+        {
+            path: "/master-employee",
+            name: "master-employee",
+            component: () => import("./pages/master/employees/index.vue"),
+            props: true 
+        },
+        {
+            path: "/master-customer",
+            name: "master-customer",
+            component: () => import("./pages/master/customers/index.vue"),
+            props: true 
+        },
+        {
+            path: "/master-supplier",
+            name: "master-suppliers",
+            component: () => import("./pages/master/suppliers/index.vue"),
+            props: true 
+        },
+        {
+            path: "/master-product",
+            name: "master-product",
+            component: () => import("./pages/master/products/index.vue"),
+            props: true 
+        },
         
     ],
 });
