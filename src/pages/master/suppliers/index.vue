@@ -3,7 +3,7 @@
 
 <template>
     <div>
-        Employee
+        Supplier
     </div>
 </template>
 

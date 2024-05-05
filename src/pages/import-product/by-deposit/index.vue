@@ -46,7 +46,7 @@ const onSubmit = () => {
                         <div class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6">
                             <span class="w-1/4 text-red-800 font-semibold">รหัสสินค้า</span>
                             <input
-                                class="h-8 w-3/4 outline outline-red-300 focus:outline-red-400 rounded bg-red-100 px-3"
+                                class="h-8 w-3/4  focus:outline-red-400 rounded bg-red-100 px-3"
                                 type="text" />
                         </div>
 

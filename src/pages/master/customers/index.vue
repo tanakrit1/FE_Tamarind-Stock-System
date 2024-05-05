@@ -3,7 +3,7 @@
 
 <template>
     <div>
-        Employee
+        Customer
     </div>
 </template>
 
