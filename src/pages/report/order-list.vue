@@ -110,14 +110,14 @@ const rows = [
             <div class="flex flex-col">
               <span class="text-red-800 font-semibold">รหัสสินค้า</span>
               <input
-                class="h-8 w-50 outline outline-red-300 focus:outline-red-400 rounded bg-red-100 px-3"
+                class="h-8 w-50 focus:outline-red-400 rounded bg-red-100 px-3"
                 type="text"
               />
             </div>
             <div class="flex flex-col">
               <span class="text-red-800 font-semibold">รายการสินค้า</span>
               <input
-                class="h-8 w-50 outline outline-red-300 focus:outline-red-400 rounded bg-red-100 px-3"
+                class="h-8 w-50 focus:outline-red-400 rounded bg-red-100 px-3"
                 type="text"
               />
             </div>
@@ -125,7 +125,7 @@ const rows = [
             <div class="flex flex-col">
               <span class="text-red-800 font-semibold">หมายเลขคำสั่งซื้อ/เบิก</span>
               <input
-                class="h-8 w-50 outline outline-red-300 focus:outline-red-400 rounded bg-red-100 px-3"
+                class="h-8 w-50 focus:outline-red-400 rounded bg-red-100 px-3"
                 type="text"
               />
             </div>
@@ -133,7 +133,7 @@ const rows = [
             <div class="flex flex-col">
               <span class="text-red-800 font-semibold">ประเภทสินค้านำออก</span>
               <select
-                class="h-8 w-50 outline outline-red-300 focus:outline-red-400 rounded bg-red-100 px-3"
+                class="h-8 w-50 focus:outline-red-400 rounded bg-red-100 px-3"
               >
                 <option disabled selected>ผู้จัดจำหน่าย</option>
                 <option>จากการฝาก</option>
@@ -144,14 +144,14 @@ const rows = [
                 >วันที่สั่งซื้อ/เบิก</span
               >
               <input
-                class="h-8 w-50 outline outline-red-300 focus:outline-red-400 rounded bg-red-100 px-3"
+                class="h-8 w-50 focus:outline-red-400 rounded bg-red-100 px-3"
                 type="date"
               />
             </div>
             <div class="flex flex-col">
               <span class="text-red-800 font-semibold">สถานะ</span>
               <select
-                class="h-8 w-50 outline outline-red-300 focus:outline-red-400 rounded bg-red-100 px-3"
+                class="h-8 w-50 focus:outline-red-400 rounded bg-red-100 px-3"
               >
                 <option disabled selected>ดำเนินการเสร็จสิ้น</option>
                 <option>กำลังดำเนินการ</option>
@@ -161,7 +161,7 @@ const rows = [
           </div>
           <div class="flex justify-center py-5">
             <button
-              class="h-10 w-40 btn btn-outline btn-error btn-wide text-xl font-semibold"
+              class="h-10 w-40 btn btn-btn-error btn-wide text-xl font-semibold"
             >
               ค้นหา
             </button>
