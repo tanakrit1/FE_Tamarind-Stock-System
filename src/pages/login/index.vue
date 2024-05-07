@@ -20,19 +20,20 @@ const onCloseAlert = () => {
 }
 
 const onLogin = async () => {
-    await _apiAuthen.onLogin(formLogin.value, response => {
-        if (response?.statusCode === 200) {
-            setLoginStorage(response.data.profile, response.data.access_token)
-            emit('login-success')
-        } else {
-            formAlertModal.value = {
-                status: true,
-                titleMessage: "เกิดข้อผิดพลาด",
-                bodyMessage: response.data.description
-            }
-        }
+    // await _apiAuthen.onLogin(formLogin.value, response => {
+    //     if (response?.statusCode === 200) {
+    //         setLoginStorage(response.data.profile, response.data.access_token)
+    //         emit('login-success')
+    //     } else {
+    //         formAlertModal.value = {
+    //             status: true,
+    //             titleMessage: "เกิดข้อผิดพลาด",
+    //             bodyMessage: response.data.description
+    //         }
+    //     }
 
-    })
+    // })
+    emit('login-success')
 }
 </script>
 
