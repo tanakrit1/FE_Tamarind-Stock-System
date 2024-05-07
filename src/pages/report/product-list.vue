@@ -1,6 +1,7 @@
 <script setup>
 import tableBasic from "../../components/tables/table-basic.vue";
 import { useRouter } from "vue-router";
+import paginationPage from "../../components/pagination/pagination-page.vue";
 const $router = useRouter();
 
 const columns = [
@@ -167,33 +168,7 @@ const rows = [
       <div class="rounded-xl mb-10 overflow-auto">
         <tableBasic :columns="columns" :rows="rows" />
         <div class="flex justify-end py-5">
-          <div class="join">
-            <input
-              class="join-item btn btn-square"
-              type="radio"
-              name="options"
-              aria-label="1"
-              checked
-            />
-            <input
-              class="join-item btn btn-square"
-              type="radio"
-              name="options"
-              aria-label="2"
-            />
-            <input
-              class="join-item btn btn-square"
-              type="radio"
-              name="options"
-              aria-label="3"
-            />
-            <input
-              class="join-item btn btn-square"
-              type="radio"
-              name="options"
-              aria-label="4"
-            />
-          </div>
+          <pagination-page/>
         </div>
       </div>
     </div>
