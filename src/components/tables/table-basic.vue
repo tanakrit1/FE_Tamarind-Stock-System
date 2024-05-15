@@ -12,7 +12,7 @@ const props = defineProps(['columns', 'rows'])
         </thead>
         <tbody class="bg-white">
             <tr v-for="(row, index) in props.rows" :key="index">
-                <td v-for="(column, index) in props.columns" :key="index">{{ row[column.field] }}</td>
+                <td v-for="(column, index) in props.columns" :key="index" class="font-semibold">{{ row[column.field] }}</td>
             </tr>
         </tbody>
         

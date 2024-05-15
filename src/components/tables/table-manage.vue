@@ -39,7 +39,7 @@ const onClickRemove = (rowData) => {
         </thead>
         <tbody class="bg-white">
             <tr v-for="(row, index) in props.rows" :key="index">
-                <td v-for="(column, index) in props.columns" :key="index">{{ row[column.field] }}</td>
+                <td v-for="(column, index) in props.columns" :key="index" class="font-semibold">{{ row[column.field] }}</td>
                 <td v-if="props.rowEdit || props.rowRemove">
                     <div class="flex space-x-6 ">
                         <button class="rounded-full hover:bg-red-100 px-2 py-2" v-if="props.rowEdit"

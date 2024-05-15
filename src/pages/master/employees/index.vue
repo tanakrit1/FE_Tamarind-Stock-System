@@ -2,28 +2,58 @@
 // import ButtonPrimaryOutline from '../../../components/buttons/button-primary-outline.vue';
 import buttonPrimary from '../../../components/buttons/button-primary.vue';
 import buttonPrimaryOutline from '../../../components/buttons/button-primary-outline.vue';
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import tableManage from '../../../components/tables/table-manage.vue';
+import _apiUser from '../../../api/master-user'
+import store from '../../../store';
+import Alert from '../../../components/alert/alert.vue';
 
 const columns = [
-    { field: "id", label: "รหัสพนักงาน", width: "15%" },
-    { field: "name", label: "ชื่อผู้ใช้", width: "17%" },
-    { field: "position", label: "ตําแหน่ง", width: "17%" },
-    { field: "department", label: "แผนก", width: "17%" },
-    { field: "permission", label: "สิทธิ์", width: "17%" },
+    { field: "employeeID", label: "รหัสพนักงาน", width: "10%" },
+    { field: "firstName", label: "รหัสพนักงาน", width: "20%" },
+    { field: "lastName", label: "รหัสพนักงาน", width: "20%" },
+    { field: "username", label: "ชื่อผู้ใช้", width: "20%" },
+    { field: "role", label: "สิทธิ์", width: "30%" },
+
 ]
-const rows = ref([
-    { id: "0000", name: "AAAAA", position: "BBBBB", department: "CCCCC", permission: "DDDDD" },
-    { id: "0000", name: "AAAAA", position: "BBBBB", department: "CCCCC", permission: "DDDDD" },
-    { id: "0000", name: "AAAAA", position: "BBBBB", department: "CCCCC", permission: "DDDDD" },
-    { id: "0000", name: "AAAAA", position: "BBBBB", department: "CCCCC", permission: "DDDDD" },
-    { id: "0000", name: "AAAAA", position: "BBBBB", department: "CCCCC", permission: "DDDDD" },
-    { id: "0000", name: "AAAAA", position: "BBBBB", department: "CCCCC", permission: "DDDDD" },
+// const rows = ref([
+//     { id: "0000", name: "AAAAA", position: "BBBBB", department: "CCCCC", permission: "DDDDD" },
+//     { id: "0000", name: "AAAAA", position: "BBBBB", department: "CCCCC", permission: "DDDDD" },
+//     { id: "0000", name: "AAAAA", position: "BBBBB", department: "CCCCC", permission: "DDDDD" },
+//     { id: "0000", name: "AAAAA", position: "BBBBB", department: "CCCCC", permission: "DDDDD" },
+//     { id: "0000", name: "AAAAA", position: "BBBBB", department: "CCCCC", permission: "DDDDD" },
+//     { id: "0000", name: "AAAAA", position: "BBBBB", department: "CCCCC", permission: "DDDDD" },
+// ])
+const rows = ref([])
+const modalAlert = ref({
+    status: false,
+    title: "",
+    body: "",
+})
 
-])
-
+const formModal = ref({
+    employeeID: "",
+    username: "",
+    password: "",
+    confirmPassword: "",
+    firstName: "",
+    lastName: "",
+    role: "ผู้ดูแลระบบ"
+})
 const modeModal = ref("add")
 const rowAction = ref(null)
+
+const onClearFormModal = () => {
+    formModal.value = {
+        employeeID: "",
+        username: "",
+        password: "",
+        confirmPassword: "",
+        firstName: "",
+        lastName: "",
+        role: "ผู้ดูแลระบบ"
+    }
+}
 
 const onClickEdit = (row) => {
     console.log("onClickEdit--> ", row)
@@ -38,7 +68,7 @@ const onClickRemove = (row) => {
 const onOpenModal = (mode) => {
     modeModal.value = mode
     if (mode === "add") {
-
+        onClearFormModal()
     } else {
 
     }
@@ -47,9 +77,25 @@ const onOpenModal = (mode) => {
 
 const onSubmitModal = () => {
     console.log("***Submit***")
-    if( modeModal.value === "add"){
-        console.log("***Add***")
-    }else{
+    if (modeModal.value === "add") {
+        const body = {
+            employeeID: formModal.employeeID,
+            username: formModal.username,
+            password: formModal.password,
+            firstName: formModal.firstName,
+            lastName: formModal.lastName,
+            role: formModal.role
+        }
+        _apiUser.create( body, response => {
+            console.log("response---> ", response)
+            if( response.statusCode === 200 ){
+                modalAlert.value.status = true
+            }else{
+                modalAlert.value.status = true
+            }
+
+        } )
+    } else {
         console.log("***Edit***")
     }
 }
@@ -57,6 +103,24 @@ const onSubmitModal = () => {
 const onCloseModal = () => {
     document.getElementById("modal-employee").close()
 }
+
+const onLoadData = async () => {
+    const body = {
+        page: 1,
+        limit: 200,
+    }
+    await _apiUser.search(body, response => {
+        console.log("response --> ", response)
+        rows.value = response.data
+    })
+}
+
+onMounted(async () => {
+    store.commit('setStatusLoading', true)
+    await onLoadData()
+    onClearFormModal()
+    store.commit('setStatusLoading', false)
+})
 
 </script>
 
@@ -103,20 +167,67 @@ const onCloseModal = () => {
                 <h3 class="font-bold text-lg">{{ modeModal === 'add' ? 'เพิ่มผู้ใช้งาน' : 'แก้ไขผู้ใช้งาน' }}</h3>
                 <hr class="mt-2" style="border: 1px solid #c2796a">
                 <div class="py-4 flex flex-wrap">
-                    <div class="basis-1/2 px-3 space-y-2">
-                        <label>99</label><br>
-                        <input type="text" class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3" />
+                    <div class="basis-1/5 px-3 space-y-2 mb-3">
+                        <label class="font-semibold">รหัสผู้ใช้งาน</label><br>
+                        <input type="text" class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
+                            v-model="formModal.employeeID" />
                     </div>
+                    <div class="basis-2/5 px-3 space-y-2 mb-3">
+                        <label class="font-semibold">ชื่อ</label><br>
+                        <input type="text" class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
+                            v-model="formModal.firstName" />
+                    </div>
+                    <div class="basis-2/5 px-3 space-y-2 mb-3">
+                        <label class="font-semibold">สกุล</label><br>
+                        <input type="text" class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
+                            v-model="formModal.lastName" />
+                    </div>
+                    <div class="basis-2/6 px-3 space-y-2 mb-3">
+                        <label class="font-semibold">ชื่อผู้ใช้</label><br>
+                        <input type="text" class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
+                            v-model="formModal.username" />
+                    </div>
+                    <div class="basis-2/6 px-3 space-y-2 mb-3">
+                        <label class="font-semibold">รหัสผ่าน</label><br>
+                        <input type="text" class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
+                            v-model="formModal.password" />
+                    </div>
+                    <div class="basis-2/6 px-3 space-y-2 mb-3">
+                        <label class="font-semibold">ยืนยันรหัสผ่าน</label><br>
+                        <input type="text" class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
+                            v-model="formModal.confirmPassword" />
+                    </div>
+
+                    <div class="basis-1/2 px-3 space-y-2 mb-3">
+                        <label class="font-semibold">สิทธิ์การใช้งานระบบ</label><br>
+                        <div class="flex flex-col space-y-2">
+                            <div class="flex space-x-3">
+                                <input type="radio" name="role" value="ผู้ดูแลระบบ" class="radio radio-primary"
+                                    v-model="formModal.role" />
+                                <label class="font-semibold">ผู้ดูแลระบบ</label>
+                            </div>
+                            <div class="flex space-x-3">
+                                <input type="radio" name="role" value="ผู้ใช้งาน" class="radio radio-primary"
+                                    v-model="formModal.role" />
+                                <label class="font-semibold">ผู้ใช้งาน</label>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+
                 </div>
                 <div class="modal-action">
 
-                    <buttonPrimary label="เพิ่ม" @click="onSubmitModal" />
+                    <buttonPrimary label="เพิ่ม1" @click="onSubmitModal" />
                     <buttonPrimaryOutline label="ปิด" @click="onCloseModal" />
                 </div>
             </div>
         </dialog>
 
-
+        <Alert :titleMessage="modalAlert.title" :bodyMessage="modalAlert.body" :status="modalAlert.status"/>
     </div>
 </template>
 
