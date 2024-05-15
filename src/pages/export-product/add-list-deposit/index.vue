@@ -89,60 +89,38 @@ import buttonPrimaryOutline from "../../../components/buttons/button-primary-out
       </div>
       <div class="w-full bg-white rounded-xl py-5">
         <div class="px-6">
-          <span class="text-lg font-semibold text-red-800"
-            >รายละเอียดการสั่งซื้อสินค้า</span
-          >
+          <span class="text-lg font-semibold text-red-800">รายละเอียดการสั่งซื้อสินค้า</span>
         </div>
         <hr class="mt-2 mx-6" style="border: 1px solid #c2796a" />
-        <div class="grid grid-rows-2 grid-flow-col gap-4 px-6">
-          <div class="col-span-2">
-            <div class="flex flex-col my-3 space-y-2">
+        <div class="flex flex-wrap px-10 mt-3 space-x-10">
+          <div class="space-y-4">
+            <div class="flex flex-col">
               <span class="text-red-800 font-semibold">ชื่อ - สกุล</span>
-              <input
-                class="h-8 w-50 focus:outline-red-400 rounded bg-red-100 px-3"
-                type="text"
-              />
+              <input class="h-8 w-96 focus:outline-red-400 rounded bg-red-100 px-3" type="text" />
             </div>
-          </div>
-          <div class="col-span-2">
-            <div class="flex flex-col my-3 space-y-2">
-              <span class="text-red-800 font-semibold">เบอร์โทร</span>
-              <input
-                class="h-8 w-50 focus:outline-red-400 rounded bg-red-100 px-3"
-                type="text"
-              />
-            </div>
-          </div>
-          <div class="row-span-2">
-            <div class="flex flex-col my-3 space-y-2">
+
+            <div class="flex flex-col">
               <span class="text-red-800 font-semibold">ที่อยู่</span>
-              <textarea
-                class="focus:outline-red-400 rounded bg-red-100 px-3 py-2"
-                rows="5"
-                type="text"
-              ></textarea>
+              <textarea class="focus:outline-red-400 rounded bg-red-100 px-3 py-2" rows="3" type="text"></textarea>
             </div>
           </div>
-          <div class="col-span-2">
-            <div class="flex flex-col my-3 space-y-2">
+          <div class="space-y-4">
+            <div class="flex flex-col">
               <span class="text-red-800 font-semibold">จังหวัด</span>
-              <input
-                class="h-8 w-50 focus:outline-red-400 rounded bg-red-100 px-3"
-                type="text"
-              />
+              <input class="h-8 w-96 focus:outline-red-400 rounded bg-red-100 px-3" type="text" />
             </div>
-          </div>
-          <div class="col-span-2">
-            <div class="flex flex-col my-3 space-y-2">
+            <div class="flex flex-col">
               <span class="text-red-800 font-semibold">รหัสไปรษณีย์</span>
-              <input
-                class="h-8 w-50 focus:outline-red-400 rounded bg-red-100 px-3"
-                type="text"
-              />
+              <input class="h-8 w-96 focus:outline-red-400 rounded bg-red-100 px-3" type="text" />
+            </div>
+            <div class="flex flex-col">
+              <span class="text-red-800 font-semibold">เบอร์โทร</span>
+              <input class="h-8 w-50 focus:outline-red-400 rounded bg-red-100 px-3" type="text" />
             </div>
           </div>
         </div>
       </div>
+      
       <div class="flex justify-center py-10">
         <buttonPrimaryOutline label="บันทึกข้อมูล" />
       </div>
