@@ -1,8 +1,12 @@
 <script setup>
+import { ref } from 'vue';
 import tableBasic from "../../components/tables/table-basic.vue";
 import paginationPage from "../../components/pagination/pagination-page.vue";
 import { useRouter } from "vue-router";
 const $router = useRouter();
+
+const currentPage = ref(1);
+const totalPages = ref(10);
 
 const columns = [
   { field: "id", label: "หมายเลขคำสั่งซื้อ/เบิก", width: "auto" },
@@ -172,7 +176,7 @@ const rows = [
       <div class="rounded-xl mb-10 overflow-auto">
         <tableBasic :columns="columns" :rows="rows" />
         <div class="flex justify-end py-5">
-          <pagination-page/>
+          <paginationPage :currentPage="currentPage" :totalPages="totalPages"/>
         </div>
       </div>
     </div>
