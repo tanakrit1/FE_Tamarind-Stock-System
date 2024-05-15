@@ -30,6 +30,10 @@ const itemNavbar = ref([
                 path: '/add-list-supplier'
             },
             {
+                name: 'เบิกเพื่อแปรรูปสินค้า',
+                path: '/add-list-supplier'
+            },
+            {
                 name: 'นำสินค้าออก (จากการฝาก)',
                 path: '/add-list-deposit'
             },
