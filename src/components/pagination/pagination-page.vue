@@ -55,6 +55,7 @@ const pagesToShow = computed(() => {
         pages.push(i);
       }
     } else {
+      pages.push(1);
       pages.push('...');
       for (let i = localCurrentPage.value - 2; i <= localCurrentPage.value + 2; i++) {
         pages.push(i);
