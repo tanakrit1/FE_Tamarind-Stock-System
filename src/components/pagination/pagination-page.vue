@@ -50,6 +50,7 @@ const pagesToShow = computed(() => {
       pages.push('...');
       pages.push(props.totalPages);
     } else if (localCurrentPage.value > props.totalPages - 3) {
+      pages.push(1);
       pages.push('...');
       for (let i = props.totalPages - 3; i <= props.totalPages; i++) {
         pages.push(i);
