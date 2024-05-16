@@ -17,7 +17,8 @@ watch(() => props.status, (val) => {
         <dialog id="alert-modal" class="modal">
             <div class="modal-box">
                 <h3 class="font-bold text-lg">{{ props.titleMessage }}</h3>
-                <p class="py-4">{{ props.bodyMessage }}</p>
+                <!-- {{ props.bodyMessage }} -->
+                <div v-html="props.bodyMessage"></div>
                 <div class="modal-action">
                     <form method="dialog">
                         <!-- if there is a button in form, it will close the modal -->

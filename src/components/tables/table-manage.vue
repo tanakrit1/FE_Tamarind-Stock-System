@@ -6,7 +6,7 @@ const emit = defineEmits()
 const rowClick = ref({})
 const formModalConfirm = ref({
     titleMessage: "xxxxx",
-    bodyMessage: "xxxxx",
+    bodyMessage: "YYYY",
     status: false
 })
 

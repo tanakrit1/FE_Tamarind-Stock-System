@@ -17,12 +17,12 @@ export default {
         result(response.data);
       })
       .catch((error) => {
-        result(error.response);
+        result(error.response.data);
       });
   },
 
   async create(body, result) {
-    await Axios.post('user', body, this.config_authen())
+    await Axios.post('/user', body, this.config_authen())
       .then((response) => {
         result(response.data);
       })
@@ -31,13 +31,8 @@ export default {
       });
   },
 
-  update(params, result) {
-    const body = {
-      sessionEmpID: sessionInfo.id,
-      body: params,
-      module: "update",
-    };
-    Axios.post(apiLine, body, this.config_authen())
+  async update(body, keyWord, result) {
+    await Axios.patch(`/user/${keyWord}`, body, this.config_authen())
       .then((response) => {
         result(response.data);
       })
@@ -52,7 +47,7 @@ export default {
       body: params,
       module: "delete",
     };
-    Axios.post(apiLine, body, this.config_authen())
+    Axios.delete(apiLine, body, this.config_authen())
       .then((response) => {
         result(response.data);
       })

@@ -10,8 +10,8 @@ import Alert from '../../../components/alert/alert.vue';
 
 const columns = [
     { field: "employeeID", label: "รหัสพนักงาน", width: "10%" },
-    { field: "firstName", label: "รหัสพนักงาน", width: "20%" },
-    { field: "lastName", label: "รหัสพนักงาน", width: "20%" },
+    { field: "firstName", label: "ชื่อ", width: "20%" },
+    { field: "lastName", label: "สกุล", width: "20%" },
     { field: "username", label: "ชื่อผู้ใช้", width: "20%" },
     { field: "role", label: "สิทธิ์", width: "30%" },
 
@@ -32,33 +32,36 @@ const modalAlert = ref({
 })
 
 const formModal = ref({
-    employeeID: "",
-    username: "",
-    password: "",
-    confirmPassword: "",
-    firstName: "",
-    lastName: "",
-    role: "ผู้ดูแลระบบ"
+    in_employeeID: "",
+    in_username: "",
+    in_password: "",
+    in_confirmPassword: "",
+    in_firstName: "",
+    in_lastName: "",
+    in_role: "ผู้ดูแลระบบ"
 })
 const modeModal = ref("add")
 const rowAction = ref(null)
 
+
+
 const onClearFormModal = () => {
     formModal.value = {
-        employeeID: "",
-        username: "",
-        password: "",
-        confirmPassword: "",
-        firstName: "",
-        lastName: "",
-        role: "ผู้ดูแลระบบ"
+        in_employeeID: "",
+        in_username: "",
+        in_password: "",
+        in_confirmPassword: "",
+        in_firstName: "",
+        in_lastName: "",
+        in_role: "ผู้ดูแลระบบ"
     }
 }
 
 const onClickEdit = (row) => {
     console.log("onClickEdit--> ", row)
-    onOpenModal("edit")
     rowAction.value = row
+    onOpenModal("edit")
+
 }
 
 const onClickRemove = (row) => {
@@ -70,38 +73,92 @@ const onOpenModal = (mode) => {
     if (mode === "add") {
         onClearFormModal()
     } else {
-
+        console.log("edit--> ", rowAction.value)
+        formModal.value = {
+            in_employeeID: rowAction.value.employeeID,
+            in_username: rowAction.value.username,
+            // in_password: rowAction.value.password,
+            // in_confirmPassword: rowAction.value.confirmPassword,
+            in_firstName: rowAction.value.firstName,
+            in_lastName: rowAction.value.lastName,
+            in_role: rowAction.value.role
+        }
     }
     document.getElementById("modal-employee").showModal()
 }
 
-const onSubmitModal = () => {
+const onSubmitModal = async() => {
     console.log("***Submit***")
     if (modeModal.value === "add") {
         const body = {
-            employeeID: formModal.employeeID,
-            username: formModal.username,
-            password: formModal.password,
-            firstName: formModal.firstName,
-            lastName: formModal.lastName,
-            role: formModal.role
+            employeeID: formModal.value.in_employeeID,
+            username: formModal.value.in_username,
+            password: formModal.value.in_password,
+            firstName: formModal.value.in_firstName,
+            lastName: formModal.value.in_lastName,
+            role: formModal.value.in_role
         }
-        _apiUser.create( body, response => {
-            console.log("response---> ", response)
-            if( response.statusCode === 200 ){
-                modalAlert.value.status = true
-            }else{
-                modalAlert.value.status = true
+        await _apiUser.create(body, async(response) => {
+            if (response.statusCode === 200) {
+                modalAlert.value = {
+                    status: true,
+                    title: "สำเร็จ",
+                    body: "บันทึกข้อมูลสำเร็จ"
+                }
+                onCloseModal()
+                await onLoadData()
+            } else {
+                const mapValidation = response.message.map(item => {
+                    return `<li>${item}</li>`
+                })
+                modalAlert.value = {
+                    status: true,
+                    title: "กรุณาตรวจสอบ",
+                    body: mapValidation.join('')
+                }
             }
 
-        } )
+        })
     } else {
         console.log("***Edit***")
+        const body = {
+            employeeID: formModal.value.in_employeeID,
+            username: formModal.value.in_username,
+            password: formModal.value.in_password,
+            firstName: formModal.value.in_firstName,
+            lastName: formModal.value.in_lastName,
+            role: formModal.value.in_role
+        }
+        await _apiUser.update(body, formModal.value.in_username, async(response) => {
+            console.log("response--> ", response)
+            if (response.statusCode === 200) {
+                modalAlert.value = {
+                    status: true,
+                    title: "สำเร็จ",
+                    body: "แก้ไขข้อมูลสำเร็จ"
+                }
+                onCloseModal()
+                await onLoadData()
+            } else {
+                const mapValidation = response.message.map(item => {
+                    return `<li>${item}</li>`
+                })
+                modalAlert.value = {
+                    status: true,
+                    title: "กรุณาตรวจสอบ",
+                    body: mapValidation.join('')
+                }
+            }
+        })
     }
 }
 
 const onCloseModal = () => {
     document.getElementById("modal-employee").close()
+}
+
+const onCloseAlert = () => {
+    modalAlert.value.status = false
 }
 
 const onLoadData = async () => {
@@ -170,32 +227,32 @@ onMounted(async () => {
                     <div class="basis-1/5 px-3 space-y-2 mb-3">
                         <label class="font-semibold">รหัสผู้ใช้งาน</label><br>
                         <input type="text" class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
-                            v-model="formModal.employeeID" />
+                            v-model="formModal.in_employeeID" />
                     </div>
                     <div class="basis-2/5 px-3 space-y-2 mb-3">
                         <label class="font-semibold">ชื่อ</label><br>
                         <input type="text" class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
-                            v-model="formModal.firstName" />
+                            v-model="formModal.in_firstName" />
                     </div>
                     <div class="basis-2/5 px-3 space-y-2 mb-3">
                         <label class="font-semibold">สกุล</label><br>
                         <input type="text" class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
-                            v-model="formModal.lastName" />
+                            v-model="formModal.in_lastName" />
                     </div>
                     <div class="basis-2/6 px-3 space-y-2 mb-3">
                         <label class="font-semibold">ชื่อผู้ใช้</label><br>
                         <input type="text" class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
-                            v-model="formModal.username" />
+                            v-model="formModal.in_username" />
                     </div>
                     <div class="basis-2/6 px-3 space-y-2 mb-3">
                         <label class="font-semibold">รหัสผ่าน</label><br>
                         <input type="text" class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
-                            v-model="formModal.password" />
+                            v-model="formModal.in_password" />
                     </div>
                     <div class="basis-2/6 px-3 space-y-2 mb-3">
                         <label class="font-semibold">ยืนยันรหัสผ่าน</label><br>
                         <input type="text" class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
-                            v-model="formModal.confirmPassword" />
+                            v-model="formModal.in_confirmPassword" />
                     </div>
 
                     <div class="basis-1/2 px-3 space-y-2 mb-3">
@@ -203,12 +260,12 @@ onMounted(async () => {
                         <div class="flex flex-col space-y-2">
                             <div class="flex space-x-3">
                                 <input type="radio" name="role" value="ผู้ดูแลระบบ" class="radio radio-primary"
-                                    v-model="formModal.role" />
+                                    v-model="formModal.in_role" />
                                 <label class="font-semibold">ผู้ดูแลระบบ</label>
                             </div>
                             <div class="flex space-x-3">
                                 <input type="radio" name="role" value="ผู้ใช้งาน" class="radio radio-primary"
-                                    v-model="formModal.role" />
+                                    v-model="formModal.in_role" />
                                 <label class="font-semibold">ผู้ใช้งาน</label>
                             </div>
 
@@ -220,14 +277,13 @@ onMounted(async () => {
 
                 </div>
                 <div class="modal-action">
-
-                    <buttonPrimary label="เพิ่ม1" @click="onSubmitModal" />
+                    <buttonPrimary :label="modeModal == 'add' ? 'เพิ่ม' : 'แก้ไข'" @click="onSubmitModal" />
                     <buttonPrimaryOutline label="ปิด" @click="onCloseModal" />
                 </div>
             </div>
         </dialog>
 
-        <Alert :titleMessage="modalAlert.title" :bodyMessage="modalAlert.body" :status="modalAlert.status"/>
+        <Alert :titleMessage="modalAlert.title" :bodyMessage="modalAlert.body" :status="modalAlert.status" @close-alert-modal="onCloseAlert" />
     </div>
 </template>
 

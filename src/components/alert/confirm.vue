@@ -8,9 +8,9 @@ const emit = defineEmits()
 
 watch(() => props.status, (val) => {
     if (val == true) {
-        document.getElementById("alert-modal").showModal()
+        document.getElementById("confirm-modal").showModal()
     }else{
-        document.getElementById("alert-modal").close()
+        document.getElementById("confirm-modal").close()
     }
 })
 
@@ -28,7 +28,7 @@ const onResultConfirm = (result) => {
 </script>
 <template>
     <div>
-        <dialog id="alert-modal" class="modal">
+        <dialog id="confirm-modal" class="modal">
             <div class="modal-box">
                 <h3 class="font-bold text-lg">{{ props.titleMessage }}</h3>
                 <p class="py-4">{{ props.bodyMessage }}</p>
