@@ -11,18 +11,23 @@ const formModalConfirm = ref({
 })
 
 const onCloseModalConfirm = (result) => {
-    if( result === true ){  
+    if (result === true) {
         emit('onClickRemove', rowClick.value)
         formModalConfirm.value.status = false
-    }else{
+    } else {
         formModalConfirm.value.status = false
     }
-    
+
 }
 
 const onClickRemove = (rowData) => {
     rowClick.value = rowData
-    formModalConfirm.value.status = true
+    // formModalConfirm.value.status = true
+    formModalConfirm.value = {
+        titleMessage: "ลบข้อมูล",
+        bodyMessage: "ท่านต้องการลบข้อมูลนี้ใช่หรือไม่ ?",
+        status: true
+    }
 }
 
 
@@ -39,7 +44,8 @@ const onClickRemove = (rowData) => {
         </thead>
         <tbody class="bg-white">
             <tr v-for="(row, index) in props.rows" :key="index">
-                <td v-for="(column, index) in props.columns" :key="index" class="font-semibold">{{ row[column.field] }}</td>
+                <td v-for="(column, index) in props.columns" :key="index" class="font-semibold">{{ row[column.field] }}
+                </td>
                 <td v-if="props.rowEdit || props.rowRemove">
                     <div class="flex space-x-6 ">
                         <button class="rounded-full hover:bg-red-100 px-2 py-2" v-if="props.rowEdit"

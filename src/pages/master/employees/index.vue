@@ -17,12 +17,7 @@ const columns = [
 
 ]
 // const rows = ref([
-//     { id: "0000", name: "AAAAA", position: "BBBBB", department: "CCCCC", permission: "DDDDD" },
-//     { id: "0000", name: "AAAAA", position: "BBBBB", department: "CCCCC", permission: "DDDDD" },
-//     { id: "0000", name: "AAAAA", position: "BBBBB", department: "CCCCC", permission: "DDDDD" },
-//     { id: "0000", name: "AAAAA", position: "BBBBB", department: "CCCCC", permission: "DDDDD" },
-//     { id: "0000", name: "AAAAA", position: "BBBBB", department: "CCCCC", permission: "DDDDD" },
-//     { id: "0000", name: "AAAAA", position: "BBBBB", department: "CCCCC", permission: "DDDDD" },
+//     { employeeID: "0000", firstName: "AAAAA", position: "BBBBB", department: "CCCCC", permission: "DDDDD" },
 // ])
 const rows = ref([])
 const modalAlert = ref({
@@ -64,8 +59,27 @@ const onClickEdit = (row) => {
 
 }
 
-const onClickRemove = (row) => {
+const onClickRemove = async (row) => {
     console.log("onClickRemove--> ", row)
+    await _apiUser.delete(row.username, async (response) => {
+        if (response.statusCode === 200) {
+            modalAlert.value = {
+                status: true,
+                title: "สำเร็จ",
+                body: "ลบข้อมูลสำเร็จ"
+            }
+            await onLoadData()
+        } else {
+            const mapValidation = response.message.map(item => {
+                return `<li>${item}</li>`
+            })
+            modalAlert.value = {
+                status: true,
+                title: "กรุณาตรวจสอบ",
+                body: mapValidation.join('')
+            }
+        }
+    })
 }
 
 const onOpenModal = (mode) => {
@@ -87,69 +101,85 @@ const onOpenModal = (mode) => {
     document.getElementById("modal-employee").showModal()
 }
 
-const onSubmitModal = async() => {
-    console.log("***Submit***")
-    if (modeModal.value === "add") {
-        const body = {
-            employeeID: formModal.value.in_employeeID,
-            username: formModal.value.in_username,
-            password: formModal.value.in_password,
-            firstName: formModal.value.in_firstName,
-            lastName: formModal.value.in_lastName,
-            role: formModal.value.in_role
-        }
-        await _apiUser.create(body, async(response) => {
-            if (response.statusCode === 200) {
-                modalAlert.value = {
-                    status: true,
-                    title: "สำเร็จ",
-                    body: "บันทึกข้อมูลสำเร็จ"
-                }
-                onCloseModal()
-                await onLoadData()
-            } else {
-                const mapValidation = response.message.map(item => {
-                    return `<li>${item}</li>`
-                })
-                modalAlert.value = {
-                    status: true,
-                    title: "กรุณาตรวจสอบ",
-                    body: mapValidation.join('')
-                }
-            }
-
-        })
+const fnValidationPassword = () => {
+    if (formModal.value.in_password === formModal.value.in_confirmPassword) {
+        return true
     } else {
-        console.log("***Edit***")
-        const body = {
-            employeeID: formModal.value.in_employeeID,
-            username: formModal.value.in_username,
-            password: formModal.value.in_password,
-            firstName: formModal.value.in_firstName,
-            lastName: formModal.value.in_lastName,
-            role: formModal.value.in_role
+        modalAlert.value = {
+            status: true,
+            title: "กรุณาตรวจสอบ",
+            body: "กรุณาตรวจสอบรหัสผ่าน"
         }
-        await _apiUser.update(body, formModal.value.in_username, async(response) => {
-            console.log("response--> ", response)
-            if (response.statusCode === 200) {
-                modalAlert.value = {
-                    status: true,
-                    title: "สำเร็จ",
-                    body: "แก้ไขข้อมูลสำเร็จ"
-                }
-                onCloseModal()
-                await onLoadData()
-            } else {
-                const mapValidation = response.message.map(item => {
-                    return `<li>${item}</li>`
-                })
-                modalAlert.value = {
-                    status: true,
-                    title: "กรุณาตรวจสอบ",
-                    body: mapValidation.join('')
-                }
+    }
+}
+
+const onSubmitModal = async () => {
+    console.log("***Submit***")
+    const fnValid = fnValidationPassword()
+    console.log("validation ", fnValid)
+    if (fnValid) {
+        if (modeModal.value === "add") {
+            const body = {
+                employeeID: formModal.value.in_employeeID,
+                username: formModal.value.in_username,
+                password: formModal.value.in_password,
+                firstName: formModal.value.in_firstName,
+                lastName: formModal.value.in_lastName,
+                role: formModal.value.in_role
             }
-        })
+            await _apiUser.create(body, async (response) => {
+                if (response.statusCode === 200) {
+                    modalAlert.value = {
+                        status: true,
+                        title: "สำเร็จ",
+                        body: "บันทึกข้อมูลสำเร็จ"
+                    }
+                    onCloseModal()
+                    await onLoadData()
+                } else {
+                    const mapValidation = response.message.map(item => {
+                        return `<li>${item}</li>`
+                    })
+                    modalAlert.value = {
+                        status: true,
+                        title: "กรุณาตรวจสอบ",
+                        body: mapValidation.join('')
+                    }
+                }
+
+            })
+        } else {
+            console.log("***Edit***", rowAction.value)
+            const body = {
+                employeeID: formModal.value.in_employeeID,
+                username: formModal.value.in_username,
+                password: formModal.value.in_password,
+                firstName: formModal.value.in_firstName,
+                lastName: formModal.value.in_lastName,
+                role: formModal.value.in_role
+            }
+            await _apiUser.update(body, rowAction.value.username, async (response) => {
+                console.log("response--> ", response)
+                if (response.statusCode === 200) {
+                    modalAlert.value = {
+                        status: true,
+                        title: "สำเร็จ",
+                        body: "แก้ไขข้อมูลสำเร็จ"
+                    }
+                    onCloseModal()
+                    await onLoadData()
+                } else {
+                    const mapValidation = response.message.map(item => {
+                        return `<li>${item}</li>`
+                    })
+                    modalAlert.value = {
+                        status: true,
+                        title: "กรุณาตรวจสอบ",
+                        body: mapValidation.join('')
+                    }
+                }
+            })
+        }
     }
 }
 
@@ -246,12 +276,12 @@ onMounted(async () => {
                     </div>
                     <div class="basis-2/6 px-3 space-y-2 mb-3">
                         <label class="font-semibold">รหัสผ่าน</label><br>
-                        <input type="text" class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
+                        <input type="password" class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
                             v-model="formModal.in_password" />
                     </div>
                     <div class="basis-2/6 px-3 space-y-2 mb-3">
                         <label class="font-semibold">ยืนยันรหัสผ่าน</label><br>
-                        <input type="text" class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
+                        <input type="password" class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
                             v-model="formModal.in_confirmPassword" />
                     </div>
 
@@ -283,7 +313,8 @@ onMounted(async () => {
             </div>
         </dialog>
 
-        <Alert :titleMessage="modalAlert.title" :bodyMessage="modalAlert.body" :status="modalAlert.status" @close-alert-modal="onCloseAlert" />
+        <Alert :titleMessage="modalAlert.title" :bodyMessage="modalAlert.body" :status="modalAlert.status"
+            @close-alert-modal="onCloseAlert" />
     </div>
 </template>
 

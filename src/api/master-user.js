@@ -1,6 +1,5 @@
 import Axios from "axios";
 
-const apiLine = `/user`;
 export default {
   config_authen() {
     return {
@@ -41,13 +40,8 @@ export default {
       });
   },
 
-  delete(params, result) {
-    const body = {
-      sessionEmpID: sessionInfo.id,
-      body: params,
-      module: "delete",
-    };
-    Axios.delete(apiLine, body, this.config_authen())
+  async delete(keyWord, result) {
+    await Axios.delete(`/user/${keyWord}`, this.config_authen())
       .then((response) => {
         result(response.data);
       })
