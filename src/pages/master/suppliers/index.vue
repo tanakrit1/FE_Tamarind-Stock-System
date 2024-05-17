@@ -289,7 +289,7 @@ const onCloseModal = () => {
                 </h3>
                 <hr class="mt-2" style="border: 1px solid #c2796a">
                 <div class="py-4 flex flex-wrap">
-                    <div class="basis-1/2 px-3 space-y-2 mb-3">
+                    <div class="basis-1/2 px-3 space-y-2 mb-3" v-if="modeModal === 'edit'">
                         <label class="font-semibold">รหัสผู้จัดจำหน่าย</label><br>
                         <input disabled v-model="formModal.in_specialID" type="text"
                             class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3" />
