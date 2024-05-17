@@ -2,60 +2,245 @@
 // import ButtonPrimaryOutline from '../../../components/buttons/button-primary-outline.vue';
 import buttonPrimary from '../../../components/buttons/button-primary.vue';
 import buttonPrimaryOutline from '../../../components/buttons/button-primary-outline.vue';
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import tableManage from '../../../components/tables/table-manage.vue';
+import province from '../../../assets/address/thai_provinces.json'
+import district from '../../../assets/address/thai_amphures.json'
+import subDistrict from '../../../assets/address/thai_tambons.json'
+import _apiSupplier from '../../../api/master-supplier'
+import store from '../../../store';
+import Alert from '../../../components/alert/alert.vue';
 
 const columns = [
-    { field: "id", label: "รหัสพนักงาน", width: "15%" },
-    { field: "name", label: "ชื่อผู้ใช้", width: "17%" },
-    { field: "position", label: "ตําแหน่ง", width: "17%" },
-    { field: "department", label: "แผนก", width: "17%" },
-    { field: "permission", label: "สิทธิ์", width: "17%" },
+    { field: "specialID", label: "รหัส", width: "10%" },
+    { field: "firstName", label: "ชื่อ", width: "15%" },
+    { field: "lastName", label: "สกุล", width: "15%" },
+    { field: "address", label: "ที่อยู่", width: "15%" },
+    { field: "subDistric", label: "ตำบล", width: "15%" },
+    { field: "distric", label: "อำเภอ", width: "15%" },
+    { field: "province", label: "จังหวัด", width: "15%" },
+    { field: "zipCode", label: "ไปรษณีย์", width: "10%" },
 ]
 const rows = ref([
-    { id: "0000", name: "AAAAA", position: "BBBBB", department: "CCCCC", permission: "DDDDD" },
-    { id: "0000", name: "AAAAA", position: "BBBBB", department: "CCCCC", permission: "DDDDD" },
-    { id: "0000", name: "AAAAA", position: "BBBBB", department: "CCCCC", permission: "DDDDD" },
-    { id: "0000", name: "AAAAA", position: "BBBBB", department: "CCCCC", permission: "DDDDD" },
-    { id: "0000", name: "AAAAA", position: "BBBBB", department: "CCCCC", permission: "DDDDD" },
-    { id: "0000", name: "AAAAA", position: "BBBBB", department: "CCCCC", permission: "DDDDD" },
+    // { id: "0000", name: "AAAAA", position: "BBBBB", department: "CCCCC", permission: "DDDDD" },
+    // { id: "0000", name: "AAAAA", position: "BBBBB", department: "CCCCC", permission: "DDDDD" },
+    // { id: "0000", name: "AAAAA", position: "BBBBB", department: "CCCCC", permission: "DDDDD" },
+    // { id: "0000", name: "AAAAA", position: "BBBBB", department: "CCCCC", permission: "DDDDD" },
+    // { id: "0000", name: "AAAAA", position: "BBBBB", department: "CCCCC", permission: "DDDDD" },
+    // { id: "0000", name: "AAAAA", position: "BBBBB", department: "CCCCC", permission: "DDDDD" },
 
 ])
 
+const modalAlert = ref({
+    status: false,
+    title: "",
+    body: "",
+})
+
 const modeModal = ref("add")
 const rowAction = ref(null)
+const ddl = ref({
+    province: [],
+    district: [],
+    subDistrict: []
+})
+const formModal = ref({
+    in_specialID: "",
+    in_firstName: "",
+    in_lastName: "",
+    in_phone: "",
+    in_province: "",
+    in_district: "",
+    in_subDistrict: "",
+    in_zipCode: "",
+    in_address: ""
+})
+
+
+onMounted(async () => {
+    store.commit('setStatusLoading', true)
+    ddl.value.province = province
+    await onLoadData()
+    modalAlert.value = {
+        status: false,
+        title: "",
+        body: "",
+    }
+    store.commit('setStatusLoading', false)
+})
+
+const onCloseAlert = () => {
+    modalAlert.value.status = false
+}
+
+const onClearFormModal = () => {
+    formModal.value = {
+        in_specialID: "",
+        in_firstName: "",
+        in_lastName: "",
+        in_phone: "",
+        in_province: "",
+        in_district: "",
+        in_subDistrict: "",
+        in_zipCode: "",
+        in_address: ""
+    }
+}
+
+const onLoadData = async () => {
+    const body = {
+        page: 1,
+        limit: 10,
+    }
+    await _apiSupplier.search(body, response => {
+        rows.value = response.data
+    })
+}
+
+const onChangeProvince = async(provinceID) => {
+    const filterDistrict = district.filter(item => item.province_id == provinceID)
+    ddl.value.district = filterDistrict
+    formModal.value.in_district = ""
+    formModal.value.in_subDistrict = ""
+    formModal.value.in_zipCode = ""
+}
+
+const onChangeDistrict = async(districtID) => {
+    const filterSubDistrict = subDistrict.filter(item => item.amphure_id == districtID)
+    ddl.value.subDistrict = filterSubDistrict
+    formModal.value.in_subDistrict = ""
+    formModal.value.in_zipCode = ""
+}
+
+const onChangeSubDistrict = async(subDistrictID) => {
+    const zipCode = subDistrict.find(item => item.id == subDistrictID).zip_code
+    formModal.value.in_zipCode = zipCode
+}
 
 const onClickEdit = (row) => {
-    console.log("onClickEdit--> ", row)
-    onOpenModal("edit")
     rowAction.value = row
+    onOpenModal("edit")
+    
 }
 
-const onClickRemove = (row) => {
-    console.log("onClickRemove--> ", row)
+const onClickRemove = async(row) => {
+    await _apiSupplier.delete(row.id, async (response) => {
+        if (response.statusCode === 200) {
+            modalAlert.value = {
+                status: true,
+                title: "สำเร็จ",
+                body: "ลบข้อมูลสำเร็จ"
+            }
+            await onLoadData()
+        } else {
+            const mapValidation = response.message.map(item => {
+                return `<li>${item}</li>`
+            })
+            modalAlert.value = {
+                status: true,
+                title: "กรุณาตรวจสอบ",
+                body: mapValidation.join('')
+            }
+        }
+    })
 }
 
-const onOpenModal = (mode) => {
+const onOpenModal = async(mode) => {
     modeModal.value = mode
     if (mode === "add") {
-
+        onClearFormModal()
     } else {
+        const provinceValue = province.find( item => item.name_th == rowAction.value.province )?.id
+        
+        const districtValue = district.find( item => item.name_th == rowAction.value.distric )?.id
+        const subDistrictValue = subDistrict.find( item => item.name_th == rowAction.value.subDistric )?.id
+        await onChangeProvince(provinceValue)
+        await onChangeDistrict(districtValue)
+        await onChangeSubDistrict(subDistrictValue)
+        formModal.value = {
+            in_specialID: rowAction.value.specialID,
+            in_firstName: rowAction.value.firstName,
+            in_lastName: rowAction.value.lastName,
+            in_phone: rowAction.value.phone,
 
+            in_province: provinceValue,
+            in_district: districtValue,
+            in_subDistrict:subDistrictValue,
+            in_zipCode: rowAction.value.zipCode,
+            in_address: rowAction.value.address
+        }
     }
-    document.getElementById("modal-employee").showModal()
+    document.getElementById("modal-supplier").showModal()
 }
 
-const onSubmitModal = () => {
-    console.log("***Submit***")
+const onSubmitModal = async () => {
     if (modeModal.value === "add") {
-        console.log("***Add***")
+        const body = {
+            firstName: formModal.value.in_firstName,
+            lastName: formModal.value.in_lastName,
+            address: formModal.value.in_address,
+            subDistric: subDistrict.find(item => item.id == formModal.value.in_subDistrict)?.name_th || "",
+            distric: district.find(item => item.id == formModal.value.in_district)?.name_th || "",
+            province: province.find(item => item.id == formModal.value.in_province)?.name_th || "",
+            zipCode: formModal.value.in_zipCode.toString(),
+            phone: formModal.value.in_phone.toString()
+        }
+        await _apiSupplier.create(body, async (response) => {
+            if (response.statusCode === 200) {
+                modalAlert.value = {
+                    status: true,
+                    title: "สำเร็จ",
+                    body: "บันทึกข้อมูลสำเร็จ"
+                }
+                onCloseModal()
+                await onLoadData()
+            } else {
+                const mapValidation = response.message.map(item => {
+                    return `<li>${item}</li>`
+                })
+                modalAlert.value = {
+                    status: true,
+                    title: "กรุณาตรวจสอบ",
+                    body: mapValidation.join('')
+                }
+            }
+        })
     } else {
-        console.log("***Edit***")
+        const body = {
+            firstName: formModal.value.in_firstName,
+            lastName: formModal.value.in_lastName,
+            address: formModal.value.in_address,
+            subDistric: subDistrict.find(item => item.id == formModal.value.in_subDistrict)?.name_th || "",
+            distric: district.find(item => item.id == formModal.value.in_district)?.name_th || "",
+            province: province.find(item => item.id == formModal.value.in_province)?.name_th || "",
+            zipCode: formModal.value.in_zipCode.toString(),
+            phone: formModal.value.in_phone.toString()
+        }
+        await _apiSupplier.update(body, rowAction.value.id, async (response) => {
+            if (response.statusCode === 200) {
+                modalAlert.value = {
+                    status: true,
+                    title: "สำเร็จ",
+                    body: "บันทึกข้อมูลสำเร็จ"
+                }
+                onCloseModal()
+                await onLoadData()
+            } else {
+                const mapValidation = response.message.map(item => {
+                    return `<li>${item}</li>`
+                })
+                modalAlert.value = {
+                    status: true,
+                    title: "กรุณาตรวจสอบ",
+                    body: mapValidation.join('')
+                }
+            }
+        })
     }
 }
 
 const onCloseModal = () => {
-    document.getElementById("modal-employee").close()
+    document.getElementById("modal-supplier").close()
 }
 
 </script>
@@ -98,15 +283,69 @@ const onCloseModal = () => {
 
         <!-- ----------------------------------------------------------------------------------------------------------------- -->
 
-        <dialog id="modal-employee" class="modal">
+        <dialog id="modal-supplier" class="modal">
             <div class="modal-box w-11/12 max-w-3xl ">
                 <h3 class="font-bold text-lg">{{ modeModal === 'add' ? 'เพิ่มผู้จัดจำหน่าย' : 'แก้ไขผู้จัดจำหน่าย' }}
                 </h3>
                 <hr class="mt-2" style="border: 1px solid #c2796a">
                 <div class="py-4 flex flex-wrap">
-                    <div class="basis-1/2 px-3 space-y-2">
-                        <label>99</label><br>
-                        <input type="text" class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3" />
+                    <div class="basis-1/2 px-3 space-y-2 mb-3">
+                        <label class="font-semibold">รหัสผู้จัดจำหน่าย</label><br>
+                        <input disabled v-model="formModal.in_specialID" type="text"
+                            class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3" />
+                    </div>
+                    <div class="basis-1/2 px-3 space-y-2 mb-3">
+                        <label class="font-semibold">ชื่อ</label><br>
+                        <input v-model="formModal.in_firstName" type="text"
+                            class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3" />
+                    </div>
+                    <div class="basis-1/2 px-3 space-y-2 mb-3">
+                        <label class="font-semibold">สกุล</label><br>
+                        <input v-model="formModal.in_lastName" type="text"
+                            class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3" />
+                    </div>
+                    <div class="basis-1/2 px-3 space-y-2 mb-3">
+                        <label class="font-semibold">เบอร์โทร</label><br>
+                        <input v-model="formModal.in_phone" type="text"
+                            class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3" />
+                    </div>
+                    <div class="basis-1/2 px-3 space-y-2 mb-3">
+                        <label class="font-semibold">ที่อยู่</label><br>
+                        <input v-model="formModal.in_address" type="text"
+                            class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3" />
+                    </div>
+                    <div class="basis-1/2 px-3 space-y-2 mb-3">
+                        <label class="font-semibold">จังหวัด</label><br>
+                        <select v-model="formModal.in_province"
+                            class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3" @change="(event)=>onChangeProvince(event.target.value)">
+                            <option value="">------เลือก------</option>
+                            <option v-for="(item, index) in ddl.province" :key="index" :value="item.id">{{ item.name_th
+                                }}</option>
+                        </select>
+                    </div>
+                    <div class="basis-1/2 px-3 space-y-2 mb-3">
+                        <label class="font-semibold">อำเภอ</label><br>
+                        <select v-model="formModal.in_district"
+                            class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3" @change="(event)=>onChangeDistrict(event.target.value)">
+                            <option value="">------เลือก------</option>
+                            <option v-for="(item, index) in ddl.district" :key="index" :value="item.id">{{ item.name_th
+                                }}</option>
+                        </select>
+                    </div>
+                    <div class="basis-1/2 px-3 space-y-2 mb-3">
+                        <label class="font-semibold">ตำบล</label><br>
+                        <select v-model="formModal.in_subDistrict"
+                            class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
+                            @change="(event)=>onChangeSubDistrict(event.target.value)">
+                            <option value="">------เลือก------</option>
+                            <option v-for="(item, index) in ddl.subDistrict" :key="index" :value="item.id">{{
+                                item.name_th }}</option>
+                        </select>
+                    </div>
+                    <div class="basis-1/2 px-3 space-y-2 mb-3">
+                        <label class="font-semibold">รหัสไปรษณีย์</label><br>
+                        <input v-model="formModal.in_zipCode" type="text"
+                            class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3" readonly />
                     </div>
                 </div>
                 <div class="modal-action">
@@ -117,7 +356,8 @@ const onCloseModal = () => {
             </div>
         </dialog>
 
-
+        <Alert :titleMessage="modalAlert.title" :bodyMessage="modalAlert.body" :status="modalAlert.status"
+            @close-alert-modal="onCloseAlert" />
     </div>
 </template>
 

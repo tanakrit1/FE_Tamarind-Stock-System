@@ -53,14 +53,12 @@ const onClearFormModal = () => {
 }
 
 const onClickEdit = (row) => {
-    console.log("onClickEdit--> ", row)
     rowAction.value = row
     onOpenModal("edit")
 
 }
 
 const onClickRemove = async (row) => {
-    console.log("onClickRemove--> ", row)
     await _apiUser.delete(row.username, async (response) => {
         if (response.statusCode === 200) {
             modalAlert.value = {
@@ -87,7 +85,6 @@ const onOpenModal = (mode) => {
     if (mode === "add") {
         onClearFormModal()
     } else {
-        console.log("edit--> ", rowAction.value)
         formModal.value = {
             in_employeeID: rowAction.value.employeeID,
             in_username: rowAction.value.username,
@@ -114,9 +111,7 @@ const fnValidationPassword = () => {
 }
 
 const onSubmitModal = async () => {
-    console.log("***Submit***")
     const fnValid = fnValidationPassword()
-    console.log("validation ", fnValid)
     if (fnValid) {
         if (modeModal.value === "add") {
             const body = {
@@ -149,7 +144,6 @@ const onSubmitModal = async () => {
 
             })
         } else {
-            console.log("***Edit***", rowAction.value)
             const body = {
                 employeeID: formModal.value.in_employeeID,
                 username: formModal.value.in_username,
@@ -159,7 +153,6 @@ const onSubmitModal = async () => {
                 role: formModal.value.in_role
             }
             await _apiUser.update(body, rowAction.value.username, async (response) => {
-                console.log("response--> ", response)
                 if (response.statusCode === 200) {
                     modalAlert.value = {
                         status: true,
@@ -194,10 +187,9 @@ const onCloseAlert = () => {
 const onLoadData = async () => {
     const body = {
         page: 1,
-        limit: 200,
+        limit: 10,
     }
     await _apiUser.search(body, response => {
-        console.log("response --> ", response)
         rows.value = response.data
     })
 }

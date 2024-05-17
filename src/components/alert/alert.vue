@@ -5,6 +5,7 @@ const props = defineProps(["titleMessage", "bodyMessage", "status"])
 const emit = defineEmits()
 
 watch(() => props.status, (val) => {
+    console.log("***val***")
     if (val == true) {
         document.getElementById("alert-modal").showModal()
     }else{
