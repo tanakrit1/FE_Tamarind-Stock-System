@@ -5,9 +5,8 @@ import buttonPrimaryOutline from "../../../components/buttons/button-primary-out
 import { onMounted, ref } from "vue";
 import tableManage from "../../../components/tables/table-manage.vue";
 import _apiProduct from "../../../api/master-products";
-import Alert from '../../../components/alert/alert.vue';
-import store from '../../../store';
-
+import Alert from "../../../components/alert/alert.vue";
+import store from "../../../store";
 
 const columns = [
   { field: "specialID", label: "รหัสสินค้า", width: "15%" },
@@ -39,9 +38,9 @@ const modeModal = ref("add");
 const rowAction = ref(null);
 
 const modalAlert = ref({
-    status: false,
-    title: "",
-    body: "",
+  status: false,
+  title: "",
+  body: "",
 });
 
 const onClearFormModal = () => {
@@ -71,10 +70,21 @@ const onClickRemove = async (row) => {
       };
       await onLoadData();
     } else {
+      //   console.log("response.message --> ", response.message);
+      let mapValidation = "";
+      if (Array.isArray(response.message)) {
+        mapValidation = response.message
+          .map((item) => {
+            return `<li>${item}</li>`;
+          })
+          .join("");
+      } else {
+        mapValidation = response.message; // Assuming response.message is a string
+      }
       modalAlert.value = {
         status: true,
         title: "กรุณาตรวจสอบ",
-        body: "ไม่สามารถลบข้อมูลได้",
+        body: mapValidation,
       };
     }
   });
@@ -115,23 +125,33 @@ const onSubmitModal = async () => {
           status: true,
           title: "สำเร็จ",
           body: "บันทึกข้อมูลสำเร็จ",
-        }
+        };
 
         onCloseModal();
         await onLoadData();
       } else {
+        let mapValidation = "";
+        if (Array.isArray(response.message)) {
+          mapValidation = response.message
+            .map((item) => {
+              return `<li>${item}</li>`;
+            })
+            .join("");
+        } else {
+          mapValidation = response.message; // Assuming response.message is a string
+        }
         modalAlert.value = {
           status: true,
-          title: "เกิดข้อผิดพลาด",
-          body: "บันทึกข้อมูลไม่สำเร็จ",
-        }
+          title: "กรุณาตรวจสอบ",
+          body: mapValidation,
+        };
       }
     });
   } else {
     console.log("***Edit***");
     const body = {
-    //   id: formModal.value.in_id,
-    //   specialID: formModal.value.in_specialID,
+      //   id: formModal.value.in_id,
+      //   specialID: formModal.value.in_specialID,
       name: formModal.value.in_name,
       price: formModal.value.in_price,
       type: formModal.value.in_type,
@@ -144,27 +164,30 @@ const onSubmitModal = async () => {
           status: true,
           title: "สำเร็จ",
           body: "บันทึกข้อมูลสำเร็จ",
-        }
+        };
         onCloseModal();
         await onLoadData();
-      }else {
-          modalAlert.value = {
-            status: true,
-            title: "เกิดข้อผิดพลาด",
-            body: "บันทึกข้อมูลไม่สำเร็จ",
-          }
+      } else {
+        const mapValidation = response.message.map((item) => {
+          return `<li>${item}</li>`;
+        });
+        modalAlert.value = {
+          status: true,
+          title: "กรุณาตรวจสอบ",
+          body: mapValidation.join(""),
+        };
       }
     });
   }
 };
 
 const onCloseModal = () => {
-    document.getElementById("modal-employee").close()
-}
+  document.getElementById("modal-employee").close();
+};
 
 const onCloseAlert = () => {
-    modalAlert.value.status = false
-}
+  modalAlert.value.status = false;
+};
 
 const onLoadData = async () => {
   const body = {
@@ -250,7 +273,6 @@ onMounted(async () => {
         </h3>
         <hr class="mt-2" style="border: 1px solid #c2796a" />
         <div class="py-4 flex flex-wrap">
-            
           <div class="basis-1/2 px-3 space-y-2" v-if="modeModal === 'edit'">
             <label>รหัสสินค้า</label><br />
             <input
@@ -276,7 +298,6 @@ onMounted(async () => {
               class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
               v-model="formModal.in_type"
             >
-              <option value="">เลือกประเภทสินค้า</option>
               <option value="ขาย">ขาย</option>
               <option value="รับฝาก">รับฝาก</option>
             </select>
@@ -292,13 +313,20 @@ onMounted(async () => {
           </div>
         </div>
         <div class="modal-action">
-          <buttonPrimary :label="modeModal == 'add' ? 'เพิ่ม' : 'แก้ไข'" @click="onSubmitModal" />
+          <buttonPrimary
+            :label="modeModal == 'add' ? 'เพิ่ม' : 'แก้ไข'"
+            @click="onSubmitModal"
+          />
           <buttonPrimaryOutline label="ปิด" @click="onCloseModal" />
         </div>
       </div>
     </dialog>
-    <Alert :titleMessage="modalAlert.title" :bodyMessage="modalAlert.body" :status="modalAlert.status"
-            @close-alert-modal="onCloseAlert" />
+    <Alert
+      :titleMessage="modalAlert.title"
+      :bodyMessage="modalAlert.body"
+      :status="modalAlert.status"
+      @close-alert-modal="onCloseAlert"
+    />
   </div>
 </template>
 
