@@ -1,12 +1,27 @@
 6+3<script setup>
 import { onMounted, ref } from 'vue';
 import { getLoginStorage } from '../../helpers/set-storage';
+import confirm from '../alert/confirm.vue';
 import menuItem from './menu.vue'
 const emit = defineEmits()
 const profile = ref(null)
+const statusConfirm = ref(false)
 
-const onLogOut = () => {
-    emit("logout-success")
+const onCoonfirmLogout = () => {
+    statusConfirm.value = true
+}
+
+// const onLogOut = () => {
+//     emit("logout-success")
+// }
+
+const resultConfirm = (result) => {
+    statusConfirm.value = result
+    if( result === true ){
+        emit("logout-success")
+    }else{
+        statusConfirm.value = false
+    }
 }
 
 onMounted(() => {
@@ -28,13 +43,16 @@ onMounted(() => {
                 <span class="font-bold text-white">{{ `${profile?.firstName} ${profile?.lastName}` }}</span>
                 <span class="font-bold text-white">{{ profile?.role }}</span>
             </div>
-            <button class="flex items-center space-x-3 px-6  text-white hover:text-black" @click="onLogOut">
+            <button class="flex items-center space-x-3 px-6  text-white hover:text-black" @click="onCoonfirmLogout">
                 <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 8 8">
                     <path fill="currentColor" d="M3 0v1h4v5H3v1h5V0zm1 2v1H0v1h4v1l2-1.5z" />
                 </svg>
             </button>
         </div>
+
+        
     </div>
+    <confirm titleMessage="ออกจากระบบ" bodyMessage="ท่านต้องการออกจากระบบใช่หรือไม่ ?" :status="statusConfirm" @resultConfirm="resultConfirm" />
 </template>
 
 
