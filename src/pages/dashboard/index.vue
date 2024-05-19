@@ -1,19 +1,141 @@
 <script setup>
-import tabVersion1 from '../../components/tabs/tab-version1.vue';
-// import outlineBlueBtn from '../../components/button/btn-blue-outline.vue'
-import testTabs1 from './test-tab1.vue';
-import testTab2 from './test-tab2.vue';
-const tabs = [
-    { label: "รายการสั่งซื้อ", component: testTabs1 },
-    { label: "รายการเบิก", component: testTab2 },
-]
+import { onMounted, ref } from 'vue';
+import { use } from 'echarts/core';
+import { CanvasRenderer } from 'echarts/renderers';
+import { LineChart, PieChart } from 'echarts/charts';
+import { GridComponent } from 'echarts/components';
+import {
+    TitleComponent,
+    TooltipComponent,
+    LegendComponent,
+} from 'echarts/components';
+import VChart, { THEME_KEY } from 'vue-echarts';
 
+use([
+    GridComponent,
+    PieChart,
+    LineChart,
+    CanvasRenderer,
+    TitleComponent,
+    TooltipComponent,
+    LegendComponent,
+]);
 
+const optionChart1 = ref({})
+const optionChart2 = ref({})
+const optionChart3 = ref({})
+
+const setChart = () => {
+    optionChart1.value = {
+        title: {
+            text: 'Stacked Line'
+        },
+        tooltip: {
+            trigger: 'axis'
+        },
+        legend: {
+            data: ['Email', 'Union Ads', 'Video Ads', 'Direct', 'Search Engine']
+        },
+        grid: {
+            left: '3%',
+            right: '4%',
+            bottom: '3%',
+            containLabel: true
+        },
+        toolbox: {
+            feature: {
+                saveAsImage: {}
+            }
+        },
+        xAxis: {
+            type: 'category',
+            boundaryGap: false,
+            data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+        },
+        yAxis: {
+            type: 'value'
+        },
+        series: [
+            {
+                name: 'Email',
+                type: 'line',
+                stack: 'Total',
+                data: [120, 132, 101, 134, 90, 230, 210]
+            },
+            {
+                name: 'Union Ads',
+                type: 'line',
+                stack: 'Total',
+                data: [220, 182, 191, 234, 290, 330, 310]
+            },
+            {
+                name: 'Video Ads',
+                type: 'line',
+                stack: 'Total',
+                data: [150, 232, 201, 154, 190, 330, 410]
+            },
+            {
+                name: 'Direct',
+                type: 'line',
+                stack: 'Total',
+                data: [320, 332, 301, 334, 390, 330, 320]
+            },
+            {
+                name: 'Search Engine',
+                type: 'line',
+                stack: 'Total',
+                data: [820, 932, 901, 934, 1290, 1330, 1320]
+            }
+        ]
+    }
+    optionChart2.value = {
+        tooltip: {
+            trigger: 'item'
+        },
+        legend: {
+            top: '5%',
+            left: 'center'
+        },
+        series: [
+            {
+                name: 'Access From',
+                type: 'pie',
+                radius: ['40%', '70%'],
+                avoidLabelOverlap: false,
+                label: {
+                    show: false,
+                    position: 'center'
+                },
+                emphasis: {
+                    label: {
+                        show: true,
+                        fontSize: 40,
+                        fontWeight: 'bold'
+                    }
+                },
+                labelLine: {
+                    show: false
+                },
+                data: [
+                    { value: 1048, name: 'Search Engine' },
+                    { value: 735, name: 'Direct' },
+                    { value: 580, name: 'Email' },
+                    { value: 484, name: 'Union Ads' },
+                    { value: 300, name: 'Video Ads' }
+                ]
+            }
+        ]
+    }
+}
+
+onMounted(() => {
+    setChart()
+})
 
 </script>
 
 <template>
-    <div class="px-36">
+    <div class="px-36 pb-10">
         <div class="flex justify-between space-x-24">
             <div class="rounded-xl bg-white px-10 py-6 h-36 w-1/3" style="background-color: #C2796A;">
                 <p class="text-white mb-3 font-semibold">จำนวนเงินทั้งหมด</p>
@@ -32,13 +154,35 @@ const tabs = [
             </div>
         </div>
 
-        <div class="mt-6">
-            <tabVersion1 :tabs="tabs"/>
+        <div class="mt-10 bg-red-800 p-10 rounded-lg "
+            style="background-color: #D9ADA1; border-left-width: 15px;border-left-color: #A2422C">
+            <v-chart class="chart" :option="optionChart1" autoresize />
         </div>
-       
+
+        <div class="mt-10 flex justify-between space-x-16">
+            <div class="grow">
+                <p class="text-2xl font-bold text-red-800">จังหวัดที่ซื้อมากที่สุด</p>
+                <div class="px-10  rounded-lg bg-white" style="border-left-width: 15px; border-left-color: #68524D">
+                    <v-chart style="height: 400px; width: 100%;" :option="optionChart2" autoresize />
+                </div>
+            </div>
+
+            <div class="grow">
+                <p class="text-2xl font-bold text-red-800">สินค้าที่เหลือในคลัง</p>
+                <div class="px-10  rounded-lg bg-white" style="border-left-width: 15px; border-left-color: #68524D">
+                    <v-chart style="height: 400px; width: 100%;" :option="optionChart2" autoresize />
+                </div>
+            </div>
+        </div>
     </div>
     <!-- <div class="rounded-xl bg-white px-6 ">
         <span class="text-3xl font-bold text-lime-500">Testttt</span>
         <outlineBlueBtn :text="'Search'" />
     </div> -->
 </template>
+<style scoped>
+.chart {
+    height: 300px;
+    width: 100%;
+}
+</style>

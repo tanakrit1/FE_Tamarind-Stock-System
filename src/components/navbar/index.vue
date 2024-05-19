@@ -1,24 +1,36 @@
 6+3<script setup>
 import { onMounted, ref } from 'vue';
 import { getLoginStorage } from '../../helpers/set-storage';
-import confirm from '../alert/confirm.vue';
+// import confirm from '../alert/confirm.vue';
 import menuItem from './menu.vue'
 const emit = defineEmits()
 const profile = ref(null)
 const statusConfirm = ref(false)
+const formModalConfirm = ref({
+    titleMessage: "",
+    bodyMessage: "",
+    status: false
+})
+
 
 const onCoonfirmLogout = () => {
-    statusConfirm.value = true
+    formModalConfirm.value = {
+        titleMessage: "ออกจากระบบ",
+        bodyMessage: "ท่านต้องการออกจากระบบใช่หรือไม่ ?"
+    }
+    document.getElementById("confirm-logout").showModal()
+    // statusConfirm.value = true
 }
 
 // const onLogOut = () => {
 //     emit("logout-success")
 // }
 
-const resultConfirm = (result) => {
-    statusConfirm.value = result
+const onResultConfirm = (result) => {
+    formModalConfirm.value.status = result
+    // statusConfirm.value = result
     if( result === true ){
-        emit("logout-success")
+        emit("logout-logout")
     }else{
         statusConfirm.value = false
     }
@@ -50,9 +62,20 @@ onMounted(() => {
             </button>
         </div>
 
-        
+        <!-- <confirm :titleMessage="formModalConfirm.titleMessage" :bodyMessage="formModalConfirm.bodyMessage" :status="formModalConfirm.status" @resultConfirm="resultConfirm" /> -->
+
+        <dialog id="confirm-logout" class="modal">
+            <div class="modal-box">
+                <h3 class="font-bold text-lg">{{ formModalConfirm.titleMessage }}</h3>
+                <p class="py-4">{{ formModalConfirm.bodyMessage }}</p>
+                <div class="modal-action">
+                        <buttonPrimary label="ใช่" @click="onResultConfirm(true)" />
+                        <buttonPrimaryOutline label="ไม่ใช่"  @click="onResultConfirm(false)"/>
+                </div>
+            </div>
+        </dialog>
     </div>
-    <confirm titleMessage="ออกจากระบบ" bodyMessage="ท่านต้องการออกจากระบบใช่หรือไม่ ?" :status="statusConfirm" @resultConfirm="resultConfirm" />
+    
 </template>
 
 

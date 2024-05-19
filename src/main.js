@@ -8,6 +8,7 @@ import  Axios  from "axios";
 const app = createApp(App);
 app.use(router);
 app.use(store)
+// app.use(VueEcharts)
 
 Axios.defaults.baseURL = import.meta.env.VITE_API_URL
 app.mount("#app");

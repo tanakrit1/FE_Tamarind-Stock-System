@@ -2,6 +2,10 @@
 import { ref } from 'vue';
 const props = defineProps(['tabs'])
 const indexActive = ref(0)
+// const tabs = [
+//     { label: "รายการสั่งซื้อ", component: testTabs1 },
+//     { label: "รายการเบิก", component: testTab2 },
+// ]
 console.log("tab--> ", props.tabs)
 
 </script>
