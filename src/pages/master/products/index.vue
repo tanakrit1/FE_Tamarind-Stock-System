@@ -7,12 +7,19 @@ import tableManage from "../../../components/tables/table-manage.vue";
 import _apiProduct from "../../../api/master-products";
 import Alert from "../../../components/alert/alert.vue";
 import store from "../../../store";
+import paginationPage from "../../../components/pagination/pagination-page.vue";
+
+const pagination = ref({
+  page: 1,
+  limit: 3,
+  totalPage: 0,
+});
 
 const columns = [
-  { field: "specialID", label: "รหัสสินค้า", width: "15%" },
-  { field: "name", label: "ชื่อสินค้า", width: "17%" },
-  { field: "type", label: "ประเภทสินค้า", width: "17%" },
-  { field: "price", label: "ราคา", width: "17%" },
+  { field: "specialID", label: "รหัสสินค้า", width: "20%" },
+  { field: "name", label: "ชื่อสินค้า", width: "20%" },
+  { field: "type", label: "ประเภทสินค้า", width: "20%" },
+  { field: "price", label: "ราคา", width: "20%" },
   // { field: "permission", label: "สิทธิ์", width: "17%" },
 ];
 // const rows = ref([
@@ -191,15 +198,21 @@ const onCloseAlert = () => {
 
 const onLoadData = async () => {
   const body = {
-    page: 1,
-    limit: 200,
+    page: pagination.value.page,
+    limit: pagination.value.limit,
   };
   await _apiProduct.search(body, (response) => {
     if (response.statusCode === 200) {
       console.log("response --> ", response);
       rows.value = response.data;
+      pagination.value.totalPage = response.metadata.totalPage;
     }
   });
+};
+
+const onChangePagination = (val) => {
+  pagination.page = val;
+  onLoadData();
 };
 
 onMounted(async () => {
@@ -259,6 +272,15 @@ onMounted(async () => {
             :rowRemove="true"
             @onClickEdit="onClickEdit"
             @onClickRemove="onClickRemove"
+          />
+        </div>
+
+        <div class="flex justify-end py-5">
+          <paginationPage
+            v-model:currentPage="pagination.page"
+            :totalPages="pagination.totalPage"
+            :limit="pagination.limit"
+            @update:currentPage="onChangePagination"
           />
         </div>
       </div>

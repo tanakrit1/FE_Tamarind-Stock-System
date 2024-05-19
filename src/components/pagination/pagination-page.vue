@@ -1,17 +1,27 @@
-
 <script setup>
 import { ref, computed, watch } from 'vue';
-import { defineProps, defineEmits } from 'vue';
 
-const props = defineProps(['currentPage', 'totalPages']); // Total number of pages
-// const currentPage = ref(props.currentPage);
+const props = defineProps({
+  currentPage: {
+    type: Number,
+    required: true,
+  },
+  totalPages: {
+    type: Number,
+    required: true,
+  },
+  limit: {
+    type: Number,
+    required: true,
+  },
+});
 
-const emit = defineEmits(['update:currentPage', 'update:totalPages']);
+const emit = defineEmits(['update:currentPage']);
 
 const localCurrentPage = ref(props.currentPage);
 
-watch(() => props.currentPage, (newVal) => {
-  localCurrentPage.value = newVal;
+watch(() => props.currentPage, (newPage) => {
+  localCurrentPage.value = newPage;
 });
 
 const changePage = (page) => {
@@ -23,15 +33,13 @@ const changePage = (page) => {
 
 const nextPage = () => {
   if (localCurrentPage.value < props.totalPages) {
-    localCurrentPage.value++;
-    emit('update:currentPage', localCurrentPage.value);
+    changePage(localCurrentPage.value + 1);
   }
 };
 
 const prevPage = () => {
   if (localCurrentPage.value > 1) {
-    localCurrentPage.value--;
-    emit('update:currentPage', localCurrentPage.value);
+    changePage(localCurrentPage.value - 1);
   }
 };
 
@@ -73,13 +81,26 @@ const pagesToShow = computed(() => {
 <template>
   <nav aria-label="Pagination" class="flex items-center text-[#C2796A]">
     <a href="#" @click.prevent="prevPage" class="p-2 mr-4 rounded-full hover:bg-[#F6EFED]">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="h-6 w-6"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M15 19l-7-7 7-7"
+        />
       </svg>
     </a>
 
     <template v-for="pageNumber in pagesToShow" :key="pageNumber">
-      <span v-if="pageNumber === '...'">...</span>
+      <span v-if="pageNumber === '...'">
+        ...
+      </span>
       <a
         v-else
         href="#"
@@ -92,8 +113,19 @@ const pagesToShow = computed(() => {
     </template>
 
     <a href="#" @click.prevent="nextPage" class="p-2 ml-4 rounded-full hover:bg-[#F6EFED]">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="h-6 w-6"
+        fill="none"
+        viewBox="0 24 24"
+        stroke="currentColor"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M9 5l7 7-7 7"
+        />
       </svg>
     </a>
   </nav>
