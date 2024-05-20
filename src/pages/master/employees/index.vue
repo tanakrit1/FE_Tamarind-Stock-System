@@ -7,6 +7,13 @@ import tableManage from '../../../components/tables/table-manage.vue';
 import _apiUser from '../../../api/master-user'
 import store from '../../../store';
 import Alert from '../../../components/alert/alert.vue';
+import paginationPage from '../../../components/pagination/pagination-page.vue';
+
+const pagination = ref({
+    page: 1,
+    limit: 5,
+    totalPage: 0
+});
 
 const columns = [
     { field: "employeeID", label: "รหัสพนักงาน", width: "10%" },
@@ -186,14 +193,19 @@ const onCloseAlert = () => {
 
 const onLoadData = async () => {
     const body = {
-        page: 1,
-        limit: 10,
+        page: pagination.value.page,
+        limit:  pagination.value.limit,
     }
     await _apiUser.search(body, response => {
         rows.value = response.data
+        pagination.value.totalPage = response.metadata.totalPage
     })
 }
 
+const onChangePagination = (val) => {
+  pagination.page = val;
+  onLoadData();
+};
 onMounted(async () => {
     store.commit('setStatusLoading', true)
     await onLoadData()
@@ -236,6 +248,14 @@ onMounted(async () => {
                     <tableManage :columns="columns" :rows="rows" :rowEdit="true" :rowRemove="true"
                         @onClickEdit="onClickEdit" @onClickRemove="onClickRemove" />
                 </div>
+                <div class="flex justify-end py-5">
+          <paginationPage
+            v-model:currentPage="pagination.page"
+            :totalPages="pagination.totalPage"
+            :limit="pagination.limit"
+            @update:currentPage="onChangePagination"
+          />
+        </div>
             </div>
         </div>
 
