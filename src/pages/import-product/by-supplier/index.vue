@@ -66,16 +66,6 @@ const selectedSupplier = ref(null);
 const selectedProductId = ref(null);
 const newPrice = ref(null);
 
-const onChangeIdProduct = (event) => {
-  const productId = event.target.value;
-  console.log(productId);
-
-  const filterData = products.value.filter(
-    (product) => product.specialID === productId
-  );
-  selectedProductId.value = filterData[0];
-};
-
 const onChangePhone = (event) => {
   const phoneNumber = event.target.value;
 
@@ -93,20 +83,21 @@ const onChangePhone = (event) => {
     selectedSupplier.value = data;
   }
 };
+const onChangeIdProduct = (event) => {
+  const productId = event.target.value;
+  console.log(productId);
 
-// const onChangePrice = (event) => {
-//   const inputPrice = parseFloat(event.target.value); // แปลงค่าใน input เป็นตัวเลข
-//   const productPrice = selectedProductId.value ? selectedProductId.value.price : 0; // ดึงราคาของสินค้าที่ถูกเลือก
-//   const newPrice = inputPrice * productPrice; // คูณค่าใน input กับราคาที่เลือก
-//   console.log("onChangePrice", newPrice); // ทดสอบเพื่อดูผลลัพธ์ในคอนโซล
-//   // ทำสิ่งที่ต้องการกับ newPrice ต่อไป
-// }
+  const filterData = products.value.filter(
+    (product) => product.specialID === productId
+  );
+  selectedProductId.value = filterData[0] || null; // กำหนดค่าใหม่หรือเป็น null ถ้าไม่พบข้อมูลที่ตรงกับค่าที่เลือก
+};
 
 const onChangePrice = (event) => {
   const inputPrice = parseFloat(event.target.value); // แปลงค่าใน input เป็นตัวเลข
   const productPrice = selectedProductId.value ? selectedProductId.value.price : 0; // ดึงราคาของสินค้าที่ถูกเลือก
-  newPrice.value = inputPrice * productPrice; // คำนวณค่าใหม่และเก็บไว้ในตัวแปร newPrice
-}
+  newPrice.value = productPrice !== 0 ? inputPrice * productPrice : null; // คำนวณค่าใหม่และเก็บไว้ในตัวแปร newPrice หรือเป็น null หากไม่มีสินค้าที่ถูกเลือก
+};
 
 const formattedNewPrice = computed(() => {
   return newPrice.value !== null ? newPrice.value.toFixed(2) : ''; // รูปแบบราคาให้เป็นทศนิยม 2 ตำแหน่ง
@@ -236,14 +227,15 @@ onMounted(async () => {
             <div
               class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6"
             >
-              <span class="w-1/4 text-red-800 font-semibold">ราคา</span>
+              <span class="w-1/4 text-red-800 font-semibold">ราคาต่อหน่วย</span>
               <input
                 disabled
                 type="text"
                 class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
-                :value="formattedNewPrice"
+                :value="selectedProductId ? selectedProductId.price : ''"
               />
             </div>
+            
 
             <div
               class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6"
@@ -254,6 +246,17 @@ onMounted(async () => {
                 type="text"
                 v-model="inputPrice"
                 @change="onChangePrice"
+              />
+            </div>
+            <div
+              class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6"
+            >
+              <span class="w-1/4 text-red-800 font-semibold">ราคา</span>
+              <input
+                disabled
+                type="text"
+                class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
+                :value="formattedNewPrice"
               />
             </div>
           </div>
