@@ -1,6 +1,8 @@
 <script setup>
 import tableBasic from "../../../components/tables/table-basic.vue";
 import buttonPrimaryOutline from "../../../components/buttons/button-primary-outline.vue";
+import _apiSupplierImport from "../../../api/supplier-import.js";
+import { computed, onMounted, ref } from "vue";
 
 const columns = [
   { field: "id", label: "รหัสสินค้า", width: "15%" },
@@ -57,6 +59,82 @@ const rows = [
 const onSubmit = () => {
   console.log("***onSubmit***");
 };
+
+const products = ref([]);
+const supplierDetail = ref([]);
+const selectedSupplier = ref(null);
+const selectedProductId = ref(null);
+const newPrice = ref(null);
+
+const onChangeIdProduct = (event) => {
+  const productId = event.target.value;
+  console.log(productId);
+
+  const filterData = products.value.filter(
+    (product) => product.specialID === productId
+  );
+  selectedProductId.value = filterData[0];
+};
+
+const onChangePhone = (event) => {
+  const phoneNumber = event.target.value;
+
+  // console.log(phoneNumber);
+
+  // ตรวจสอบว่า supplierDetail เป็นอาร์เรย์หรือไม่
+  if (Array.isArray(supplierDetail.value)) {
+    // นี่คือการเข้าถึงค่าอาร์เรย์ที่อยู่ใน ref
+    const filterData = supplierDetail.value.filter(
+      (item) => item.phone == phoneNumber
+    );
+    console.log("data---->", filterData);
+    const data = filterData[0];
+    // console.log("-------------->",data.specialID);
+    selectedSupplier.value = data;
+  }
+};
+
+// const onChangePrice = (event) => {
+//   const inputPrice = parseFloat(event.target.value); // แปลงค่าใน input เป็นตัวเลข
+//   const productPrice = selectedProductId.value ? selectedProductId.value.price : 0; // ดึงราคาของสินค้าที่ถูกเลือก
+//   const newPrice = inputPrice * productPrice; // คูณค่าใน input กับราคาที่เลือก
+//   console.log("onChangePrice", newPrice); // ทดสอบเพื่อดูผลลัพธ์ในคอนโซล
+//   // ทำสิ่งที่ต้องการกับ newPrice ต่อไป
+// }
+
+const onChangePrice = (event) => {
+  const inputPrice = parseFloat(event.target.value); // แปลงค่าใน input เป็นตัวเลข
+  const productPrice = selectedProductId.value ? selectedProductId.value.price : 0; // ดึงราคาของสินค้าที่ถูกเลือก
+  newPrice.value = inputPrice * productPrice; // คำนวณค่าใหม่และเก็บไว้ในตัวแปร newPrice
+}
+
+const formattedNewPrice = computed(() => {
+  return newPrice.value !== null ? newPrice.value.toFixed(2) : ''; // รูปแบบราคาให้เป็นทศนิยม 2 ตำแหน่ง
+});
+
+const onLoadData = async () => {
+  const body = {
+    page: 1,
+    limit: 10,
+  };
+  await _apiSupplierImport.searchProduct(body, (response) => {
+    if (response.statusCode === 200) {
+      products.value = response.data;
+      console.log("response --> ", products.value);
+    }
+  });
+
+  await _apiSupplierImport.searchSupplier(body, (response) => {
+    if (response.statusCode === 200) {
+      supplierDetail.value = response.data;
+      console.log("searchSupplier --> ", supplierDetail.value);
+    }
+  });
+};
+
+onMounted(async () => {
+  await onLoadData();
+});
 </script>
 
 <template>
@@ -93,32 +171,42 @@ const onSubmit = () => {
             >
               <span class="w-1/4 text-red-800 font-semibold">รหัสสินค้า</span>
               <select
-              class="h-8 w-3/4 focus:outline-red-400 rounded bg-red-100 px-3"
-            >
-              <option value="">------เลือก------</option>
-            </select>
+                class="h-8 w-3/4 focus:outline-red-400 rounded bg-red-100 px-3"
+                @change="onChangeIdProduct"
+              >
+                <option value="">------เลือก------</option>
+                <option
+                  v-for="product in products"
+                  :key="product.specialID"
+                  :value="product.specialID"
+                >
+                  {{ product.specialID }}
+                </option>
+              </select>
             </div>
 
             <div
               class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6"
             >
               <span class="w-1/4 text-red-800 font-semibold">ชื่อสินค้า</span>
-              <select
-              class="h-8 w-3/4 focus:outline-red-400 rounded bg-red-100 px-3"
-            >
-              <option value="">------เลือก------</option>
-            </select>
+              <input
+                disabled
+                type="text"
+                class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
+                :value="selectedProductId ? selectedProductId.name : ''"
+              />
             </div>
 
             <div
               class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6"
             >
               <span class="w-1/4 text-red-800 font-semibold">ประเภทสินค้า</span>
-              <select
-              class="h-8 w-3/4 focus:outline-red-400 rounded bg-red-100 px-3"
-            >
-              <option value="">------เลือก------</option>
-            </select>
+              <input
+                disabled
+                type="text"
+                class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
+                :value="selectedProductId ? selectedProductId.type : ''"
+              />
             </div>
 
             <div
@@ -150,8 +238,10 @@ const onSubmit = () => {
             >
               <span class="w-1/4 text-red-800 font-semibold">ราคา</span>
               <input
-                class="h-8 w-3/4 focus:outline-red-400 rounded bg-red-100 px-3"
+                disabled
                 type="text"
+                class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
+                :value="formattedNewPrice"
               />
             </div>
 
@@ -162,6 +252,8 @@ const onSubmit = () => {
               <input
                 class="h-8 w-3/4 focus:outline-red-400 rounded bg-red-100 px-3"
                 type="text"
+                v-model="inputPrice"
+                @change="onChangePrice"
               />
             </div>
           </div>
@@ -169,7 +261,9 @@ const onSubmit = () => {
       </div>
       <div class="w-full bg-white rounded-xl py-3">
         <div class="px-6">
-          <span class="text-lg font-semibold text-red-800">ข้อมูลสินค้า</span>
+          <span class="text-lg font-semibold text-red-800"
+            >ข้อมูลผู้จัดจำหน่าย</span
+          >
         </div>
         <hr class="mt-2 mx-6" style="border: 1px solid #c2796a" />
         <div class="px-12 flex flex-wrap pt-10">
@@ -177,7 +271,12 @@ const onSubmit = () => {
             <label class="font-semibold">เบอร์โทร</label><br />
             <input
               type="text"
+              placeholder="กรอกเบอร์โทรศัพท์ (10 หลัก)"
+              pattern="[0-9]*"
+              maxlength="10"
               class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
+              v-model="phoneNumber"
+              @change="onChangePhone"
             />
           </div>
           <div class="basis-1/2 px-3 space-y-2 mb-3">
@@ -186,60 +285,71 @@ const onSubmit = () => {
               disabled
               type="text"
               class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
+              :value="selectedSupplier ? selectedSupplier.specialID : ''"
             />
           </div>
           <div class="basis-1/2 px-3 space-y-2 mb-3">
             <label class="font-semibold">ชื่อ</label><br />
             <input
+              disabled
               type="text"
               class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
+              :value="selectedSupplier ? selectedSupplier.firstName : ''"
             />
           </div>
           <div class="basis-1/2 px-3 space-y-2 mb-3">
             <label class="font-semibold">สกุล</label><br />
             <input
+              disabled
               type="text"
               class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
+              :value="selectedSupplier ? selectedSupplier.lastName : ''"
             />
           </div>
 
           <div class="basis-1/2 px-3 space-y-2 mb-3">
             <label class="font-semibold">ที่อยู่</label><br />
             <input
+              disabled
               type="text"
               class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
+              :value="selectedSupplier ? selectedSupplier.address : ''"
             />
           </div>
           <div class="basis-1/2 px-3 space-y-2 mb-3">
             <label class="font-semibold">จังหวัด</label><br />
-            <select
+            <input
+              disabled
+              type="text"
               class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
-            >
-              <option value="">------เลือก------</option>
-            </select>
+              :value="selectedSupplier ? selectedSupplier.province : ''"
+            />
           </div>
           <div class="basis-1/2 px-3 space-y-2 mb-3">
             <label class="font-semibold">อำเภอ</label><br />
-            <select
+            <input
+              disabled
+              type="text"
               class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
-            >
-              <option value="">------เลือก------</option>
-            </select>
+              :value="selectedSupplier ? selectedSupplier.distric : ''"
+            />
           </div>
           <div class="basis-1/2 px-3 space-y-2 mb-3">
             <label class="font-semibold">ตำบล</label><br />
-            <select
+            <input
+              disabled
+              type="text"
               class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
-            >
-              <option value="">------เลือก------</option>
-            </select>
+              :value="selectedSupplier ? selectedSupplier.subDistric : ''"
+            />
           </div>
           <div class="basis-1/2 px-3 space-y-2 mb-3">
             <label class="font-semibold">รหัสไปรษณีย์</label><br />
             <input
+              disabled
               type="text"
               class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
-              readonly
+              :value="selectedSupplier ? selectedSupplier.zipCode : ''"
             />
           </div>
         </div>
@@ -257,7 +367,5 @@ const onSubmit = () => {
     </div>
   </div>
 </template>
-
-
 
 <style></style>
