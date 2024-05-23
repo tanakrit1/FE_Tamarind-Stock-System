@@ -105,7 +105,7 @@ const onLoadData = async () => {
 
 const onChangePagination = (val) =>{
   pagination.value.page = val;
-  onLoadData();
+  onLoadData();yarn
 }
 
 const onChangeProvince = async (provinceID) => {

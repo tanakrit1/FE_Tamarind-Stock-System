@@ -68,7 +68,11 @@ const formInput = ref({
 //     in_address: "",
 //   };
 // };
-
+const products = ref([]);
+const supplierDetail = ref([]);
+const selectedSupplier = ref([]);
+const selectedProductId = ref([]);
+const newPrice = ref(0); // ตั้งค่าเริ่มต้นเป็น 0 หรือค่าใดก็ได้ที่เป็นตัวเลข
 const onLoadData = async () => {
   const body = {
     page: 1,
@@ -103,27 +107,75 @@ const onLoadData = async () => {
   });
 };
 
-const onShowProduct = async() => {
+const onShowProduct = async () => {
   const body = {
     page: 1,
     limit: 10,
-    
   };
-  await _apiSupplierImport.searchProduct(body,(response) => {
-    if (response.statusCode === 200) {
-      const product = response.data;
 
-      console.log("product->",product)
+  await _apiSupplierImport.searchProduct(body, (response) => {
+    if (response.statusCode === 200) {
+      products.value = response.data;
+      console.log("response --> ", products.value);
     }
   });
-  await _apiSupplierImport.searchSupplier(body,(response) => {
+  await _apiSupplierImport.searchSupplier(body, (response) => {
     if (response.statusCode === 200) {
-      const product = response.data;
-
-      console.log("product->",product)
+      supplierDetail.value = response.data;
+      console.log("searchSupplier --> ", supplierDetail.value);
     }
   });
-}
+};
+
+const onChangePhone = (event) => {
+  const phoneNumber = event.target.value;
+
+  // console.log(phoneNumber);
+
+  // ตรวจสอบว่า supplierDetail เป็นอาร์เรย์หรือไม่
+  if (Array.isArray(supplierDetail.value)) {
+    // นี่คือการเข้าถึงค่าอาร์เรย์ที่อยู่ใน ref
+    const filterData = supplierDetail.value.filter(
+      (item) => item.phone == phoneNumber
+    );
+    console.log("data---->", filterData);
+    const data = filterData[0];
+    // console.log("-------------->",data.specialID);
+    selectedSupplier.value = data;
+  }
+};
+const onChangeIdProduct = (event) => {
+  const productId = event.target.value;
+  console.log(productId);
+
+  // เคลียร์ค่า inputPrice เมื่อ productId เปลี่ยน
+  const filterData = products.value.filter(
+    (product) => product.specialID === productId
+  );
+  selectedProductId.value = filterData[0] || null;
+
+  // เคลียร์ค่า newPrice เมื่อ productId เปลี่ยน
+  newPrice.value = null;
+
+  // เคลียร์ค่า formattedNewPrice เมื่อ productId เปลี่ยน
+  formattedNewPrice.value = "";
+  onChangePrice.value = "";
+  
+};
+
+const onChangePrice = (event) => {
+  const inputPrice = parseFloat(event.target.value); // แปลงค่าใน input เป็นตัวเลข
+  const productPrice = selectedProductId.value
+    ? selectedProductId.value.price
+    : 0; // ดึงราคาของสินค้าที่ถูกเลือก
+  newPrice.value = productPrice !== 0 ? inputPrice * productPrice : null; // คำนวณค่าใหม่และเก็บไว้ในตัวแปร newPrice หรือเป็น null หากไม่มีสินค้าที่ถูกเลือก
+};
+
+
+const formattedNewPrice = computed(() => {
+  return typeof newPrice.value === "number" ? newPrice.value.toFixed(2) : ""; // รูปแบบราคาให้เป็นทศนิยม 2 ตำแหน่ง
+});
+
 onMounted(async () => {
   await onLoadData();
   await onShowProduct();
@@ -165,14 +217,15 @@ onMounted(async () => {
               <span class="w-1/4 text-red-800 font-semibold">รหัสสินค้า</span>
               <select
                 class="h-8 w-3/4 focus:outline-red-400 rounded bg-red-100 px-3"
+                @change="onChangeIdProduct"
               >
                 <option value="">------เลือก------</option>
                 <option
-                  v-for="product in formInput"
-                  :key="product.in_specialID"
-                  :value="product.in_specialID"
+                  v-for="product in products"
+                  :key="product.specialID"
+                  :value="product.specialID"
                 >
-                  {{ product.in_specialID }}
+                  {{ product.specialID }}
                 </option>
               </select>
             </div>
@@ -185,7 +238,7 @@ onMounted(async () => {
                 disabled
                 type="text"
                 class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
-                v-model="formInput.in_productName"
+                :value="selectedProductId ? selectedProductId.name : ''"
               />
             </div>
 
@@ -197,7 +250,7 @@ onMounted(async () => {
                 disabled
                 type="text"
                 class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
-                v-model="formInput.in_productType"
+                :value="selectedProductId ? selectedProductId.type : ''"
               />
             </div>
 
@@ -209,7 +262,6 @@ onMounted(async () => {
                 class="w-3/4 focus:outline-red-400 rounded bg-red-100 px-3 py-2"
                 rows="1"
                 type="text"
-                v-model="formInput.in_description"
               ></textarea>
               <!-- <input class="h-8 w-3/4   focus:outline-red-400 rounded bg-red-100 px-3" type="text"/> -->
             </div>
@@ -223,7 +275,6 @@ onMounted(async () => {
               <input
                 class="h-8 w-3/4 focus:outline-red-400 rounded bg-red-100 px-3"
                 type="date"
-                v-model="formInput.in_dateImport"
               />
             </div>
 
@@ -235,7 +286,7 @@ onMounted(async () => {
                 disabled
                 type="text"
                 class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
-                v-model="formInput.in_productPrice"
+                :value="selectedProductId ? selectedProductId.price : ''"
               />
             </div>
 
@@ -246,7 +297,8 @@ onMounted(async () => {
               <input
                 class="h-8 w-3/4 focus:outline-red-400 rounded bg-red-100 px-3"
                 type="text"
-                v-model="formInput.in_quantity"
+                v-model="inputPrice"
+                @change="onChangePrice"
               />
             </div>
             <div
@@ -257,7 +309,7 @@ onMounted(async () => {
                 disabled
                 type="text"
                 class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
-                v-model="formInput.in_amount"
+                :value="formattedNewPrice"
               />
             </div>
           </div>
@@ -279,7 +331,8 @@ onMounted(async () => {
               pattern="[0-9]*"
               maxlength="10"
               class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
-              v-model="formInput.in_phone"
+              v-model="phoneNumber"
+              @change="onChangePhone"
             />
           </div>
           <div class="basis-1/2 px-3 space-y-2 mb-3">
@@ -288,7 +341,7 @@ onMounted(async () => {
               disabled
               type="text"
               class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
-              v-model="formInput.in_specialSupplierID"
+              :value="selectedSupplier ? selectedSupplier.specialID : ''"
             />
           </div>
           <div class="basis-1/2 px-3 space-y-2 mb-3">
@@ -297,6 +350,7 @@ onMounted(async () => {
               disabled
               type="text"
               class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
+              :value="selectedSupplier ? selectedSupplier.firstName : ''"
             />
           </div>
           <div class="basis-1/2 px-3 space-y-2 mb-3">
@@ -305,6 +359,7 @@ onMounted(async () => {
               disabled
               type="text"
               class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
+              :value="selectedSupplier ? selectedSupplier.lastName : ''"
             />
           </div>
 
@@ -314,6 +369,7 @@ onMounted(async () => {
               disabled
               type="text"
               class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
+              :value="selectedSupplier ? selectedSupplier.address : ''"
             />
           </div>
           <div class="basis-1/2 px-3 space-y-2 mb-3">
@@ -322,6 +378,7 @@ onMounted(async () => {
               disabled
               type="text"
               class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
+              :value="selectedSupplier ? selectedSupplier.province : ''"
             />
           </div>
           <div class="basis-1/2 px-3 space-y-2 mb-3">
@@ -330,6 +387,7 @@ onMounted(async () => {
               disabled
               type="text"
               class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
+              :value="selectedSupplier ? selectedSupplier.distric : ''"
             />
           </div>
           <div class="basis-1/2 px-3 space-y-2 mb-3">
@@ -338,6 +396,7 @@ onMounted(async () => {
               disabled
               type="text"
               class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
+              :value="selectedSupplier ? selectedSupplier.subDistric : ''"
             />
           </div>
           <div class="basis-1/2 px-3 space-y-2 mb-3">
@@ -346,6 +405,7 @@ onMounted(async () => {
               disabled
               type="text"
               class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
+              :value="selectedSupplier ? selectedSupplier.zipCode : ''"
             />
           </div>
         </div>
