@@ -30,8 +30,8 @@ export default {
       });
   },
 
-  async createSupplierImport(body, result) {
-    await Axios.post("transaction_import", body, this.config_authen())
+  async searchSupplierImport(body, result) {
+    await Axios.post("transaction_import/search", body, this.config_authen())
       .then((response) => {
         result(response.data);
       })
@@ -39,4 +39,13 @@ export default {
         result(error.response.data);
       });
   },
+  // async createSupplierImport(body, result) {
+  //   await Axios.post("transaction_import", body, this.config_authen())
+  //     .then((response) => {
+  //       result(response.data);
+  //     })
+  //     .catch((error) => {
+  //       result(error.response.data);
+  //     });
+  // },
 };
