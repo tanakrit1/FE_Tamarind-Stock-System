@@ -23,9 +23,9 @@ const onLogoutSuccess = () => {
 
 const fnCheckLogin = () => {
     const loginStorage = getLoginStorage()
-    if( loginStorage?.token && loginStorage?.profile ){
+    if (loginStorage?.token && loginStorage?.profile) {
         loginMode.value = true
-    }else{
+    } else {
         loginMode.value = false
         $router.push('/login')
     }
@@ -37,18 +37,19 @@ onMounted(() => {
 </script>
 
 <template>
-    <loader :status="$store.state.statusLoading" />
-    <div v-if="loginMode">
-        <navbar @logout-success="onLogoutSuccess"/>
-        <div class="h-screen overflow-y-auto pt-24" style="background-color: #F1D6CF;">
-            <router-view />
+    <div class="">
+        <loader :status="$store.state.statusLoading" />
+        <div v-if="loginMode">
+            <navbar @logout-success="onLogoutSuccess" />
+            <div class="h-screen overflow-y-auto pt-24" style="background-color: #F1D6CF;">
+                <router-view />
+            </div>
+        </div>
+
+        <div v-else>
+            <Login @login-success="onSigninSuccess" />
         </div>
     </div>
-
-    <div v-else>
-        <Login @login-success="onSigninSuccess" />
-    </div>
-
 </template>
 
 <style scoped></style>

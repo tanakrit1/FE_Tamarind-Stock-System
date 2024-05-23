@@ -27,7 +27,7 @@ const itemNavbar = ref([
         menu: [
             {
                 name: 'ขายสินค้า',
-                path: '/add-list-supplier'
+                path: '/add-list-customer'
             },
             {
                 name: 'เบิกเพื่อแปรรูปสินค้า',

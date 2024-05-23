@@ -46,9 +46,9 @@ const router = createRouter({
             props: true 
         },
         {
-            path: "/add-list-supplier",
-            name: "add-list-supplier",
-            component: () => import("./pages/export-product/add-list-supplier/index.vue"),
+            path: "/add-list-customer",
+            name: "add-list-customer",
+            component: () => import("./pages/export-product/add-list-customer/index.vue"),
             props: true 
         },
 
