@@ -2,7 +2,8 @@
 import tableManage from "../../../components/tables/table-manage.vue";
 import buttonPrimaryOutline from "../../../components/buttons/button-primary-outline.vue";
 import _apiSupplierImport from "../../../api/supplier-import.js";
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
+import alert from "../../../components/alert/alert.vue";
 
 const columns = [
   { field: "specialID", label: "รหัส", width: "10%" },
@@ -22,57 +23,29 @@ const columns = [
 
 const rows = ref([]);
 
-const onSubmit = () => {
-  console.log("***onSubmit***");
+const products = ref([]);
+const suppliers = ref([]);
+const formInputs = ref([]);
+const in_quantity = ref("");
+const in_priceTotal = ref("");
+// const selectedSupplier = ref("");
+const clearData = () => {
+  formInputs.value = [];
+};
+const inputForm = ref({
+  in_date: "",
+  in_description: "",
+});
+
+const formAlert = ref({
+  status: false,
+  title: "",
+  body: "",
+});
+const onCloseAlert = () => {
+  formAlert.value.status = false;
 };
 
-const formInput = ref({
-  in_specialID: "",
-  in_productName: "",
-  in_productType: "",
-  in_description: "",
-  in_dateImport: "",
-  in_productPrice: "",
-  in_typeAction: "",
-  in_amount: "",
-  in_quantity: "",
-  in_specialSupplierID: "",
-  in_firstName: "",
-  in_lastName: "",
-  in_phone: "",
-  in_province: "",
-  in_district: "",
-  in_subDistrict: "",
-  in_zipCode: "",
-  in_address: "",
-});
-// const onClearForm = () => {
-//   formInput.value = {
-//     in_specialID: "",
-//     in_productName: "",
-//     in_productType: "",
-//     in_description: "",
-//     in_dateImport: "",
-//     in_productPrice: "",
-//     in_typeAction: "",
-//     in_amount: "",
-//     in_quantity: "",
-//     in_specialSupplierID: "",
-//     in_firstName: "",
-//     in_lastName: "",
-//     in_phone: "",
-//     in_province: "",
-//     in_district: "",
-//     in_subDistrict: "",
-//     in_zipCode: "",
-//     in_address: "",
-//   };
-// };
-const products = ref([]);
-const supplierDetail = ref([]);
-const selectedSupplier = ref([]);
-const selectedProductId = ref([]);
-const newPrice = ref(0); // ตั้งค่าเริ่มต้นเป็น 0 หรือค่าใดก็ได้ที่เป็นตัวเลข
 const onLoadData = async () => {
   const body = {
     page: 1,
@@ -115,71 +88,133 @@ const onShowProduct = async () => {
 
   await _apiSupplierImport.searchProduct(body, (response) => {
     if (response.statusCode === 200) {
-      products.value = response.data;
-      console.log("response --> ", products.value);
+      const productData = response.data;
+      // console.log("response---->", productData);
+
+      products.value = productData.map((product) => ({
+        in_special_id: product.id,
+        in_specialID: product.specialID,
+        in_productName: product.name,
+        in_productType: product.type,
+        in_productPrice: product.price,
+      }));
+
+      console.log("response", products.value);
     }
   });
   await _apiSupplierImport.searchSupplier(body, (response) => {
     if (response.statusCode === 200) {
-      supplierDetail.value = response.data;
-      console.log("searchSupplier --> ", supplierDetail.value);
+      const SupplierData = response.data;
+      // console.log("SupplierData---->", SupplierData);
+
+      suppliers.value = SupplierData.map((Supplier) => ({
+        in_supplierID: Supplier.specialID,
+        in_supplierFirstName: Supplier.firstName,
+        in_supplierLastName: Supplier.lastName,
+        in_supplierAddress: Supplier.address,
+        in_supplierSubDistrict: Supplier.subDistric,
+        in_supplierDistrict: Supplier.distric,
+        in_supplierProvince: Supplier.province,
+        in_supplierZipCode: Supplier.zipCode,
+        in_supplierPhone: Supplier.phone,
+      }));
+      console.log("response---->", suppliers.value);
+    } else {
+      formAlert.value = {
+        status: true,
+        title: "เเจ้งเตือน",
+        body: "ไม่พบรายชื่อลูกค้าในระบบ กรณาเพิ่มลูกค้าใหม่",
+      };
     }
   });
 };
-
-const onChangePhone = (event) => {
-  const phoneNumber = event.target.value;
-
-  // console.log(phoneNumber);
-
-  // ตรวจสอบว่า supplierDetail เป็นอาร์เรย์หรือไม่
-  if (Array.isArray(supplierDetail.value)) {
-    // นี่คือการเข้าถึงค่าอาร์เรย์ที่อยู่ใน ref
-    const filterData = supplierDetail.value.filter(
-      (item) => item.phone == phoneNumber
-    );
-    console.log("data---->", filterData);
-    const data = filterData[0];
-    // console.log("-------------->",data.specialID);
-    selectedSupplier.value = data;
-  }
-};
-const onChangeIdProduct = (event) => {
-  const productId = event.target.value;
-  console.log(productId);
-
-  // เคลียร์ค่า inputPrice เมื่อ productId เปลี่ยน
-  const filterData = products.value.filter(
-    (product) => product.specialID === productId
-  );
-  selectedProductId.value = filterData[0] || null;
-
-  // เคลียร์ค่า newPrice เมื่อ productId เปลี่ยน
-  newPrice.value = null;
-
-  // เคลียร์ค่า formattedNewPrice เมื่อ productId เปลี่ยน
-  formattedNewPrice.value = "";
-  onChangePrice.value = "";
-  
-};
-
-const onChangePrice = (event) => {
-  const inputPrice = parseFloat(event.target.value); // แปลงค่าใน input เป็นตัวเลข
-  const productPrice = selectedProductId.value
-    ? selectedProductId.value.price
-    : 0; // ดึงราคาของสินค้าที่ถูกเลือก
-  newPrice.value = productPrice !== 0 ? inputPrice * productPrice : null; // คำนวณค่าใหม่และเก็บไว้ในตัวแปร newPrice หรือเป็น null หากไม่มีสินค้าที่ถูกเลือก
-};
-
-
-const formattedNewPrice = computed(() => {
-  return typeof newPrice.value === "number" ? newPrice.value.toFixed(2) : ""; // รูปแบบราคาให้เป็นทศนิยม 2 ตำแหน่ง
-});
 
 onMounted(async () => {
   await onLoadData();
   await onShowProduct();
 });
+
+const selectedProductId = ref("");
+
+function onChangeIdProduct() {
+  const selectedProduct = computed(() => {
+    // ตรวจสอบว่า products มีค่าหรือไม่ และทำการค้นหา selectedProductId จาก products
+    if (products.value && selectedProductId.value) {
+      return products.value.find(
+        (product) => product.in_specialID === selectedProductId.value
+      );
+    }
+  });
+  const formInput = selectedProduct.value;
+
+  formInputs.value = formInput;
+  console.log("formInputs", formInputs.value);
+
+  in_quantity.value = "";
+  formattedNewPrice.value = "";
+  in_priceTotal.value = "";
+}
+const onChangePhone = (event) => {
+  const phoneNumber = event.target.value;
+  console.log(phoneNumber);
+
+  const filterData = suppliers.value.find(
+    (item) => item.in_supplierPhone === phoneNumber
+  );
+
+  if (filterData) {
+    formInputs.value = filterData;
+    console.log("data---->", formInputs.value);
+  } else {
+    // ถ้าไม่มีข้อมูลที่ตรงกัน
+    console.log("ไม่พบข้อมูล");
+    formAlert.value = {
+      status: true,
+      title: "เเจ้งเตือน",
+      body: "ไม่พบข้อมูลในระบบ",
+    };
+    clearData();
+  }
+};
+
+const onChangePrice = (event) => {
+  const in_quantity = parseFloat(event.target.value);
+  if (in_quantity !== "") {
+    in_priceTotal.value =
+      parseFloat(in_quantity) * parseFloat(formInputs.value.in_productPrice);
+  } else {
+    in_priceTotal.value = "";
+  }
+};
+
+const formattedNewPrice = computed(() => {
+  return typeof in_priceTotal.value === "number"
+    ? in_priceTotal.value.toFixed(2)
+    : ""; // รูปแบบราคาให้เป็นทศนิยม 2 ตำแหน่ง
+});
+
+const onSubmit = () => {
+  console.log("***onSubmit***");
+  const body = {
+    quantity: in_quantity.value,
+    price: formattedNewPrice.value,
+    typeAction: formInputs.value.in_productType,
+    //  //--------product----------------//
+    product_id: formInputs.value.in_special_id,
+    //  //--------supplier---------------//
+    firstName: formInputs.value.in_supplierFirstName,
+    lastName: formInputs.value.in_supplierLastName,
+    address: formInputs.value.in_supplierAddress,
+    subDistric: formInputs.value.in_supplierSubDistrict,
+    distric: formInputs.value.in_supplierDistrict,
+    province: formInputs.value.in_supplierProvince,
+    zipCode: formInputs.value.in_supplierZipCode,
+    phone: formInputs.value.in_supplierPhone,
+  };
+  console.log(body);
+};
+
+
 </script>
 
 <template>
@@ -218,14 +253,15 @@ onMounted(async () => {
               <select
                 class="h-8 w-3/4 focus:outline-red-400 rounded bg-red-100 px-3"
                 @change="onChangeIdProduct"
+                v-model="selectedProductId"
               >
                 <option value="">------เลือก------</option>
                 <option
                   v-for="product in products"
-                  :key="product.specialID"
-                  :value="product.specialID"
+                  :key="product.in_specialID"
+                  :value="product.in_specialID"
                 >
-                  {{ product.specialID }}
+                  {{ product.in_specialID }}
                 </option>
               </select>
             </div>
@@ -238,7 +274,7 @@ onMounted(async () => {
                 disabled
                 type="text"
                 class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
-                :value="selectedProductId ? selectedProductId.name : ''"
+                v-model="formInputs.in_productName"
               />
             </div>
 
@@ -250,7 +286,7 @@ onMounted(async () => {
                 disabled
                 type="text"
                 class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
-                :value="selectedProductId ? selectedProductId.type : ''"
+                v-model="formInputs.in_productType"
               />
             </div>
 
@@ -262,8 +298,9 @@ onMounted(async () => {
                 class="w-3/4 focus:outline-red-400 rounded bg-red-100 px-3 py-2"
                 rows="1"
                 type="text"
+                v-model="inputForm.in_description"
+                placeholder="รายละเอียดสินค้า"
               ></textarea>
-              <!-- <input class="h-8 w-3/4   focus:outline-red-400 rounded bg-red-100 px-3" type="text"/> -->
             </div>
 
             <div
@@ -275,6 +312,7 @@ onMounted(async () => {
               <input
                 class="h-8 w-3/4 focus:outline-red-400 rounded bg-red-100 px-3"
                 type="date"
+                v-model="inputForm.in_date"
               />
             </div>
 
@@ -286,7 +324,7 @@ onMounted(async () => {
                 disabled
                 type="text"
                 class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
-                :value="selectedProductId ? selectedProductId.price : ''"
+                v-model="formInputs.in_productPrice"
               />
             </div>
 
@@ -297,8 +335,8 @@ onMounted(async () => {
               <input
                 class="h-8 w-3/4 focus:outline-red-400 rounded bg-red-100 px-3"
                 type="text"
-                v-model="inputPrice"
                 @change="onChangePrice"
+                v-model="in_quantity"
               />
             </div>
             <div
@@ -309,7 +347,7 @@ onMounted(async () => {
                 disabled
                 type="text"
                 class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
-                :value="formattedNewPrice"
+                v-model="formattedNewPrice"
               />
             </div>
           </div>
@@ -331,7 +369,7 @@ onMounted(async () => {
               pattern="[0-9]*"
               maxlength="10"
               class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
-              v-model="phoneNumber"
+              v-model="suppliers.in_supplierPhone"
               @change="onChangePhone"
             />
           </div>
@@ -341,7 +379,7 @@ onMounted(async () => {
               disabled
               type="text"
               class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
-              :value="selectedSupplier ? selectedSupplier.specialID : ''"
+              v-model="formInputs.in_supplierID"
             />
           </div>
           <div class="basis-1/2 px-3 space-y-2 mb-3">
@@ -350,7 +388,7 @@ onMounted(async () => {
               disabled
               type="text"
               class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
-              :value="selectedSupplier ? selectedSupplier.firstName : ''"
+              v-model="formInputs.in_supplierFirstName"
             />
           </div>
           <div class="basis-1/2 px-3 space-y-2 mb-3">
@@ -359,7 +397,7 @@ onMounted(async () => {
               disabled
               type="text"
               class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
-              :value="selectedSupplier ? selectedSupplier.lastName : ''"
+              v-model="formInputs.in_supplierLastName"
             />
           </div>
 
@@ -369,7 +407,7 @@ onMounted(async () => {
               disabled
               type="text"
               class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
-              :value="selectedSupplier ? selectedSupplier.address : ''"
+              v-model="formInputs.in_supplierAddress"
             />
           </div>
           <div class="basis-1/2 px-3 space-y-2 mb-3">
@@ -378,7 +416,7 @@ onMounted(async () => {
               disabled
               type="text"
               class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
-              :value="selectedSupplier ? selectedSupplier.province : ''"
+              v-model="formInputs.in_supplierProvince"
             />
           </div>
           <div class="basis-1/2 px-3 space-y-2 mb-3">
@@ -387,7 +425,7 @@ onMounted(async () => {
               disabled
               type="text"
               class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
-              :value="selectedSupplier ? selectedSupplier.distric : ''"
+              v-model="formInputs.in_supplierDistrict"
             />
           </div>
           <div class="basis-1/2 px-3 space-y-2 mb-3">
@@ -396,7 +434,7 @@ onMounted(async () => {
               disabled
               type="text"
               class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
-              :value="selectedSupplier ? selectedSupplier.subDistric : ''"
+              v-model="formInputs.in_supplierSubDistrict"
             />
           </div>
           <div class="basis-1/2 px-3 space-y-2 mb-3">
@@ -405,22 +443,26 @@ onMounted(async () => {
               disabled
               type="text"
               class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
-              :value="selectedSupplier ? selectedSupplier.zipCode : ''"
+              v-model="formInputs.in_supplierZipCode"
             />
           </div>
         </div>
       </div>
 
       <div class="flex justify-center my-6">
-        <buttonPrimaryOutline label="บันทึกข้อมูล" @onClick="onSubmit" />
-        <!-- <button type="button"
-                            class="font-semibold px-8 py-2 outline outline-red-700 rounded-full text-red-800 hover:bg-red-100">บันทึกข้อมูล</button> -->
+        <buttonPrimaryOutline label="บันทึกข้อมูล" @click="onSubmit" />
       </div>
     </div>
   </div>
   <div class="rounded-xl mb-10 overflow-auto mx-5">
     <tableManage :columns="columns" :rows="rows" />
   </div>
+  <alert
+    :titleMessage="formAlert.title"
+    :bodyMessage="formAlert.body"
+    :status="formAlert.status"
+    @close-alert-modal="onCloseAlert"
+  />
 </template>
 
 <style></style>
