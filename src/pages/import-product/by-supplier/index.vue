@@ -2,6 +2,11 @@
 import tableManage from "../../../components/tables/table-manage.vue";
 import buttonPrimaryOutline from "../../../components/buttons/button-primary-outline.vue";
 import _apiSupplierImport from "../../../api/supplier-import.js";
+import _apiProduct from "../../../api/master-products.js";
+import _apiSupplier from "../../../api/master-supplier.js";
+import subDistrict from "../../../assets/address/thai_tambons.json";
+import district from "../../../assets/address/thai_amphures.json";
+import province from "../../../assets/address/thai_provinces.json";
 import { computed, onMounted, ref, watch } from "vue";
 import alert from "../../../components/alert/alert.vue";
 
@@ -23,20 +28,43 @@ const columns = [
 
 const rows = ref([]);
 
-const products = ref([]);
-const suppliers = ref([]);
-const formInputs = ref([]);
-const in_quantity = ref("");
-const in_priceTotal = ref("");
-// const selectedSupplier = ref("");
-const clearData = () => {
-  formInputs.value = [];
-};
-const inputForm = ref({
-  in_date: "",
-  in_description: "",
+//จัดลำดับข้อมูลให้เท่ากันก่อนนำมาใช้งาน
+const dataInput = ref({
+  product: [],
+  listProductAll: [],
+  province: [],
+  district: [],
+  subDistrict: [],
 });
 
+const formProduct = ref({
+  productID: "",
+  productName: "",
+  typeAction: "",
+  productPrice: "",
+  discription: "",
+  dateTransaction: "",
+  quantity: "",
+  totalPrice: "0.00",
+});
+
+const formSupplier = ref({
+  id: "",
+  firstName: "",
+  lastName: "",
+  address: "",
+  province: "",
+  district: "",
+  subDistrict: "",
+  zipCode: "",
+  phone: "",
+});
+
+const clearData = () => {
+  formSupplier.value = [];
+  formProduct.value = [];
+
+};
 const formAlert = ref({
   status: false,
   title: "",
@@ -45,6 +73,8 @@ const formAlert = ref({
 const onCloseAlert = () => {
   formAlert.value.status = false;
 };
+
+const formSupplierActive = ref(false);
 
 const onLoadData = async () => {
   const body = {
@@ -76,6 +106,12 @@ const onLoadData = async () => {
       }));
       rows.value = flattenedData;
       console.log("response", rows.value);
+    } else {
+      formAlert.value = {
+        status: true,
+        title: "เกิดข้อผิดพลาด",
+        body: response.message,
+      };
     }
   });
 };
@@ -85,136 +121,222 @@ const onShowProduct = async () => {
     page: 1,
     limit: 10,
   };
-
-  await _apiSupplierImport.searchProduct(body, (response) => {
+  await _apiProduct.search(body, (response) => {
     if (response.statusCode === 200) {
-      const productData = response.data;
-      // console.log("response---->", productData);
-
-      products.value = productData.map((product) => ({
-        in_special_id: product.id,
-        in_specialID: product.specialID,
-        in_productName: product.name,
-        in_productType: product.type,
-        in_productPrice: product.price,
-      }));
-
-      console.log("response", products.value);
-    }
-  });
-  await _apiSupplierImport.searchSupplier(body, (response) => {
-    if (response.statusCode === 200) {
-      const SupplierData = response.data;
-      // console.log("SupplierData---->", SupplierData);
-
-      suppliers.value = SupplierData.map((Supplier) => ({
-        in_supplierID: Supplier.specialID,
-        in_supplierFirstName: Supplier.firstName,
-        in_supplierLastName: Supplier.lastName,
-        in_supplierAddress: Supplier.address,
-        in_supplierSubDistrict: Supplier.subDistric,
-        in_supplierDistrict: Supplier.distric,
-        in_supplierProvince: Supplier.province,
-        in_supplierZipCode: Supplier.zipCode,
-        in_supplierPhone: Supplier.phone,
-      }));
-      console.log("response---->", suppliers.value);
+      dataInput.value.product = response.data.map((item) => {
+        return {
+          specialID: item.specialID,
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          type: item.type,
+        };
+      });
+      dataInput.value.listProductAll = response.data;
+      dataInput.value.product = response.data;
     } else {
       formAlert.value = {
         status: true,
-        title: "เเจ้งเตือน",
-        body: "ไม่พบรายชื่อลูกค้าในระบบ กรณาเพิ่มลูกค้าใหม่",
+        title: "เกิดข้อผิดพลาด",
+        body: response.message,
       };
+    }
+  });
+  dataInput.value.province = province.map((item) => {
+    return { label: item.name_th, value: item.id };
+  });
+};
+
+const onChangeProduct = (productID) => {
+  if (productID !== "") {
+    formProduct.value.price = dataInput.value.listProductAll
+      .find((item) => item.id == productID)
+      .price?.toLocaleString();
+    formProduct.value.productID = productID;
+    formProduct.value.totalPrice = formProduct.value.price;
+    formProduct.value.quantity = "1";
+    formProduct.value.dateTransaction = new Date();
+    formProduct.value.discription = "";
+    formProduct.value.productName = dataInput.value.product[0].name;
+    formProduct.value.typeAction = dataInput.value.product[0].type;
+
+    // console.log("formProduct", formProduct.value);
+    console.log("dataInput", dataInput.value.product[0].name);
+    console.log("dataInput---->", dataInput.value.product);
+  } else {
+    formProduct.value.price = "";
+    formProduct.value.totalPrice = "0.00";
+    formProduct.value.quantity = "";
+    formProduct.value.dateTransaction = "";
+    formProduct.value.productName = "";
+    formProduct.value.typeAction = "";
+    formProduct.value.discription = "";
+  }
+};
+const onChangeQuantity = (quantity) => {
+  formProduct.value.totalPrice = formProduct.value.price * quantity;
+};
+
+const onChangeSupplier = async (phone) => {
+  const body = {
+    page: 1,
+    limit: 1,
+    filterModel: {
+      logicOperator: "and",
+      items: [
+        {
+          field: "phone",
+          operator: "equals",
+          value: phone,
+        },
+      ],
+    },
+  };
+  await _apiSupplier.search(body, (response) => {
+    if (response.statusCode === 200) {
+      if (response.data.length > 0) {
+        console.log("**");
+        formSupplierActive.value = false;
+        formSupplier.value.id = response.data[0].id;
+        formSupplier.value.firstName = response.data[0].firstName;
+        formSupplier.value.lastName = response.data[0].lastName;
+        formSupplier.value.address = response.data[0].address;
+        formSupplier.value.province = response.data[0].province;
+        formSupplier.value.district = response.data[0].distric;
+        formSupplier.value.subDistrict = response.data[0].subDistric;
+        formSupplier.value.zipCode = response.data[0].zipCode;
+        formSupplier.value.phone = response.data[0].phone;
+
+        console.log("formSupplier", formSupplier.value);
+      } else {
+        formAlert.value = {
+          status: true,
+          title: "เเจ้งเตือน",
+          body: "ไม่พบรายชื่อลูกค้าในระบบ กรณาเพิ่มลูกค้าใหม่",
+        };
+        formSupplierActive.value = true;
+        formSupplier.value = {
+          id: "",
+          firstName: "",
+          lastName: "",
+          address: "",
+          province: "",
+          district: "",
+          subDistrict: "",
+          zipCode: "",
+          phone: phone,
+        };
+      }
+    } else {
+      formAlert.value = {
+        status: true,
+        title: "เกิดข้อผิดพลาด",
+        body: response.message,
+      };
+      formSupplierActive.value = true;
+      clearData();
     }
   });
 };
 
+const onChangeProvince = async (provinceID) => {
+  const filterDistrict = district.filter(
+    (item) => item.province_id == provinceID
+  );
+  dataInput.value.district = filterDistrict.map((item) => {
+    return { label: item.name_th, value: item.id };
+  });
+  formSupplier.value.district = "";
+  formSupplier.value.subDistrict = "";
+  formSupplier.value.zipCode = "";
+};
+
+const onChangeDistrict = async (districtID) => {
+  const filterSubDistrict = subDistrict.filter(
+    (item) => item.amphure_id == districtID
+  );
+  dataInput.value.subDistrict = filterSubDistrict.map((item) => {
+    return { label: item.name_th, value: item.id };
+  });
+  formSupplier.value.subDistrict = "";
+  formSupplier.value.zipCode = "";
+};
+
+const onChangeSubDistrict = async (subDistrictID) => {
+  const zipCode = subDistrict.find((item) => item.id == subDistrictID).zip_code;
+  formSupplier.value.zipCode = zipCode;
+};
+const onSubmit = async () => {
+  console.log("***onSubmit***");
+  if (formSupplierActive.value === false) {
+    const body = {
+      //------transaction_import------//
+      quantity: formProduct.value.quantity,
+      price: formProduct.value.totalPrice,
+      // priceDeposit:1152.05,
+      typeAction: formProduct.value.typeAction,
+      //--------product----------------//
+      product_id: Number(formProduct.value.productID), //formProduct.value.productID,
+      //--------supplier---------------//
+      firstName: formSupplier.value.firstName,
+      lastName: formSupplier.value.lastName,
+      address: formSupplier.value.address,
+      subDistric: formSupplier.value.subDistrict,
+      distric: formSupplier.value.district,
+      province: formSupplier.value.province,
+      zipCode: formSupplier.value.zipCode,
+      phone: formSupplier.value.phone,
+    };
+
+    await _apiSupplierImport.createSupplierImport(body, (response) => {
+      if (response.statusCode === 200) {
+        formAlert.value = {
+          status: true,
+          title: "เเจ้งเตือน",
+          body: "บันทึกข้อมูลเรียบร้อย",
+        };
+        clearData();
+        onLoadData();
+        onShowProduct();
+      } else {
+        formAlert.value = {
+          status: true,
+          title: "เกิดข้อผิดพลาด",
+          body: response.message,
+        };
+      }
+      
+    })
+    console.log(body);
+  }else{
+    console.log("insertformSupplier.......");
+    const body = {
+      //------transaction_import------//
+      quantity: formProduct.value.quantity,
+      price: formProduct.value.totalPrice,
+      // priceDeposit:1152.05,
+      typeAction: formProduct.value.typeAction,
+      //--------product----------------//
+      product_id: formProduct.value.productID,
+      //--------supplier---------------//
+      firstName: formSupplier.value.firstName,
+      lastName: formSupplier.value.lastName,
+      address: formSupplier.value.address,
+      subDistric: formSupplier.value.subDistrict,
+      distric: formSupplier.value.district,
+      province: formSupplier.value.province,
+      zipCode: formSupplier.value.zipCode,
+      phone: formSupplier.value.phone,
+    };
+
+    console.log(body);
+  }
+
+};
 onMounted(async () => {
   await onLoadData();
   await onShowProduct();
 });
-
-const selectedProductId = ref("");
-
-function onChangeIdProduct() {
-  const selectedProduct = computed(() => {
-    // ตรวจสอบว่า products มีค่าหรือไม่ และทำการค้นหา selectedProductId จาก products
-    if (products.value && selectedProductId.value) {
-      return products.value.find(
-        (product) => product.in_specialID === selectedProductId.value
-      );
-    }
-  });
-  const formInput = selectedProduct.value;
-
-  formInputs.value = formInput;
-  console.log("formInputs", formInputs.value);
-
-  in_quantity.value = "";
-  formattedNewPrice.value = "";
-  in_priceTotal.value = "";
-}
-const onChangePhone = (event) => {
-  const phoneNumber = event.target.value;
-  console.log(phoneNumber);
-
-  const filterData = suppliers.value.find(
-    (item) => item.in_supplierPhone === phoneNumber
-  );
-
-  if (filterData) {
-    formInputs.value = filterData;
-    console.log("data---->", formInputs.value);
-  } else {
-    // ถ้าไม่มีข้อมูลที่ตรงกัน
-    console.log("ไม่พบข้อมูล");
-    formAlert.value = {
-      status: true,
-      title: "เเจ้งเตือน",
-      body: "ไม่พบข้อมูลในระบบ",
-    };
-    clearData();
-  }
-};
-
-const onChangePrice = (event) => {
-  const in_quantity = parseFloat(event.target.value);
-  if (in_quantity !== "") {
-    in_priceTotal.value =
-      parseFloat(in_quantity) * parseFloat(formInputs.value.in_productPrice);
-  } else {
-    in_priceTotal.value = "";
-  }
-};
-
-const formattedNewPrice = computed(() => {
-  return typeof in_priceTotal.value === "number"
-    ? in_priceTotal.value.toFixed(2)
-    : ""; // รูปแบบราคาให้เป็นทศนิยม 2 ตำแหน่ง
-});
-
-const onSubmit = () => {
-  console.log("***onSubmit***");
-  const body = {
-    quantity: in_quantity.value,
-    price: formattedNewPrice.value,
-    typeAction: formInputs.value.in_productType,
-    //  //--------product----------------//
-    product_id: formInputs.value.in_special_id,
-    //  //--------supplier---------------//
-    firstName: formInputs.value.in_supplierFirstName,
-    lastName: formInputs.value.in_supplierLastName,
-    address: formInputs.value.in_supplierAddress,
-    subDistric: formInputs.value.in_supplierSubDistrict,
-    distric: formInputs.value.in_supplierDistrict,
-    province: formInputs.value.in_supplierProvince,
-    zipCode: formInputs.value.in_supplierZipCode,
-    phone: formInputs.value.in_supplierPhone,
-  };
-  console.log(body);
-};
-
-
 </script>
 
 <template>
@@ -251,17 +373,17 @@ const onSubmit = () => {
             >
               <span class="w-1/4 text-red-800 font-semibold">รหัสสินค้า</span>
               <select
-                class="h-8 w-3/4 focus:outline-red-400 rounded bg-red-100 px-3"
-                @change="onChangeIdProduct"
-                v-model="selectedProductId"
+                v-model="formProduct.productID"
+                class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
+                @change="(event) => onChangeProduct(event.target.value)"
               >
                 <option value="">------เลือก------</option>
                 <option
-                  v-for="product in products"
-                  :key="product.in_specialID"
-                  :value="product.in_specialID"
+                  v-for="(item, index) in dataInput.product"
+                  :key="index"
+                  :value="item.id"
                 >
-                  {{ product.in_specialID }}
+                  {{ item.specialID }}
                 </option>
               </select>
             </div>
@@ -274,7 +396,7 @@ const onSubmit = () => {
                 disabled
                 type="text"
                 class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
-                v-model="formInputs.in_productName"
+                v-model="formProduct.productName"
               />
             </div>
 
@@ -286,7 +408,7 @@ const onSubmit = () => {
                 disabled
                 type="text"
                 class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
-                v-model="formInputs.in_productType"
+                v-model="formProduct.typeAction"
               />
             </div>
 
@@ -298,8 +420,8 @@ const onSubmit = () => {
                 class="w-3/4 focus:outline-red-400 rounded bg-red-100 px-3 py-2"
                 rows="1"
                 type="text"
-                v-model="inputForm.in_description"
                 placeholder="รายละเอียดสินค้า"
+                v-model="formProduct.discription"
               ></textarea>
             </div>
 
@@ -312,7 +434,7 @@ const onSubmit = () => {
               <input
                 class="h-8 w-3/4 focus:outline-red-400 rounded bg-red-100 px-3"
                 type="date"
-                v-model="inputForm.in_date"
+                v-model="formProduct.dateTransaction"
               />
             </div>
 
@@ -324,7 +446,7 @@ const onSubmit = () => {
                 disabled
                 type="text"
                 class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
-                v-model="formInputs.in_productPrice"
+                v-model="formProduct.price"
               />
             </div>
 
@@ -335,8 +457,8 @@ const onSubmit = () => {
               <input
                 class="h-8 w-3/4 focus:outline-red-400 rounded bg-red-100 px-3"
                 type="text"
-                @change="onChangePrice"
-                v-model="in_quantity"
+                @change="(event) => onChangeQuantity(event.target.value)"
+                v-model="formProduct.quantity"
               />
             </div>
             <div
@@ -347,7 +469,7 @@ const onSubmit = () => {
                 disabled
                 type="text"
                 class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
-                v-model="formattedNewPrice"
+                v-model="formProduct.totalPrice"
               />
             </div>
           </div>
@@ -369,72 +491,148 @@ const onSubmit = () => {
               pattern="[0-9]*"
               maxlength="10"
               class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
-              v-model="suppliers.in_supplierPhone"
-              @change="onChangePhone"
+              v-model="formSupplier.phone"
+              @blur="(event) => onChangeSupplier(event.target.value)"
             />
           </div>
           <div class="basis-1/2 px-3 space-y-2 mb-3">
             <label class="font-semibold">รหัสผู้จัดจำหน่าย</label><br />
             <input
+              v-if="formSupplierActive"
+              type="text"
+              class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
+              v-model="formSupplier.id"
+            />
+            <input
+              v-else
               disabled
               type="text"
               class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
-              v-model="formInputs.in_supplierID"
+              v-model="formSupplier.id"
             />
           </div>
           <div class="basis-1/2 px-3 space-y-2 mb-3">
             <label class="font-semibold">ชื่อ</label><br />
             <input
+              v-if="formSupplierActive"
+              type="text"
+              class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
+              v-model="formSupplier.firstName"
+            />
+            <input
+              v-else
               disabled
               type="text"
               class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
-              v-model="formInputs.in_supplierFirstName"
+              v-model="formSupplier.firstName"
             />
           </div>
           <div class="basis-1/2 px-3 space-y-2 mb-3">
             <label class="font-semibold">สกุล</label><br />
             <input
+              v-if="formSupplierActive"
+              type="text"
+              class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
+              v-model="formSupplier.lastName"
+            />
+            <input
+              v-else
               disabled
               type="text"
               class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
-              v-model="formInputs.in_supplierLastName"
+              v-model="formSupplier.lastName"
             />
           </div>
 
           <div class="basis-1/2 px-3 space-y-2 mb-3">
             <label class="font-semibold">ที่อยู่</label><br />
             <input
+              v-if="formSupplierActive"
+              type="text"
+              class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
+              v-model="formSupplier.address"
+            />
+            <input
+              v-else
               disabled
               type="text"
               class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
-              v-model="formInputs.in_supplierAddress"
+              v-model="formSupplier.address"
             />
           </div>
           <div class="basis-1/2 px-3 space-y-2 mb-3">
             <label class="font-semibold">จังหวัด</label><br />
+            <select
+              v-if="formSupplierActive"
+              v-model="formSupplier.province"
+              @change="(event) => onChangeProvince(event.target.value)"
+              class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
+            >
+              <option value="">------เลือก------</option>
+              <option
+                v-for="(item, index) in dataInput.province"
+                :key="index"
+                :value="item.value"
+              >
+                {{ item.label }}
+              </option>
+            </select>
             <input
+              v-else
               disabled
               type="text"
               class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
-              v-model="formInputs.in_supplierProvince"
+              v-model="formSupplier.province"
             />
           </div>
           <div class="basis-1/2 px-3 space-y-2 mb-3">
             <label class="font-semibold">อำเภอ</label><br />
+            <select
+              v-if="formSupplierActive"
+              v-model="formSupplier.district"
+              @change="(event) => onChangeDistrict(event.target.value)"
+              class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
+            >
+              <option value="">------เลือก------</option>
+              <option
+                v-for="(item, index) in dataInput.district"
+                :key="index"
+                :value="item.value"
+              >
+                {{ item.label }}
+              </option>
+            </select>
             <input
+              v-else
               disabled
               type="text"
               class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
-              v-model="formInputs.in_supplierDistrict"
+              v-model="formSupplier.district"
             />
           </div>
           <div class="basis-1/2 px-3 space-y-2 mb-3">
             <label class="font-semibold">ตำบล</label><br />
+            <select
+              v-if="formSupplierActive"
+              v-model="formSupplier.subDistrict"
+              @change="(event) => onChangeSubDistrict(event.target.value)"
+              class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
+            >
+              <option value="">------เลือก------</option>
+              <option
+                v-for="(item, index) in dataInput.subDistrict"
+                :key="index"
+                :value="item.value"
+              >
+                {{ item.label }}
+              </option>
+            </select>
             <input
+              v-else
               disabled
               type="text"
               class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
-              v-model="formInputs.in_supplierSubDistrict"
+              v-model="formSupplier.subDistrict"
             />
           </div>
           <div class="basis-1/2 px-3 space-y-2 mb-3">
@@ -443,7 +641,7 @@ const onSubmit = () => {
               disabled
               type="text"
               class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
-              v-model="formInputs.in_supplierZipCode"
+              v-model="formSupplier.zipCode"
             />
           </div>
         </div>
