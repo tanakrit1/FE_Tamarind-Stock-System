@@ -11,7 +11,6 @@ import { onMounted, ref } from "vue";
 import alert from "../../../components/alert/alert.vue";
 import store from "../../../store";
 
-
 const columns = [
   { field: "specialID", label: "รหัส", width: "10%" },
   { field: "productName", label: "ชื่อสินค้า", width: "20%" },
@@ -45,7 +44,6 @@ const formProduct = ref({
   typeAction: "",
   productPrice: "0.00",
   discription: "",
-  dateTransaction: "",
   quantity: "",
   totalPrice: "0.00",
 });
@@ -81,6 +79,8 @@ const onLoadData = async () => {
   const body = {
     page: 1,
     limit: 10,
+    sortField: "id",
+    sortType: "ASC",
     filterModel: {
       logicOperator: "and",
       items: [
@@ -163,22 +163,18 @@ const onChangeProduct = (productID) => {
     formProduct.value.price = "0.00";
     formProduct.value.totalPrice = "0.00";
     formProduct.value.quantity = "1";
-    formProduct.value.dateTransaction = new Date().toISOString().split('T')[0];
     formProduct.value.discription = "";
     formProduct.value.productName = dataInput.value.product[0].name;
-    formProduct.value.typeAction = "ฝากเก็บ";
+    formProduct.value.typeAction = "ฝาก";
 
     // console.log("formProduct", formProduct.value);
     console.log("dataInput", dataInput.value.product[0].name);
     console.log("dataInput---->", dataInput.value.product);
-
   } else {
     formProduct.value.price = "0.00";
     formProduct.value.totalPrice = "0.00";
     formProduct.value.quantity = "1";
-    formProduct.value.dateTransaction = new Date().toISOString().split('T')[0];
     formProduct.value.discription = "";
-    formProduct.value.dateTransaction = "";
     formProduct.value.productName = "";
     formProduct.value.typeAction = "";
     formProduct.value.discription = "";
@@ -238,7 +234,6 @@ const onChangeSupplier = async (phone) => {
           phone: phone,
         };
       }
-
     } else {
       formAlert.value = {
         status: true,
@@ -278,13 +273,35 @@ const onChangeSubDistrict = async (subDistrictID) => {
   const zipCode = subDistrict.find((item) => item.id == subDistrictID).zip_code;
   formSupplier.value.zipCode = zipCode;
 };
+
+function isEmpty(value) {
+  return value === null || value === undefined || value === '';
+}
+
+function validateFormProduct(product) {
+  return !isEmpty(product.quantity) && !isEmpty(product.price) && !isEmpty(product.typeAction) && !isEmpty(product.productID);
+}
+
+function validateFormSupplier(supplier) {
+  return !isEmpty(supplier.firstName) && !isEmpty(supplier.lastName) && !isEmpty(supplier.address) && !isEmpty(supplier.subDistrict) && !isEmpty(supplier.district) && !isEmpty(supplier.province) && !isEmpty(supplier.zipCode) && !isEmpty(supplier.phone);
+}
+
 const onSubmit = async () => {
   console.log("***onSubmit***");
   if (formSupplierActive.value === false) {
+    if (!validateFormProduct(formProduct.value) || !validateFormSupplier(formSupplier.value)) {
+    formAlert.value = {
+      status: true,
+      title: "เกิดข้อผิดพลาด",
+      body: "กรุณากรอกข้อมูลให้ครบถ้วน",
+    };
+    return;
+  }
+
     const body = {
       //------transaction_import------//
       quantity: formProduct.value.quantity,
-      price: formProduct.value.totalPrice,
+      price: Number(formProduct.value.price), //formProduct.value.totalPrice,
       // priceDeposit:1152.05,
       typeAction: formProduct.value.typeAction,
       //--------product----------------//
@@ -312,20 +329,31 @@ const onSubmit = async () => {
         onLoadData();
         onShowProduct();
       } else {
-        formAlert.value = {
+        const mapValidation = response.message.map((item) => {
+          return `<li>${item}</li>`;
+        });
+        modalAlert.value = {
           status: true,
-          title: "เกิดข้อผิดพลาด",
-          body: response.message,
+          title: "กรุณาตรวจสอบ",
+          body: mapValidation.join(""),
         };
       }
     });
     console.log(body);
   } else {
     console.log("insertformSupplier.......");
+    if (!validateFormProduct(formProduct.value) || !validateFormSupplier(formSupplier.value)) {
+    formAlert.value = {
+      status: true,
+      title: "เกิดข้อผิดพลาด",
+      body: "กรุณากรอกข้อมูลให้ครบถ้วน",
+    };
+    return;
+  }
     const body = {
       //------transaction_import------//
       quantity: formProduct.value.quantity,
-      price: formProduct.value.totalPrice,
+      price: Number(formProduct.value.price), //formProduct.value.totalPrice,
       // priceDeposit:1152.05,
       typeAction: formProduct.value.typeAction,
       //--------product----------------//
@@ -352,10 +380,13 @@ const onSubmit = async () => {
       if (response.statusCode === 200) {
         onSupplierCrate();
       } else {
-        formAlert.value = {
+        const mapValidation = response.message.map((item) => {
+          return `<li>${item}</li>`;
+        });
+        modalAlert.value = {
           status: true,
-          title: "เกิดข้อผิดพลาด",
-          body: response.message,
+          title: "กรุณาตรวจสอบ",
+          body: mapValidation.join(""),
         };
       }
     });
@@ -492,19 +523,6 @@ onMounted(async () => {
                 placeholder="รายละเอียดสินค้า"
                 v-model="formProduct.discription"
               ></textarea>
-            </div>
-
-            <div
-              class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6"
-            >
-              <span class="w-1/4 text-red-800 font-semibold"
-                >วันที่รับสินค้าเข้าคลัง</span
-              >
-              <input
-                class="h-8 w-3/4 focus:outline-red-400 rounded bg-red-100 px-3"
-                type="date"
-                v-model="formProduct.dateTransaction"
-              />
             </div>
 
             <div

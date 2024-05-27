@@ -44,7 +44,6 @@ const formProduct = ref({
   typeAction: "",
   productPrice: "",
   discription: "",
-  dateTransaction: "",
   quantity: "",
   totalPrice: "0.00",
 });
@@ -80,6 +79,8 @@ const onLoadData = async () => {
   const body = {
     page: 1,
     limit: 10,
+    sortField: "id",
+    sortType: "ASC",
     filterModel: {
       logicOperator: "and",
       items: [
@@ -161,10 +162,9 @@ const onChangeProduct = (productID) => {
     formProduct.value.productID = productID;
     formProduct.value.totalPrice = formProduct.value.price;
     formProduct.value.quantity = "1";
-    formProduct.value.dateTransaction = new Date().toISOString().split('T')[0];
     formProduct.value.discription = "";
     formProduct.value.productName = dataInput.value.product[0].name;
-    formProduct.value.typeAction = "ซื้อเข้า";
+    formProduct.value.typeAction = "ซื้อ-ขาย";
 
     // console.log("formProduct", formProduct.value);
     console.log("dataInput", dataInput.value.product[0].name);
@@ -272,13 +272,34 @@ const onChangeSubDistrict = async (subDistrictID) => {
   const zipCode = subDistrict.find((item) => item.id == subDistrictID).zip_code;
   formSupplier.value.zipCode = zipCode;
 };
+
+function isEmpty(value) {
+  return value === null || value === undefined || value === '';
+}
+
+function validateFormProduct(product) {
+  return !isEmpty(product.quantity) && !isEmpty(product.price) && !isEmpty(product.typeAction) && !isEmpty(product.productID);
+}
+
+function validateFormSupplier(supplier) {
+  return !isEmpty(supplier.firstName) && !isEmpty(supplier.lastName) && !isEmpty(supplier.address) && !isEmpty(supplier.subDistrict) && !isEmpty(supplier.district) && !isEmpty(supplier.province) && !isEmpty(supplier.zipCode) && !isEmpty(supplier.phone);
+}
+
 const onSubmit = async () => {
   console.log("***onSubmit***");
   if (formSupplierActive.value === false) {
+    if (!validateFormProduct(formProduct.value) || !validateFormSupplier(formSupplier.value)) {
+    formAlert.value = {
+      status: true,
+      title: "เกิดข้อผิดพลาด",
+      body: "กรุณากรอกข้อมูลให้ครบถ้วน",
+    };
+    return;
+  }
     const body = {
       //------transaction_import------//
       quantity: formProduct.value.quantity,
-      price: formProduct.value.totalPrice,
+      price: Number(formProduct.value.price), //formProduct.value.totalPrice,
       // priceDeposit:1152.05,
       typeAction: formProduct.value.typeAction,
       //--------product----------------//
@@ -318,7 +339,7 @@ const onSubmit = async () => {
     const body = {
       //------transaction_import------//
       quantity: formProduct.value.quantity,
-      price: formProduct.value.totalPrice,
+      price: Number(formProduct.value.price), //formProduct.value.totalPrice,
       // priceDeposit:1152.05,
       typeAction: formProduct.value.typeAction,
       //--------product----------------//
@@ -487,18 +508,6 @@ onMounted(async () => {
               ></textarea>
             </div>
 
-            <div
-              class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6"
-            >
-              <span class="w-1/4 text-red-800 font-semibold"
-                >วันที่รับสินค้าเข้าคลัง</span
-              >
-              <input
-                class="h-8 w-3/4 focus:outline-red-400 rounded bg-red-100 px-3"
-                type="date"
-                v-model="formProduct.dateTransaction"
-              />
-            </div>
 
             <div
               class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6"
@@ -545,8 +554,11 @@ onMounted(async () => {
         </div>
         <hr class="mt-2 mx-6" style="border: 1px solid #c2796a" />
         <div class="px-12 flex flex-wrap pt-10">
-          <div class="basis-1/2 px-3 space-y-2 mb-3">
-            <label class="font-semibold">เบอร์โทร</label><br />
+          
+            <div
+              class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6"
+            >
+            <label class="w-1/4 text-red-800 font-semibold">เบอร์โทร</label>
             <input
               type="text"
               placeholder="กรอกเบอร์โทรศัพท์ (10 หลัก)"
@@ -557,16 +569,16 @@ onMounted(async () => {
               @blur="(event) => onChangeSupplier(event.target.value)"
             />
           </div>
-          <div v-if="formSupplierActive" class="basis-1/2 px-3 space-y-2 mb-3" hidden>
-            <label class="font-semibold">รหัสผู้จัดจำหน่าย</label><br />
+          <div v-if="formSupplierActive" class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6" hidden>
+            <label class="w-auto text-red-800 font-semibold">รหัสผู้จัดจำหน่าย</label>
             <input
               type="text"
               class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
               v-model="formSupplier.id"
             />
           </div>
-          <div v-else class="basis-1/2 px-3 space-y-2 mb-3">
-            <label class="font-semibold">รหัสผู้จัดจำหน่าย</label><br />
+          <div v-else class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6">
+            <label class="w-1/4 text-red-800 font-semibold">รหัสผู้จัดจำหน่าย</label>
             <input
               disabled
               type="text"
@@ -574,8 +586,8 @@ onMounted(async () => {
               v-model="formSupplier.id"
             />
           </div>
-          <div class="basis-1/2 px-3 space-y-2 mb-3">
-            <label class="font-semibold">ชื่อ</label><br />
+          <div class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6">
+            <label class="w-1/4 text-red-800 font-semibold">ชื่อ</label>
             <input
               v-if="formSupplierActive"
               type="text"
@@ -590,8 +602,8 @@ onMounted(async () => {
               v-model="formSupplier.firstName"
             />
           </div>
-          <div class="basis-1/2 px-3 space-y-2 mb-3">
-            <label class="font-semibold">สกุล</label><br />
+          <div class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6">
+            <label class="w-1/4 text-red-800 font-semibold">สกุล</label>
             <input
               v-if="formSupplierActive"
               type="text"
@@ -607,8 +619,8 @@ onMounted(async () => {
             />
           </div>
 
-          <div class="basis-1/2 px-3 space-y-2 mb-3">
-            <label class="font-semibold">ที่อยู่</label><br />
+          <div class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6">
+            <label class="w-1/4 text-red-800 font-semibold">ที่อยู่</label>
             <input
               v-if="formSupplierActive"
               type="text"
@@ -623,8 +635,8 @@ onMounted(async () => {
               v-model="formSupplier.address"
             />
           </div>
-          <div class="basis-1/2 px-3 space-y-2 mb-3">
-            <label class="font-semibold">จังหวัด</label><br />
+          <div class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6">
+            <label class="w-1/4 text-red-800 font-semibold">จังหวัด</label>
             <select
               v-if="formSupplierActive"
               v-model="formSupplier.province"
@@ -648,8 +660,8 @@ onMounted(async () => {
               v-model="formSupplier.province"
             />
           </div>
-          <div class="basis-1/2 px-3 space-y-2 mb-3">
-            <label class="font-semibold">อำเภอ</label><br />
+          <div class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6">
+            <label class="w-1/4 text-red-800 font-semibold">อำเภอ</label>
             <select
               v-if="formSupplierActive"
               v-model="formSupplier.district"
@@ -673,8 +685,8 @@ onMounted(async () => {
               v-model="formSupplier.district"
             />
           </div>
-          <div class="basis-1/2 px-3 space-y-2 mb-3">
-            <label class="font-semibold">ตำบล</label><br />
+          <div class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6">
+            <label class="w-1/4 text-red-800 font-semibold">ตำบล</label>
             <select
               v-if="formSupplierActive"
               v-model="formSupplier.subDistrict"
@@ -698,8 +710,8 @@ onMounted(async () => {
               v-model="formSupplier.subDistrict"
             />
           </div>
-          <div class="basis-1/2 px-3 space-y-2 mb-3">
-            <label class="font-semibold">รหัสไปรษณีย์</label><br />
+          <div class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6">
+            <label class="w-1/4 text-red-800 font-semibold">รหัสไปรษณีย์</label>
             <input
               disabled
               type="text"

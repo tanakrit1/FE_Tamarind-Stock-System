@@ -11,7 +11,7 @@ import paginationPage from "../../../components/pagination/pagination-page.vue";
 
 const pagination = ref({
   page: 1,
-  limit: 3,
+  limit: 10,
   totalPage: 0,
 });
 
@@ -19,7 +19,8 @@ const columns = [
   { field: "specialID", label: "รหัสสินค้า", width: "20%" },
   { field: "name", label: "ชื่อสินค้า", width: "20%" },
   { field: "type", label: "ประเภทสินค้า", width: "20%" },
-  { field: "price", label: "ราคา", width: "20%" },
+  { field: "price", label: "ราคาราคาขื้อเข้า", width: "20%" },
+  { field: "priceOut", label: "ราคาขายออก", width: "20%" },
   // { field: "permission", label: "สิทธิ์", width: "17%" },
 ];
 // const rows = ref([
@@ -39,6 +40,7 @@ const formModal = ref({
   in_specialID: "",
   in_name: "",
   in_price: "",
+  in_price_out: "",
   in_type: "",
 });
 const modeModal = ref("add");
@@ -56,6 +58,7 @@ const onClearFormModal = () => {
     in_specialID: "",
     in_name: "",
     in_price: "",
+    in_price_out: "",
     in_type: "",
   };
 };
@@ -107,7 +110,8 @@ const onOpenModal = (mode) => {
       in_id: rowAction.value.id,
       in_specialID: rowAction.value.specialID,
       in_name: rowAction.value.name,
-      in_price: rowAction.value.price,
+      in_price: Number(rowAction.value.price),
+      in_price_out: Number(rowAction.value.priceOut),
       in_type: rowAction.value.type,
     };
   }
@@ -121,7 +125,8 @@ const onSubmitModal = async () => {
     const body = {
       specialID: formModal.value.in_specialID,
       name: formModal.value.in_name,
-      price: formModal.value.in_price,
+      price: Number(formModal.value.in_price),
+      priceOut: Number(formModal.value.in_price_out),
       type: formModal.value.in_type,
     };
     await _apiProduct.create(body, async (response) => {
@@ -160,7 +165,8 @@ const onSubmitModal = async () => {
       //   id: formModal.value.in_id,
       //   specialID: formModal.value.in_specialID,
       name: formModal.value.in_name,
-      price: formModal.value.in_price,
+      price: Number(formModal.value.in_price),
+      priceOut: Number(formModal.value.in_price_out),
       type: formModal.value.in_type,
     };
     await _apiProduct.update(body, rowAction.value.id, async (response) => {
@@ -251,16 +257,6 @@ onMounted(async () => {
               icon="plus"
               @click="onOpenModal('add')"
             />
-            <!-- <button type="button" class="rounded-full " style="background-color: #A2422C">
-                            <div class="flex space-x-3 items-center px-10 py-2 ">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 16 16">
-                                    <path fill="#F1D6CF" fill-rule="evenodd"
-                                        d="M4 2a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2zm4 9a.75.75 0 0 1-.75-.75v-1.5h-1.5a.75.75 0 0 1 0-1.5h1.5v-1.5a.75.75 0 0 1 1.5 0v1.5h1.5a.75.75 0 0 1 0 1.5h-1.5v1.5A.75.75 0 0 1 8 11"
-                                        clip-rule="evenodd" />
-                                </svg>
-                                <span class="text-white font-semibold">เพิ่มข้อมูล</span>
-                            </div>
-                        </button> -->
           </div>
         </div>
 
@@ -320,19 +316,28 @@ onMounted(async () => {
               class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
               v-model="formModal.in_type"
             >
-              <option value="ขาย">ขาย</option>
-              <option value="รับฝาก">รับฝาก</option>
+              <option value="ซื้อ-ขาย">ซื้อ-ขาย</option>
+              <option value="ฝาก">ฝาก</option>
             </select>
           </div>
 
           <div class="basis-1/2 px-3 space-y-2">
-            <label>ราคา</label><br />
+            <label>ราคาขื้อเข้า</label><br />
             <input
               type="text"
               class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
               v-model="formModal.in_price"
             />
           </div>
+          <div class="basis-1/2 px-3 space-y-2">
+            <label>ราคาขายออก</label><br />
+            <input
+              type="text"
+              class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
+              v-model="formModal.in_price_out"
+            />
+          </div>
+          
         </div>
         <div class="modal-action">
           <buttonPrimary
