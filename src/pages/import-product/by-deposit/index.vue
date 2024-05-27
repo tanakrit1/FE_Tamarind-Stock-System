@@ -417,7 +417,7 @@ onMounted(async () => {
             />
           </svg>
           <span class="text-2xl font-bold text-red-800"
-            >รับสินค้า (ผู้จัดจำหน่าย)</span
+            >รับสินค้า (ฝากเก็บ)</span
           >
         </div>
         <div class="w-full bg-white rounded-xl py-3">
