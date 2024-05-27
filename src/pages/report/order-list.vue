@@ -153,12 +153,17 @@ const onExportExcel = () => {
                             </select>
                         </div>
                     </div>
-                    <div class="flex justify-center py-5">
-                        <button @click="onExportExcel"
-                            class="h-10 w-40 btn btn-btn-error btn-wide text-xl font-semibold">
+                    <div class="flex justify-center py-5 space-x-3">
+                        <button
+                            class="h-10 w-40 btn btn-btn-error btn-wide text-xl text-red-800 font-semibold">
                             ค้นหา
                         </button>
+                        <button @click="onExportExcel"
+                            class="h-10 w-40 btn btn-btn-error btn-wide text-xl text-red-800 font-semibold">
+                            รายงาน
+                        </button>
                     </div>
+                    
                 </div>
             </div>
             <div class="rounded-xl mb-10 overflow-auto">
