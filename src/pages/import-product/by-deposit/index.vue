@@ -9,6 +9,8 @@ import district from "../../../assets/address/thai_amphures.json";
 import province from "../../../assets/address/thai_provinces.json";
 import { onMounted, ref } from "vue";
 import alert from "../../../components/alert/alert.vue";
+import store from "../../../store";
+
 
 const columns = [
   { field: "specialID", label: "รหัส", width: "10%" },
@@ -41,7 +43,7 @@ const formProduct = ref({
   productID: "",
   productName: "",
   typeAction: "",
-  productPrice: "",
+  productPrice: "0.00",
   discription: "",
   dateTransaction: "",
   quantity: "",
@@ -158,9 +160,10 @@ const onChangeProduct = (productID) => {
       .find((item) => item.id == productID)
       .price?.toLocaleString();
     formProduct.value.productID = productID;
-    formProduct.value.totalPrice = formProduct.value.price;
+    formProduct.value.price = "0.00";
+    formProduct.value.totalPrice = "0.00";
     formProduct.value.quantity = "1";
-    formProduct.value.dateTransaction = new Date();
+    formProduct.value.dateTransaction = new Date().toISOString().split('T')[0];
     formProduct.value.discription = "";
     formProduct.value.productName = dataInput.value.product[0].name;
     formProduct.value.typeAction = "ฝากเก็บ";
@@ -168,10 +171,13 @@ const onChangeProduct = (productID) => {
     // console.log("formProduct", formProduct.value);
     console.log("dataInput", dataInput.value.product[0].name);
     console.log("dataInput---->", dataInput.value.product);
+
   } else {
-    formProduct.value.price = "";
+    formProduct.value.price = "0.00";
     formProduct.value.totalPrice = "0.00";
-    formProduct.value.quantity = "";
+    formProduct.value.quantity = "1";
+    formProduct.value.dateTransaction = new Date().toISOString().split('T')[0];
+    formProduct.value.discription = "";
     formProduct.value.dateTransaction = "";
     formProduct.value.productName = "";
     formProduct.value.typeAction = "";
@@ -232,6 +238,7 @@ const onChangeSupplier = async (phone) => {
           phone: phone,
         };
       }
+
     } else {
       formAlert.value = {
         status: true,
@@ -300,6 +307,7 @@ const onSubmit = async () => {
           title: "เเจ้งเตือน",
           body: "บันทึกข้อมูลเรียบร้อย",
         };
+
         clearData();
         onLoadData();
         onShowProduct();
@@ -354,46 +362,49 @@ const onSubmit = async () => {
   }
 };
 
-const onSupplierCrate = async() => {
+const onSupplierCrate = async () => {
   const bodySupplier = {
-      firstName: formSupplier.value.firstName,
-      lastName: formSupplier.value.lastName,
-      address: formSupplier.value.address,
-      subDistric:
-        subDistrict.find((item) => item.id == formSupplier.value.subDistrict)
-          ?.name_th || "",
-      distric:
-        district.find((item) => item.id == formSupplier.value.district)
-          ?.name_th || "",
-      province:
-        province.find((item) => item.id == formSupplier.value.province)
-          ?.name_th || "",
-      zipCode: formSupplier.value.zipCode.toString(),
-      phone: formSupplier.value.phone,
-    };
+    firstName: formSupplier.value.firstName,
+    lastName: formSupplier.value.lastName,
+    address: formSupplier.value.address,
+    subDistric:
+      subDistrict.find((item) => item.id == formSupplier.value.subDistrict)
+        ?.name_th || "",
+    distric:
+      district.find((item) => item.id == formSupplier.value.district)
+        ?.name_th || "",
+    province:
+      province.find((item) => item.id == formSupplier.value.province)
+        ?.name_th || "",
+    zipCode: formSupplier.value.zipCode.toString(),
+    phone: formSupplier.value.phone,
+  };
 
-    await _apiSupplier.create(bodySupplier, (response) => {
-      if (response.statusCode === 200) {
-        formAlert.value = {
-          status: true,
-          title: "เเจ้งเตือน",
-          body: "เพิ่มข้อมูลเรียบร้อย",
-        };
-        clearData();
-        onLoadData();
-        onShowProduct();
-      } else {
-        formAlert.value = {
-          status: true,
-          title: "เกิดข้อผิดพลาด",
-          body: response.message,
-        };
-      }
-    });
-}
+  await _apiSupplier.create(bodySupplier, (response) => {
+    if (response.statusCode === 200) {
+      formAlert.value = {
+        status: true,
+        title: "เเจ้งเตือน",
+        body: "เพิ่มข้อมูลเรียบร้อย",
+      };
+      clearData();
+      onLoadData();
+      onShowProduct();
+    } else {
+      formAlert.value = {
+        status: true,
+        title: "เกิดข้อผิดพลาด",
+        body: response.message,
+      };
+    }
+  });
+};
 onMounted(async () => {
+  store.commit("setStatusLoading", true);
+  clearData();
   await onLoadData();
   await onShowProduct();
+  store.commit("setStatusLoading", false);
 });
 </script>
 
@@ -417,7 +428,7 @@ onMounted(async () => {
             />
           </svg>
           <span class="text-2xl font-bold text-red-800"
-            >รับสินค้า (ผู้จัดจำหน่าย)</span
+            >รับสินค้า (ฝากเก็บ)</span
           >
         </div>
         <div class="w-full bg-white rounded-xl py-3">
@@ -501,7 +512,6 @@ onMounted(async () => {
             >
               <span class="w-1/4 text-red-800 font-semibold">ราคาต่อหน่วย</span>
               <input
-                disabled
                 type="text"
                 class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
                 v-model="formProduct.price"
@@ -553,7 +563,11 @@ onMounted(async () => {
               @blur="(event) => onChangeSupplier(event.target.value)"
             />
           </div>
-          <div v-if="formSupplierActive" class="basis-1/2 px-3 space-y-2 mb-3" hidden>
+          <div
+            v-if="formSupplierActive"
+            class="basis-1/2 px-3 space-y-2 mb-3"
+            hidden
+          >
             <label class="font-semibold">รหัสผู้จัดจำหน่าย</label><br />
             <input
               type="text"
