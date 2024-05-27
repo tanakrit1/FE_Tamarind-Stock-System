@@ -9,6 +9,7 @@ import district from "../../../assets/address/thai_amphures.json";
 import province from "../../../assets/address/thai_provinces.json";
 import {  onMounted, ref } from "vue";
 import alert from "../../../components/alert/alert.vue";
+import store from "../../../store";
 
 const columns = [
   { field: "specialID", label: "รหัส", width: "10%" },
@@ -160,7 +161,7 @@ const onChangeProduct = (productID) => {
     formProduct.value.productID = productID;
     formProduct.value.totalPrice = formProduct.value.price;
     formProduct.value.quantity = "1";
-    formProduct.value.dateTransaction = new Date();
+    formProduct.value.dateTransaction = new Date().toISOString().split('T')[0];
     formProduct.value.discription = "";
     formProduct.value.productName = dataInput.value.product[0].name;
     formProduct.value.typeAction = "ซื้อเข้า";
@@ -392,8 +393,11 @@ const onSupplierCrate = async() => {
     });
 }
 onMounted(async () => {
+  store.commit("setStatusLoading", true);
+  clearData();
   await onLoadData();
   await onShowProduct();
+  store.commit("setStatusLoading", false);
 });
 </script>
 
