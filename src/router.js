@@ -40,15 +40,15 @@ const router = createRouter({
             props: true 
         },
         {
-            path: "/add-list-deposit",
-            name: "add-list-deposit",
-            component: () => import("./pages/export-product/add-list-deposit/index.vue"),
+            path: "/by-deposit",
+            name: "by-deposit",
+            component: () => import("./pages/export-product/by-deposit/index.vue"),
             props: true 
         },
         {
-            path: "/add-list-customer",
-            name: "add-list-customer",
-            component: () => import("./pages/export-product/add-list-customer/index.vue"),
+            path: "/by-customer",
+            name: "by-customer",
+            component: () => import("./pages/export-product/by-customer/index.vue"),
             props: true 
         },
 

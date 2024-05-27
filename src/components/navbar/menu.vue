@@ -27,7 +27,7 @@ const itemNavbar = ref([
         menu: [
             {
                 name: 'ขายสินค้า',
-                path: '/add-list-customer'
+                path: '/by-customer'
             },
             {
                 name: 'เบิกเพื่อแปรรูปสินค้า',
@@ -35,7 +35,7 @@ const itemNavbar = ref([
             },
             {
                 name: 'นำสินค้าออก (จากการฝาก)',
-                path: '/add-list-deposit'
+                path: '/by-deposit'
             },
         ]
     },

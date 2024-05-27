@@ -7,8 +7,23 @@ import province from "../../../assets/address/thai_provinces.json"
 import { onMounted, ref } from "vue";
 import _apiProduct from "../../../api/master-products"
 import _apiCustomer from "../../../api/master-customer"
+import _apiTranExport from "../../../api/export-product"
 import alert from "../../../components/alert/alert.vue"
+import store from "../../../store";
 
+const columns = [
+    { field: "productName", label: "ชื่อสินค้า", width: "20%" },
+    { field: "quantity", label: "ปริมาณสินค้า", width: "10%" },
+    { field: "price", label: "ราคารวม", width: "10%" },
+    { field: "customerFirstName", label: "ชื่อ", width: "20%" },
+    { field: "customerLastName", label: "สกุล", width: "20%" },
+    { field: "customerAddress", label: "ที่อยู่", width: "25%" },
+    { field: "customerSubDistrict", label: "ตำบล", width: "20%" },
+    { field: "customerDistrict", label: "อำเภอ", width: "20%" },
+    { field: "customerProvince", label: "จังหวัด", width: "20%" },
+    { field: "customerZipCode", label: "ไปรษณีย์", width: "10%" },
+]
+const rows = ref([]);
 const ddl = ref({
     province: [],
     district: [],
@@ -32,7 +47,6 @@ const formOrder = ref({
 })
 
 const formCustomer = ref({
-
     firstName: "",
     lastName: "",
     address: "",
@@ -54,6 +68,15 @@ const onClearFormCustomer = () => {
         subDistrict: "",
         zipCode: "",
         phone: "",
+    }
+}
+
+const onClearFormOrder = () => {
+    formOrder.value = {
+        productID: "",
+        quantity: "",
+        price: "",
+        totalPrice: "0"
     }
 }
 
@@ -91,7 +114,7 @@ const onChangeSubDistrict = async (subDistrictID) => {
 
 const onChangeProduct = (productID) => {
     if (productID !== "") {
-        formOrder.value.price = ddl.value.listProductAll.find(item => item.id == productID).price?.toLocaleString()
+        formOrder.value.price = ddl.value.listProductAll.find(item => item.id == productID).priceOut?.toLocaleString()
         formOrder.value.totalPrice = formOrder.value.price
         formOrder.value.quantity = "1"
     } else {
@@ -110,7 +133,6 @@ const onLoadDDL = async () => {
         limit: 1000
     }
     await _apiProduct.search(body, (response) => {
-        console.log("response : ", response)
         if (response.statusCode === 200) {
             ddl.value.product = response.data.map(item => {
                 return { label: item.name, value: item.id }
@@ -125,13 +147,13 @@ const onLoadDDL = async () => {
         }
 
     })
-    console.log("province--> ", province)
     ddl.value.province = province.map(item => {
         return { label: item.name_th, value: item.id }
     })
 }
 
 const onSearchCustomer = async (phone) => {
+    store.commit("setStatusLoading", true);
     const body = {
         page: 1,
         limit: 1,
@@ -147,10 +169,8 @@ const onSearchCustomer = async (phone) => {
         }
     }
     await _apiCustomer.search(body, response => {
-        console.log("response : ", response)
         if (response.statusCode === 200) {
             if (response.data.length > 0) {
-                console.log("**")
                 formCustomerActive.value = false
                 formCustomer.value.firstName = response.data[0].firstName
                 formCustomer.value.lastName = response.data[0].lastName
@@ -168,7 +188,6 @@ const onSearchCustomer = async (phone) => {
                 }
                 formCustomerActive.value = true
                 formCustomer.value = {
-                    id: "",
                     firstName: "",
                     lastName: "",
                     address: "",
@@ -188,10 +207,113 @@ const onSearchCustomer = async (phone) => {
             formCustomerActive.value = true
             onClearFormCustomer()
         }
+        store.commit("setStatusLoading", false);
     })
 }
 
+const fnValidate = async (pFormOrder, pFormCustomer) => {
+    const totalForm = { ...pFormOrder, ...pFormCustomer }
+    for (let i = 0; i < Object.keys(totalForm).length; i++) {
+        const key = Object.keys(totalForm)[i]
+        if (totalForm[key] == "") {
+            return false
+        }
+    }
+    return true
+}
+
+const onCreateTransection = async (pFormOrder, pFormCustomer) => {
+    store.commit("setStatusLoading", true);
+    const body = {
+        quantity: pFormOrder.quantity.toString(),
+        price: Number(pFormOrder.totalPrice),
+        typeAction: "ซื้อ-ขาย",
+        product_id: pFormOrder.productID,
+
+        firstName: pFormCustomer.firstName,
+        lastName: pFormCustomer.lastName,
+        address: pFormCustomer.address,
+        subDistric: subDistrict.find(item => item.id == pFormCustomer.subDistrict).name_th,
+        distric: district.find(item => item.id == pFormCustomer.district).name_th,
+        province: province.find(item => item.id == pFormCustomer.province).name_th,
+        zipCode: pFormCustomer.zipCode.toString(),
+        phone: pFormCustomer.phone
+    }
+    await _apiTranExport.create(body, response => {
+        console.log("response : ", response)
+        if (response.statusCode === 200) {
+            formAlert.value = {
+                status: true,
+                title: "สำเร็จ",
+                body: "เพิ่มข้อมูลเรียบร้อย"
+            }
+            onClearFormCustomer()
+            onClearFormOrder()
+            onLoadTable()
+        } else {
+            formAlert.value = {
+                status: true,
+                title: "เเจ้งเตือน",
+                body: response.message
+            }
+        }
+        store.commit("setStatusLoading", false);
+    })
+}
+
+const onSubmitForm = async () => {
+    const resultValid = await fnValidate(formOrder.value, formCustomer.value)
+    if (resultValid) {
+        await onCreateTransection(formOrder.value, formCustomer.value)
+    } else {
+        formAlert.value = {
+            status: true,
+            title: "เเจ้งเตือน",
+            body: "กรุณากรอกข้อมูลให้ครบถ้วน"
+        }
+    }
+}
+
+const onLoadTable = async() => {
+    const body = {
+        page: 1,
+        limit: 10,
+        sortField:"createdAt",
+        sortType:"DESC",
+        filterModel: {
+            logicOperator: "and",
+            items: [
+                {
+                    field: "typeAction",
+                    operator: "equals",
+                    value: "ซื้อ-ขาย"
+                }
+            ]
+            
+        }
+    }
+
+    await _apiTranExport.search( body, response => {
+        console.log("response : ", response)
+        rows.value = response.data.map( item => {
+            return {
+                productName: item.product.name,
+                quantity: item.quantity,
+                price: item.price,
+                customerFirstName: item.customer.firstName,
+                customerLastName: item.customer.lastName,
+                customerAddress: item.customer.address,
+                customerSubDistrict: item.customer.subDistric,
+                customerDistrict: item.customer.distric,
+                customerProvince: item.customer.province,
+                customerZipCode: item.customer.zipCode
+            }
+        } )
+    } )
+}
+
 onMounted(async () => {
+    await onLoadTable()
     await onLoadDDL()
 })
 </script>
@@ -326,7 +448,8 @@ onMounted(async () => {
                 <div class="flex flex-row flex-wrap px-10 mt-3 ">
                     <div class="sm:basis-full md:basis-1/2 lg:basis-2/6 flex flex-col px-3 mb-3">
                         <span class="text-red-800 font-semibold">เบอร์โทร</span>
-                        <input class="h-8  focus:outline-red-400 rounded bg-red-100 px-3" type="text"
+                        <input pattern="[0-9]*" maxlength="10"
+                            class="h-8  focus:outline-red-400 rounded bg-red-100 px-3" type="text"
                             v-model="formCustomer.phone" @blur="(event) => onSearchCustomer(event.target.value)" />
                     </div>
                     <div class="sm:basis-full md:basis-1/2 lg:basis-2/6 flex flex-col px-3 mb-3">
@@ -395,11 +518,11 @@ onMounted(async () => {
                 </div>
             </div>
             <div class="flex justify-center py-10">
-                <buttonPrimaryOutline label="บันทึกข้อมูล" />
+                <buttonPrimaryOutline @click="onSubmitForm" label="บันทึกข้อมูล" />
             </div>
 
             <div class="mt-10">
-                <tableBasic :columns="[]" :rows="[]" />
+                <tableBasic :columns="columns" :rows="rows" />
             </div>
         </div>
 
