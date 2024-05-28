@@ -32,7 +32,8 @@ const columns = [
 
 const rows = ref([]);
 
-const currentDate = ref("");
+const currentDateStart = ref("");
+const currentDateEnd = ref("");
 const inputSearch = ref({
   in_specialID: "",
   in_productName: "",
@@ -51,12 +52,11 @@ const onShowProduct = async () => {
       logicOperator: "and",
       items: [],
     },
-
   };
   await _apiProduct.search(body, (response) => {
     if (response.statusCode === 200) {
       console.log("response --> ", response);
-      
+
       inputSearch.value = response.data.map((item) => {
         return {
           id: item.id,
@@ -65,12 +65,11 @@ const onShowProduct = async () => {
           typeAction: item.type,
           productPrice: item.price,
           quantity: item.quantity,
-          
         };
-      })
+      });
     }
   });
-}
+};
 const onLoadData = async () => {
   const body = {
     page: pagination.value.page,
@@ -78,8 +77,14 @@ const onLoadData = async () => {
     sortField: "id",
     sortType: "ASC",
     filterModel: {
-      logicOperator: "and",
-      items: [],
+      logicOperator: "or",
+      items: [
+        {
+          field: "id",
+          operator: "equals",
+          value: "1",
+        },
+      ],
     },
   };
   await _apiSupplierImport.searchSupplierImport(body, (response) => {
@@ -106,13 +111,58 @@ const onLoadData = async () => {
     }
   });
 };
+
+const onSubmit = () => {
+  console.log("***onSubmit***");
+  const body = {
+    id: inputSearch.value.in_specialID,
+    productName: inputSearch.value.in_productName,
+    in_productType: inputSearch.value.in_productType,
+    productPrice: inputSearch.value.in_productPrice,
+    quantity: inputSearch.value.in_quantity,
+    dateStart: currentDateStart.value,
+    dateEnd: currentDateEnd.value,
+  }
+  console.log("****body****",body);
+}
 const onChangePagination = (val) => {
   pagination.page = val;
   onLoadData();
 };
 
 const onSearch = async () => {
-  const body = {};
+  const body = {
+    page: 1,
+    limit: 10,
+    sortField: "id",
+    sortType: "ASC",
+    filterModel: {
+      logicOperator: "and",
+      items: [
+        {
+          field: "id",
+          operator: "equals",
+          value: "1",
+        },
+        {
+          field: "typeAction",
+          operator: "equals",
+          value: "ฝากเก็บ",
+        },
+        {
+          field: "quantity",
+          operator: "equals",
+          value: "1",
+        },
+      ],
+    },
+  };
+
+  await _apiSupplierImport.searchSupplierImport(body, (response) => {
+    if (response.statusCode === 200) {
+      console.log("response2--> ", response);
+    }
+  });
 };
 onMounted(async () => {
   setCurrentDate();
@@ -122,7 +172,8 @@ onMounted(async () => {
 
 function setCurrentDate() {
   const today = new Date().toISOString().substr(0, 10);
-  currentDate.value = today;
+  currentDateStart.value = today;
+  currentDateEnd.value = today;
 }
 </script>
 <template>
@@ -164,13 +215,14 @@ function setCurrentDate() {
             <div class="flex flex-col">
               <span class="text-red-800 font-semibold">รหัสสินค้า</span>
               <select
+                v-model="inputSearch.in_specialID"
                 class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
               >
                 <option value="" selected>------เลือก------</option>
                 <option
                   v-for="(item, index) in inputSearch"
                   :key="index"
-                  :value="item.specialID"
+                  :value="item.id"
                 >
                   {{ item.specialID }}
                 </option>
@@ -183,6 +235,7 @@ function setCurrentDate() {
                 type="text"
               /> -->
               <select
+                v-model="inputSearch.in_productName"
                 class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
               >
                 <option value="" selected>------เลือก------</option>
@@ -199,42 +252,38 @@ function setCurrentDate() {
             <div class="flex flex-col">
               <span class="text-red-800 font-semibold">ประเภทนำเข้าสินค้า</span>
               <select
+                v-model="inputSearch.in_productType"
                 class="h-8 w-50 focus:outline-red-400 rounded bg-red-100 px-3"
               >
-                <option disabled selected>ซื้อ-ขาย</option>
-                <option>ฝาก</option>
+                <option selected value="ซื้อ-ขาย">ซื้อ-ขาย</option>
+                <option value="ฝาก">ฝาก</option>
               </select>
             </div>
             <div class="flex flex-col">
               <div class="flex flex-row space-x-3">
                 <div class="flex flex-col">
-                  <span class="text-red-800 font-semibold"
-                  >วันที่</span
-                >
-                <input
-                  class="h-8 w-50 focus:outline-red-400 rounded bg-red-100 px-3"
-                  type="date"
-                  v-model="currentDate"
-                />
+                  <span class="text-red-800 font-semibold">วันที่</span>
+                  <input
+                    class="h-8 w-50 focus:outline-red-400 rounded bg-red-100 px-3"
+                    type="date"
+                    v-model="currentDateStart"
+                  />
                 </div>
-                <span class="text-red-800 font-semibold text-center"
-                >ถึง</span
-              >
+                <span class="text-red-800 font-semibold text-center">ถึง</span>
                 <div class="flex flex-col">
-                  <span class="text-red-800 font-semibold"
-                  >วันที่</span
-                >
-                <input
-                  class="h-8 w-50 focus:outline-red-400 rounded bg-red-100 px-3"
-                  type="date"
-                  v-model="currentDate"
-                />
+                  <span class="text-red-800 font-semibold">วันที่</span>
+                  <input
+                    class="h-8 w-50 focus:outline-red-400 rounded bg-red-100 px-3"
+                    type="date"
+                    v-model="currentDateEnd"
+                  />
                 </div>
               </div>
             </div>
             <div class="flex flex-col">
               <span class="text-red-800 font-semibold">ราคา</span>
               <input
+                v-model="inputSearch.in_price"
                 class="h-8 w-50 focus:outline-red-400 rounded bg-red-100 px-3"
                 type="text"
               />
@@ -242,6 +291,7 @@ function setCurrentDate() {
             <div class="flex flex-col">
               <span class="text-red-800 font-semibold">ปริมาณ</span>
               <input
+                v-model="inputSearch.in_quantity"
                 class="h-8 w-50 focus:outline-red-400 rounded bg-red-100 px-3"
                 type="text"
               />
@@ -249,6 +299,7 @@ function setCurrentDate() {
           </div>
           <div class="flex justify-center py-5 space-x-3">
             <button
+            label="ค้นหา" @click="onSubmit"
               class="h-10 rounded-full w-40 btn btn-btn-error btn-wide text-xl text-red-800 font-semibold"
             >
               ค้นหา
