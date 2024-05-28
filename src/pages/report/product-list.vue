@@ -1,76 +1,129 @@
 <script setup>
-import { ref } from 'vue';
-import tableBasic from "../../components/tables/table-basic.vue";
+import { onMounted, ref } from "vue";
+import tableManage from "../../components/tables/table-manage.vue";
 import { useRouter } from "vue-router";
 import paginationPage from "../../components/pagination/pagination-page.vue";
+import _apiSupplierImport from "../../api/supplier-import.js";
+import _apiProduct from "../../api/master-products.js";
+
 const $router = useRouter();
 
-const currentPage = ref(1);
-const totalPages = ref(15);
+const pagination = ref({
+  page: 1,
+  limit: 5,
+  totalPage: 0,
+});
 
 const columns = [
-  { field: "id", label: "รหัสสินค้า", width: "auto" },
-  { field: "name", label: "ชื่อสินค้า", width: "auto" },
-  { field: "type", label: "ประเภทสินค้า", width: "auto" },
-  { field: "detail", label: "รายละเอียด", width: "auto" },
-  { field: "quantity", label: "ปริมาณ", width: "auto" },
-  { field: "price", label: "ราคา", width: "auto" },
-  { field: "date", label: "วันที่รับสินค้าเข้าคลัง", width: "auto" },
-  { field: "status", label: "สถานะ", width: "auto" },
+  { field: "specialID", label: "รหัส", width: "10%" },
+  { field: "productName", label: "ชื่อสินค้า", width: "20%" },
+  { field: "typeAction", label: "ประเภทสินค้า", width: "10%" },
+  { field: "productPrice", label: "ราคาสินค้า", width: "10%" },
+  { field: "quantity", label: "ปริมาณสินค้า", width: "10%" },
+  { field: "price", label: "ราคารวม", width: "10%" },
+  { field: "supplierFirstName", label: "ชื่อ", width: "20%" },
+  { field: "supplierLastName", label: "สกุล", width: "20%" },
+  { field: "supplierAddress", label: "ที่อยู่", width: "25%" },
+  { field: "supplierSubDistrict", label: "ตำบล", width: "20%" },
+  { field: "supplierDistrict", label: "อำเภอ", width: "20%" },
+  { field: "supplierProvince", label: "จังหวัด", width: "20%" },
+  { field: "supplierZipCode", label: "ไปรษณีย์", width: "10%" },
 ];
 
-const rows = [
-  {
-    id: "0000",
-    name: "AAAAA",
-    type: "BBBBB",
-    detail: "CCCCC",
-    quantity: "FFFFF",
-    price: "GGGGG",
-    date: "HHHHH",
-    status: "เสร็จสิ้น",
-  },
-  {
-    id: "0000",
-    name: "AAAAA",
-    type: "BBBBB",
-    detail: "CCCCC",
-    quantity: "FFFFF",
-    price: "GGGGG",
-    date: "HHHHH",
-    status: "กําลังดําเนินการ",
-  },
-  {
-    id: "0000",
-    name: "AAAAA",
-    type: "BBBBB",
-    detail: "CCCCC",
-    quantity: "FFFFF",
-    price: "GGGGG",
-    date: "HHHHH",
-    status: "กําลังดําเนินการ",
-  },
-  {
-    id: "0000",
-    name: "AAAAA",
-    type: "BBBBB",
-    detail: "CCCCC",
-    quantity: "FFFFF",
-    price: "GGGGG",
-    date: "HHHHH",
-    status: "กําลังดําเนินการ",
-  },
-  {
-    id: "0000",
-    name: "AAAAA",
-    type: "BBBBB",
-    detail: "CCCCC",
-    quantity: "FFFFF",
-    price: "GGGGG",
-    date: "HHHHH",
-    status: "กําลังดําเนินการ",
-  },
-];
+const rows = ref([]);
+
+const currentDate = ref("");
+const inputSearch = ref({
+  in_specialID: "",
+  in_productName: "",
+  in_typeAction: "",
+  in_productPrice: "",
+  in_quantity: "",
+  in_price: "",
+});
+const onShowProduct = async () => {
+  const body = {
+    page: 1,
+    limit: 10000,
+    sortField: "id",
+    sortType: "ASC",
+    filterModel: {
+      logicOperator: "and",
+      items: [],
+    },
+
+  };
+  await _apiProduct.search(body, (response) => {
+    if (response.statusCode === 200) {
+      console.log("response --> ", response);
+      
+      inputSearch.value = response.data.map((item) => {
+        return {
+          id: item.id,
+          specialID: item.specialID,
+          productName: item.name,
+          typeAction: item.type,
+          productPrice: item.price,
+          quantity: item.quantity,
+          
+        };
+      })
+    }
+  });
+}
+const onLoadData = async () => {
+  const body = {
+    page: pagination.value.page,
+    limit: pagination.value.limit,
+    sortField: "id",
+    sortType: "ASC",
+    filterModel: {
+      logicOperator: "and",
+      items: [],
+    },
+  };
+  await _apiSupplierImport.searchSupplierImport(body, (response) => {
+    if (response.statusCode === 200) {
+      console.log("response2--> ", response);
+      const flattenedData = response.data.map((item) => ({
+        specialID: item.product.specialID,
+        productName: item.product.name,
+        typeAction: item.typeAction,
+        productPrice: item.product.price,
+        quantity: item.quantity,
+        price: item.price,
+        supplierFirstName: item.supplier.firstName,
+        supplierLastName: item.supplier.lastName,
+        supplierAddress: item.supplier.address,
+        supplierSubDistrict: item.supplier.subDistric,
+        supplierDistrict: item.supplier.distric,
+        supplierProvince: item.supplier.province,
+        supplierZipCode: item.supplier.zipCode,
+      }));
+      rows.value = flattenedData;
+
+      pagination.value.totalPage = response.metadata.totalPage;
+    }
+  });
+};
+const onChangePagination = (val) => {
+  pagination.page = val;
+  onLoadData();
+};
+
+const onSearch = async () => {
+  const body = {};
+};
+onMounted(async () => {
+  setCurrentDate();
+  await onLoadData();
+  onShowProduct();
+});
+
+function setCurrentDate() {
+  const today = new Date().toISOString().substr(0, 10);
+  currentDate.value = today;
+}
 </script>
 <template>
   <div class="flex md:justify-center">
@@ -100,85 +153,133 @@ const rows = [
             </g>
           </svg>
 
-          <span class="text-2xl font-bold text-red-800">รายการนำเข้าสินค้า</span>
+          <span class="text-2xl font-bold text-red-800"
+            >รายการนำเข้าสินค้า</span
+          >
         </div>
       </div>
       <div class="flex justify-center pb-5">
         <div class="w-full bg-white rounded-xl py-5">
-          <div class="grid grid-cols-3 gap-4 px-6 mt-3">
+          <div class="grid grid-cols-2 gap-4 px-6 mt-3">
             <div class="flex flex-col">
               <span class="text-red-800 font-semibold">รหัสสินค้า</span>
-              <input
-                class="h-8 w-50 focus:outline-red-400 rounded bg-red-100 px-3"
-                type="text"
-              />
+              <select
+                class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
+              >
+                <option value="" selected>------เลือก------</option>
+                <option
+                  v-for="(item, index) in inputSearch"
+                  :key="index"
+                  :value="item.specialID"
+                >
+                  {{ item.specialID }}
+                </option>
+              </select>
             </div>
             <div class="flex flex-col">
               <span class="text-red-800 font-semibold">ชื่อสินค้า</span>
-              <input
+              <!-- <input
                 class="h-8 w-50 focus:outline-red-400 rounded bg-red-100 px-3"
                 type="text"
-              />
+              /> -->
+              <select
+                class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
+              >
+                <option value="" selected>------เลือก------</option>
+                <option
+                  v-for="(item, index) in inputSearch"
+                  :key="index"
+                  :value="item.productName"
+                >
+                  {{ item.productName }}
+                </option>
+              </select>
             </div>
 
-            
             <div class="flex flex-col">
               <span class="text-red-800 font-semibold">ประเภทนำเข้าสินค้า</span>
               <select
                 class="h-8 w-50 focus:outline-red-400 rounded bg-red-100 px-3"
               >
-                <option disabled selected>ผู้จัดจำหน่าย</option>
-                <option>จากการฝาก</option>
+                <option disabled selected>ซื้อ-ขาย</option>
+                <option>ฝาก</option>
               </select>
             </div>
             <div class="flex flex-col">
-              <span class="text-red-800 font-semibold"
-                >วันที่สั่งซื้อ/เบิก</span
+              <div class="flex flex-row space-x-3">
+                <div class="flex flex-col">
+                  <span class="text-red-800 font-semibold"
+                  >วันที่</span
+                >
+                <input
+                  class="h-8 w-50 focus:outline-red-400 rounded bg-red-100 px-3"
+                  type="date"
+                  v-model="currentDate"
+                />
+                </div>
+                <span class="text-red-800 font-semibold text-center"
+                >ถึง</span
               >
-              <input
-                class="h-8 w-50 focus:outline-red-400 rounded bg-red-100 px-3"
-                type="date"
-              />
+                <div class="flex flex-col">
+                  <span class="text-red-800 font-semibold"
+                  >วันที่</span
+                >
+                <input
+                  class="h-8 w-50 focus:outline-red-400 rounded bg-red-100 px-3"
+                  type="date"
+                  v-model="currentDate"
+                />
+                </div>
+              </div>
             </div>
             <div class="flex flex-col">
-              <span class="text-red-800 font-semibold"
-                >ราคา</span
-              >
+              <span class="text-red-800 font-semibold">ราคา</span>
               <input
                 class="h-8 w-50 focus:outline-red-400 rounded bg-red-100 px-3"
                 type="text"
               />
             </div>
             <div class="flex flex-col">
-              <span class="text-red-800 font-semibold"
-                >ปริมาณ</span
-              >
+              <span class="text-red-800 font-semibold">ปริมาณ</span>
               <input
                 class="h-8 w-50 focus:outline-red-400 rounded bg-red-100 px-3"
                 type="text"
               />
             </div>
-            
           </div>
-          <div class="flex justify-center py-5">
+          <div class="flex justify-center py-5 space-x-3">
             <button
-              class="h-10 w-40 btn btn-outline btn-error btn-wide text-xl font-semibold"
+              class="h-10 rounded-full w-40 btn btn-btn-error btn-wide text-xl text-red-800 font-semibold"
             >
               ค้นหา
+            </button>
+            <button
+              class="h-10 rounded-full w-40 btn btn-btn-error btn-wide text-xl text-red-800 font-semibold"
+            >
+              รายงาน
             </button>
           </div>
         </div>
       </div>
-      <div class="rounded-xl mb-10 overflow-auto">
-        <tableBasic :columns="columns" :rows="rows" />
-        <div class="flex justify-end py-5">
-          <paginationPage :currentPage="currentPage" :totalPages="totalPages"/>
-        </div>
-      </div>
     </div>
   </div>
+  <div class="rounded-xl mb-10 overflow-auto mx-5">
+    <tableManage :columns="columns" :rows="rows" />
+    <div class="flex justify-end py-5">
+      <paginationPage
+        v-model:currentPage="pagination.page"
+        :totalPages="pagination.totalPage"
+        :limit="pagination.limit"
+        @update:currentPage="onChangePagination"
+      />
+    </div>
+  </div>
+  <!-- <alert
+    :titleMessage="formAlert.title"
+    :bodyMessage="formAlert.body"
+    :status="formAlert.status"
+    @close-alert-modal="onCloseAlert"
+  /> -->
 </template>
 
-
-<style>
-</style>
+<style></style>
