@@ -5,6 +5,9 @@ import { useRouter } from "vue-router";
 import paginationPage from "../../components/pagination/pagination-page.vue";
 import _apiSupplierImport from "../../api/supplier-import.js";
 import _apiProduct from "../../api/master-products.js";
+import ExcelJS from "exceljs";
+import alert from "../../components/alert/alert.vue";
+import store from "../../store";
 
 const $router = useRouter();
 
@@ -13,6 +16,16 @@ const pagination = ref({
   limit: 5,
   totalPage: 0,
 });
+
+const formAlert = ref({
+  status: false,
+  title: "",
+  body: "",
+});
+const onCloseAlert = () => {
+  formAlert.value.status = false;
+};
+
 
 const columns = [
   { field: "specialID", label: "รหัส", width: "10%" },
@@ -31,16 +44,12 @@ const columns = [
 ];
 
 const rows = ref([]);
-
+let flattenedData = null;
 const currentDateStart = ref("");
 const currentDateEnd = ref("");
 const inputSearch = ref({
-  in_specialID: "",
   in_productName: "",
-  in_typeAction: "",
-  in_productPrice: "",
-  in_quantity: "",
-  in_price: "",
+  in_productType: "",
 });
 const onShowProduct = async () => {
   const body = {
@@ -56,6 +65,7 @@ const onShowProduct = async () => {
   await _apiProduct.search(body, (response) => {
     if (response.statusCode === 200) {
       console.log("response --> ", response);
+      setCurrentDate();
 
       inputSearch.value = response.data.map((item) => {
         return {
@@ -67,30 +77,56 @@ const onShowProduct = async () => {
           quantity: item.quantity,
         };
       });
+    }else{
+      formAlert.value = {
+        status: true,
+        title: "เกิดข้อผิดพลาด",
+        body: response.message,
+      };
     }
   });
 };
-const onLoadData = async () => {
+
+const onChangePagination = (val) => {
+  pagination.page = val;
+};
+
+const onSubmit = async () => {
+  console.log("***onSubmit***");
+
   const body = {
     page: pagination.value.page,
     limit: pagination.value.limit,
     sortField: "id",
     sortType: "ASC",
     filterModel: {
-      logicOperator: "or",
+      logicOperator: "and",
       items: [
         {
-          field: "id",
+          field: "product_name",
           operator: "equals",
-          value: "1",
+          value: inputSearch.value.in_productName,
+        },
+        {
+          field: "typeAction",
+          operator: "equals",
+          value: inputSearch.value.in_productType,
+        },
+        {
+          field: "importDate",
+          operator: "between",
+          value: [currentDateStart.value, currentDateEnd.value], // ช่วงวันที่เริ่มต้นและสิ้นสุด
         },
       ],
     },
   };
+  console.log("****body****", body);
+
   await _apiSupplierImport.searchSupplierImport(body, (response) => {
     if (response.statusCode === 200) {
-      console.log("response2--> ", response);
-      const flattenedData = response.data.map((item) => ({
+      if (response.data.length > 0) {
+      console.log("response5555--> ", response);
+      flattenedData = response.data.map((item) => ({
         specialID: item.product.specialID,
         productName: item.product.name,
         typeAction: item.typeAction,
@@ -105,71 +141,94 @@ const onLoadData = async () => {
         supplierProvince: item.supplier.province,
         supplierZipCode: item.supplier.zipCode,
       }));
-      rows.value = flattenedData;
+      rows.value = flattenedData; 
 
       pagination.value.totalPage = response.metadata.totalPage;
+    }else{
+      formAlert.value = {
+        status: true,
+        title: "แจ้งเตือน",
+        body: "ไม่พบข้อมูล",
+      };
+
+    }
+    }else{
+      formAlert.value = {
+        status: true,
+        title: "เกิดข้อผิดพลาด",
+        body: response.message,
+      };
     }
   });
 };
 
-const onSubmit = () => {
-  console.log("***onSubmit***");
-  const body = {
-    id: inputSearch.value.in_specialID,
-    productName: inputSearch.value.in_productName,
-    in_productType: inputSearch.value.in_productType,
-    productPrice: inputSearch.value.in_productPrice,
-    quantity: inputSearch.value.in_quantity,
-    dateStart: currentDateStart.value,
-    dateEnd: currentDateEnd.value,
-  }
-  console.log("****body****",body);
-}
-const onChangePagination = (val) => {
-  pagination.page = val;
-  onLoadData();
-};
+const onExportExcel = () => {
+  console.log("***onExportExcel***");
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet('Sheet A');
 
-const onSearch = async () => {
-  const body = {
-    page: 1,
-    limit: 10,
-    sortField: "id",
-    sortType: "ASC",
-    filterModel: {
-      logicOperator: "and",
-      items: [
-        {
-          field: "id",
-          operator: "equals",
-          value: "1",
-        },
-        {
-          field: "typeAction",
-          operator: "equals",
-          value: "ฝากเก็บ",
-        },
-        {
-          field: "quantity",
-          operator: "equals",
-          value: "1",
-        },
-      ],
-    },
-  };
+  // เพิ่มหัวข้อคอลัมน์ใน Excel spreadsheet
+  worksheet.columns = [
+    { header: 'Special ID', key: 'specialID', width: 15 },
+    { header: 'Product Name', key: 'productName', width: 30 },
+    { header: 'Type of Action', key: 'typeAction', width: 20 },
+    { header: 'Product Price', key: 'productPrice', width: 15 },
+    { header: 'Quantity', key: 'quantity', width: 15 },
+    { header: 'Price', key: 'price', width: 15 },
+    { header: 'Supplier First Name', key: 'supplierFirstName', width: 20 },
+    { header: 'Supplier Last Name', key: 'supplierLastName', width: 20 },
+    { header: 'Supplier Address', key: 'supplierAddress', width: 30 },
+    { header: 'Supplier SubDistrict', key: 'supplierSubDistrict', width: 20 },
+    { header: 'Supplier District', key: 'supplierDistrict', width: 20 },
+    { header: 'Supplier Province', key: 'supplierProvince', width: 20 },
+    { header: 'Supplier Zip Code', key: 'supplierZipCode', width: 15 }
+  ];
 
-  await _apiSupplierImport.searchSupplierImport(body, (response) => {
-    if (response.statusCode === 200) {
-      console.log("response2--> ", response);
-    }
+  // เพิ่มข้อมูลลงในแถวของ Excel spreadsheet
+  flattenedData.forEach((item, index) => {
+    worksheet.addRow({
+      specialID: item.specialID,
+      productName: item.productName,
+      typeAction: item.typeAction,
+      productPrice: item.productPrice,
+      quantity: item.quantity,
+      price: item.price,
+      supplierFirstName: item.supplierFirstName,
+      supplierLastName: item.supplierLastName,
+      supplierAddress: item.supplierAddress,
+      supplierSubDistrict: item.supplierSubDistrict,
+      supplierDistrict: item.supplierDistrict,
+      supplierProvince: item.supplierProvince,
+      supplierZipCode: item.supplierZipCode
+    });
+  });
+
+  // สร้างไฟล์ Excel
+  workbook.xlsx.writeBuffer().then((data) => {
+    const blob = new Blob([data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'ExportedData.xlsx';
+    a.click();
   });
 };
 onMounted(async () => {
-  setCurrentDate();
-  await onLoadData();
+  store.commit("setStatusLoading", true);
+  // await onLoadData();
   onShowProduct();
+  store.commit("setStatusLoading", false);
 });
-
+const clearData = () => {
+  inputSearch.value = {
+    in_productType: "",
+    in_productName: "",
+  };
+  currentDateStart.value = "";
+  currentDateEnd.value = "";
+ rows.value = [];
+  onShowProduct();
+}
 function setCurrentDate() {
   const today = new Date().toISOString().substr(0, 10);
   currentDateStart.value = today;
@@ -213,22 +272,6 @@ function setCurrentDate() {
         <div class="w-full bg-white rounded-xl py-5">
           <div class="grid grid-cols-2 gap-4 px-6 mt-3">
             <div class="flex flex-col">
-              <span class="text-red-800 font-semibold">รหัสสินค้า</span>
-              <select
-                v-model="inputSearch.in_specialID"
-                class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
-              >
-                <option value="" selected>------เลือก------</option>
-                <option
-                  v-for="(item, index) in inputSearch"
-                  :key="index"
-                  :value="item.id"
-                >
-                  {{ item.specialID }}
-                </option>
-              </select>
-            </div>
-            <div class="flex flex-col">
               <span class="text-red-800 font-semibold">ชื่อสินค้า</span>
               <!-- <input
                 class="h-8 w-50 focus:outline-red-400 rounded bg-red-100 px-3"
@@ -260,51 +303,38 @@ function setCurrentDate() {
               </select>
             </div>
             <div class="flex flex-col">
-              <div class="flex flex-row space-x-3">
-                <div class="flex flex-col">
-                  <span class="text-red-800 font-semibold">วันที่</span>
-                  <input
-                    class="h-8 w-50 focus:outline-red-400 rounded bg-red-100 px-3"
-                    type="date"
-                    v-model="currentDateStart"
-                  />
-                </div>
-                <span class="text-red-800 font-semibold text-center">ถึง</span>
-                <div class="flex flex-col">
-                  <span class="text-red-800 font-semibold">วันที่</span>
-                  <input
-                    class="h-8 w-50 focus:outline-red-400 rounded bg-red-100 px-3"
-                    type="date"
-                    v-model="currentDateEnd"
-                  />
-                </div>
-              </div>
-            </div>
-            <div class="flex flex-col">
-              <span class="text-red-800 font-semibold">ราคา</span>
+              <span class="text-red-800 font-semibold">วันที่</span>
               <input
-                v-model="inputSearch.in_price"
                 class="h-8 w-50 focus:outline-red-400 rounded bg-red-100 px-3"
-                type="text"
+                type="date"
+                v-model="currentDateStart"
               />
             </div>
             <div class="flex flex-col">
-              <span class="text-red-800 font-semibold">ปริมาณ</span>
+              <span class="text-red-800 font-semibold">วันที่</span>
               <input
-                v-model="inputSearch.in_quantity"
                 class="h-8 w-50 focus:outline-red-400 rounded bg-red-100 px-3"
-                type="text"
+                type="date"
+                v-model="currentDateEnd"
               />
             </div>
           </div>
           <div class="flex justify-center py-5 space-x-3">
             <button
-            label="ค้นหา" @click="onSubmit"
+              label="ค้นหา"
+              @click="onSubmit"
               class="h-10 rounded-full w-40 btn btn-btn-error btn-wide text-xl text-red-800 font-semibold"
             >
               ค้นหา
             </button>
             <button
+              @click="clearData"
+              class="h-10 rounded-full w-40 btn btn-btn-error btn-wide text-xl text-red-800 font-semibold"
+            >
+              ยกเลิก
+            </button>
+            <button
+              @click="onExportExcel"
               class="h-10 rounded-full w-40 btn btn-btn-error btn-wide text-xl text-red-800 font-semibold"
             >
               รายงาน
@@ -325,12 +355,12 @@ function setCurrentDate() {
       />
     </div>
   </div>
-  <!-- <alert
+  <alert
     :titleMessage="formAlert.title"
     :bodyMessage="formAlert.body"
     :status="formAlert.status"
     @close-alert-modal="onCloseAlert"
-  /> -->
+  />
 </template>
 
 <style></style>

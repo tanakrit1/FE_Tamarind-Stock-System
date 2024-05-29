@@ -84,11 +84,7 @@ const onLoadData = async () => {
     filterModel: {
       logicOperator: "and",
       items: [
-        {
-          field: "typeAction",
-          operator: "equals",
-          value: "ซื้อเข้า",
-        },
+        
       ],
     },
   };
