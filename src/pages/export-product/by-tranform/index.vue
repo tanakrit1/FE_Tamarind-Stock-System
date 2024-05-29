@@ -1,6 +1,6 @@
 <script setup>
 import buttonPrimaryOutline from "../../../components/buttons/button-primary-outline.vue";
-import tableManage from "../../../components/tables/table-manage.vue";
+import tableBasic from "../../../components/tables/table-basic.vue";
 import subDistrict from "../../../assets/address/thai_tambons.json"
 import district from "../../../assets/address/thai_amphures.json"
 import province from "../../../assets/address/thai_provinces.json"
@@ -10,7 +10,6 @@ import _apiCustomer from "../../../api/master-customer"
 import _apiTranExport from "../../../api/export-product"
 import alert from "../../../components/alert/alert.vue"
 import store from "../../../store";
-import paginationPage from "../../../components/pagination/pagination-page.vue"
 
 const columns = [
     { field: "productName", label: "ชื่อสินค้า", width: "20%" },
@@ -33,12 +32,6 @@ const ddl = ref({
     listProductAll: []
 })
 const formCustomerActive = ref(false)
-
-const pagination = ref({
-    page: 1,
-    limit: 5,
-    totalPage: 5,
-});
 
 const formAlert = ref({
     status: false,
@@ -91,7 +84,45 @@ const onCloseAlert = () => {
     formAlert.value.status = false
 }
 
+const onChangeProvince = async (provinceID) => {
+    const filterDistrict = district.filter(
+        (item) => item.province_id == provinceID
+    );
+    ddl.value.district = filterDistrict.map(item => {
+        return { label: item.name_th, value: item.id }
+    });
+    formCustomer.value.district = "";
+    formCustomer.value.subDistrict = "";
+    formCustomer.value.zipCode = "";
+};
 
+const onChangeDistrict = async (districtID) => {
+    const filterSubDistrict = subDistrict.filter(
+        (item) => item.amphure_id == districtID
+    );
+    ddl.value.subDistrict = filterSubDistrict.map(item => {
+        return { label: item.name_th, value: item.id }
+    })
+    formCustomer.value.subDistrict = "";
+    formCustomer.value.zipCode = "";
+};
+
+const onChangeSubDistrict = async (subDistrictID) => {
+    const zipCode = subDistrict.find((item) => item.id == subDistrictID).zip_code;
+    formCustomer.value.zipCode = zipCode;
+};
+
+const onChangeProduct = (productID) => {
+    if (productID !== "") {
+        // formOrder.value.price = ddl.value.listProductAll.find(item => item.id == productID).priceOut?.toLocaleString()
+        formOrder.value.price = "0"
+        formOrder.value.totalPrice = formOrder.value.price
+        formOrder.value.quantity = "1"
+    } else {
+        formOrder.value.price = ""
+    }
+
+}
 
 const onChangeQuantity = (quantity) => {
     formOrder.value.totalPrice = formOrder.value.price * quantity
@@ -244,13 +275,13 @@ const onSubmitForm = async () => {
     }
 }
 
-const onLoadTable = async () => {
+const onLoadTable = async() => {
     store.commit("setStatusLoading", true);
     const body = {
         page: 1,
         limit: 10,
-        sortField: "createdAt",
-        sortType: "DESC",
+        sortField:"createdAt",
+        sortType:"DESC",
         filterModel: {
             logicOperator: "and",
             items: [
@@ -260,13 +291,13 @@ const onLoadTable = async () => {
                     value: "ซื้อ-ขาย"
                 }
             ]
-
+            
         }
     }
 
-    await _apiTranExport.search(body, response => {
+    await _apiTranExport.search( body, response => {
         console.log("response : ", response)
-        rows.value = response.data.map(item => {
+        rows.value = response.data.map( item => {
             return {
                 productName: item.product.name,
                 quantity: item.quantity,
@@ -279,17 +310,9 @@ const onLoadTable = async () => {
                 customerProvince: item.customer.province,
                 customerZipCode: item.customer.zipCode
             }
-        })
+        } )
         store.commit("setStatusLoading", false);
-    })
-}
-
-const onChangePagination =(result) => {
-    console.log("result: ", result)
-}
-
-const onTranform = (row) => {
-    console.log("**onTranform**", row)
+    } )
 }
 
 onMounted(async () => {
@@ -299,7 +322,7 @@ onMounted(async () => {
 </script>
 <template>
     <div class="flex md:justify-center">
-        <div class="sm:w-1/1 md:w-2/3 flex flex-col mb-5 px-6">
+        <div class="sm:w-1/1 md:w-2/3 flex flex-col mb-5 space-y-2 px-6">
             <div class="flex justify-between space-y-5">
                 <div class="flex items-center">
                     <svg width="50" height="50" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -321,19 +344,10 @@ onMounted(async () => {
                         </g>
                     </svg>
 
-                    <span class="text-2xl font-bold text-red-800">บันทึกรายการเบิกสินค้าออกจากคลัง (ฝากเก็บ)</span>
+                    <span class="text-2xl font-bold text-red-800">บันทึกรายการเบิกสินค้าออกจากคลัง (แปรรูป)</span>
                 </div>
             </div>
-
-            <div class="mt-2 mb-8 rounded-xl">
-                <tableManage :columns="columns" :rows="rows" :rowTranform="true" @onClickTranform="onTranform" />
-                <div class="flex justify-end mt-3">
-                    <paginationPage v-model:currentPage="pagination.page" :totalPages="pagination.totalPage"
-                        :limit="pagination.limit" @update:currentPage="onChangePagination" />
-                </div>
-            </div>
-
-            <div class="w-full bg-white rounded-xl py-5 mb-5">
+            <div class="w-full bg-white rounded-xl py-5">
                 <div class="px-6">
                     <span class="text-lg font-semibold text-red-800">รายละเอียดการเบิกซื้อสินค้า</span>
                 </div>
@@ -344,9 +358,22 @@ onMounted(async () => {
                             <div class="grid gap-4 grid-cols-2">
                                 <div class="mb-3">
                                     <span class="text-red-800 font-semibold">ชื่อสินค้า</span>
-                                    <input v-model="formOrder.productID"
-                                        class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3" />
+                                    <select v-model="formOrder.productID"
+                                        class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
+                                        @change="(event) => onChangeProduct(event.target.value)">
+                                        <option value="">------เลือก------</option>
+                                        <option v-for="(item, index) in ddl.product" :key="index" :value="item.value">
+                                            {{ item.label }}
+                                        </option>
+                                    </select>
+                                    <!-- <input class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
+                                        type="text" /> -->
                                 </div>
+                                <!-- <div class="mb-3">
+                                    <span class="text-red-800 font-semibold">วันที่ขอเบิกสินค้า</span>
+                                    <input class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
+                                        type="date" />
+                                </div> -->
                             </div>
                         </div>
                         <div class="flex flex-col md:flex-row space-x-2">
@@ -447,17 +474,42 @@ onMounted(async () => {
                     </div>
                     <div class="sm:basis-full md:basis-1/2 lg:basis-2/6 flex flex-col px-3 mb-3">
                         <span class="text-red-800 font-semibold">จังหวัด</span>
-                        <input class="h-8 focus:outline-red-400 rounded bg-red-100 px-3" type="text"
+                        <select v-if="formCustomerActive" v-model="formCustomer.province"
+                            @change="(event) => onChangeProvince(event.target.value)"
+                            class="h-8 focus:outline-red-400 rounded bg-red-100 px-3">
+                            <option value="">------เลือก------</option>
+                            <option v-for="(item, index) in ddl.province" :key="index" :value="item.value">
+                                {{ item.label }}
+                            </option>
+                        </select>
+                        <input v-else class="h-8 focus:outline-red-400 rounded bg-red-100 px-3" type="text"
                             v-model="formCustomer.province" />
                     </div>
                     <div class="sm:basis-full md:basis-1/2 lg:basis-2/6 flex flex-col px-3 mb-3">
                         <span class="text-red-800 font-semibold">อำเภอ</span>
-                        <input class="h-8 focus:outline-red-400 rounded bg-red-100 px-3" type="text"
+                        <select v-if="formCustomerActive" v-model="formCustomer.district"
+                            @change="(event) => onChangeDistrict(event.target.value)"
+                            class="h-8 focus:outline-red-400 rounded bg-red-100 px-3">
+                            <option value="">------เลือก------</option>
+                            <option v-for="(item, index) in ddl.district" :key="index" :value="item.value">
+                                {{ item.label }}
+                            </option>
+                        </select>
+
+                        <input v-else class="h-8 focus:outline-red-400 rounded bg-red-100 px-3" type="text"
                             v-model="formCustomer.district" />
                     </div>
                     <div class="sm:basis-full md:basis-1/2 lg:basis-2/6 flex flex-col px-3">
                         <span class="text-red-800 font-semibold">ตำบล</span>
-                        <input class="h-8 focus:outline-red-400 rounded bg-red-100 px-3" type="text"
+                        <select v-if="formCustomerActive" v-model="formCustomer.subDistrict"
+                            @change="(event) => onChangeSubDistrict(event.target.value)"
+                            class="h-8 focus:outline-red-400 rounded bg-red-100 px-3">
+                            <option value="">------เลือก------</option>
+                            <option v-for="(item, index) in ddl.subDistrict" :key="index" :value="item.value">
+                                {{ item.label }}
+                            </option>
+                        </select>
+                        <input v-else class="h-8 focus:outline-red-400 rounded bg-red-100 px-3" type="text"
                             v-model="formCustomer.subDistrict" />
                     </div>
                     <div class="sm:basis-full md:basis-1/2 lg:basis-2/6 flex flex-col px-3">
@@ -470,6 +522,10 @@ onMounted(async () => {
             </div>
             <div class="flex justify-center py-10">
                 <buttonPrimaryOutline @click="onSubmitForm" label="บันทึกข้อมูล" />
+            </div>
+
+            <div class="mt-10">
+                <tableBasic :columns="columns" :rows="rows" />
             </div>
         </div>
 

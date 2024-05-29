@@ -31,10 +31,10 @@ const itemNavbar = ref([
             },
             {
                 name: 'เบิกเพื่อแปรรูปสินค้า',
-                path: '/add-list-supplier'
+                path: '/by-tranform'
             },
             {
-                name: 'นำสินค้าออก (จากการฝาก)',
+                name: 'เบิกสินค้าจากการฝากเก็บ',
                 path: '/by-deposit'
             },
         ]

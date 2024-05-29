@@ -44,7 +44,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="h-16 top-0 absolute w-full flex items-center justify-between px-6" style="background-color: #A2422C">
+    <div class="h-16 top-0 absolute w-full flex items-center justify-between px-6 " style="background-color: #A2422C; z-index: 100">
         <div class="flex space-x-8 items-center">
             <img src="../../assets/images/logo.png" class="rounded-full h-14 w-12 cursor-pointer" />
             <menuItem>
