@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from 'vue';
 import confirm from '../alert/confirm.vue';
-const props = defineProps(['columns', 'rows', 'rowEdit', 'rowRemove'])
+const props = defineProps(['columns', 'rows', 'rowEdit', 'rowRemove', 'rowTranform'])
 const emit = defineEmits()
 const rowClick = ref({})
 const formModalConfirm = ref({
@@ -39,16 +39,16 @@ const onClickRemove = (rowData) => {
             <tr style="background-color: #A2422C;">
                 <th v-for="(column, index) in props.columns" :key="index" class="text-white text-lg"
                     :style="`width: ${column.width}`">{{ column.label }}</th>
-                <th v-if="props.rowEdit || props.rowRemove"></th>
+                <th v-if="props.rowEdit || props.rowRemove || props.rowTranform"></th>
             </tr>
         </thead>
         <tbody class="bg-white">
             <tr v-for="(row, index) in props.rows" :key="index">
                 <td v-for="(column, index) in props.columns" :key="index" class="font-semibold">{{ row[column.field] }}
                 </td>
-                <td v-if="props.rowEdit || props.rowRemove">
+                <td v-if="props.rowEdit || props.rowRemove || props.rowTranform">
                     <div class="flex space-x-6 ">
-                        <button class="rounded-full hover:bg-red-100 px-2 py-2" v-if="props.rowEdit"
+                        <button type="button" class="rounded-full hover:bg-red-100 px-2 py-2" v-if="props.rowEdit"
                             @click="emit('onClickEdit', row)">
                             <svg width="23" height="23" viewBox="0 0 23 23" fill="none"
                                 xmlns="http://www.w3.org/2000/svg">
@@ -59,7 +59,7 @@ const onClickRemove = (rowData) => {
                             </svg>
                         </button>
 
-                        <button class="rounded-full hover:bg-red-100 px-2 py-2" v-if="props.rowRemove"
+                        <button type="button" class="rounded-full hover:bg-red-100 px-2 py-2" v-if="props.rowRemove"
                             @click="onClickRemove(row)">
                             <svg width="23" height="23" viewBox="0 0 30 30" fill="none"
                                 xmlns="http://www.w3.org/2000/svg">
@@ -72,6 +72,27 @@ const onClickRemove = (rowData) => {
                                 <path fill-rule="evenodd" clip-rule="evenodd"
                                     d="M11.5531 14.5795C11.9925 14.1402 12.7048 14.1402 13.1441 14.5795L15.0003 16.4356L16.8564 14.5795C17.2957 14.1402 18.0081 14.1402 18.4474 14.5795C18.8868 15.0189 18.8868 15.7311 18.4474 16.1704L16.5913 18.0267L18.4474 19.8828C18.8868 20.3221 18.8868 21.0345 18.4474 21.4738C18.0081 21.9132 17.2957 21.9132 16.8564 21.4738L15.0003 19.6176L13.1441 21.4738C12.7048 21.9132 11.9925 21.9132 11.5531 21.4738C11.1138 21.0345 11.1138 20.3221 11.5531 19.8828L13.4093 18.0267L11.5531 16.1704C11.1138 15.7311 11.1138 15.0189 11.5531 14.5795Z"
                                     fill="#C2796A" />
+                            </svg>
+                        </button>
+
+                        <button type="button" class="rounded-full hover:bg-red-100 px-2 py-2" v-if="props.rowTranform"
+                            @click="emit('onClickTranform', row)">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 48 48">
+                                <path fill="#E69329" d="m11.7 21.6l5.1 9.9l9.5-3.9l4.4-12.7l-14.8.8z" />
+                                <circle cx="15" cy="36" r="7.8" fill="#C2796A" />
+                                <g fill="#C2796A">
+                                    <path
+                                        d="M15 27c-5 0-9 4-9 9s4 9 9 9s9-4 9-9s-4-9-9-9m0 16c-3.9 0-7-3.1-7-7s3.1-7 7-7s7 3.1 7 7s-3.1 7-7 7" />
+                                    <path d="M14 33h2v8h-2z" />
+                                </g>
+                                <g fill="#FFB74D">
+                                    <path
+                                        d="M12.9 36c1 1.9 3.2 2.7 5.1 1.7l16.5-8.5c1-.5 1.7-1.2 2.2-1.9c1.7-3.2 5.6-10.7 8.2-17.2l-18.2 8.7l-4.8 7.2l-6.8 3.6c-2.6 1.3-3.4 4.2-2.2 6.4" />
+                                    <path
+                                        d="M30.2 3L13.7 9.3c-.7.2-1.5 1-2.2 1.7l-5.6 7.5c-1 1.5-1.2 3.4-.5 5.1c.4 1 1.7 3.4 3.1 6.1C10.1 28 12.4 27 15 27c.4 0 .9 0 1.3.1l-2.1-4.2l4.6-4.1h8s15.5-2.2 18.2-8.7z" />
+                                </g>
+                                <path fill="#FFCDD2"
+                                    d="M18.2 36c-1.3.6-2.8 0-3.3-1.3c-.6-1.3 0-2.8 1.3-3.3c1.2-.6 3.2 4 2 4.6" />
                             </svg>
                         </button>
 

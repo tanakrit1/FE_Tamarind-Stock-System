@@ -46,6 +46,12 @@ const router = createRouter({
             props: true 
         },
         {
+            path: "/by-tranform",
+            name: "by-tranform",
+            component: () => import("./pages/export-product/by-tranform/index.vue"),
+            props: true 
+        },
+        {
             path: "/by-customer",
             name: "by-customer",
             component: () => import("./pages/export-product/by-customer/index.vue"),

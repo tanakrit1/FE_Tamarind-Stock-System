@@ -275,6 +275,7 @@ const onSubmitForm = async () => {
 }
 
 const onLoadTable = async() => {
+    store.commit("setStatusLoading", true);
     const body = {
         page: 1,
         limit: 10,
@@ -309,6 +310,7 @@ const onLoadTable = async() => {
                 customerZipCode: item.customer.zipCode
             }
         } )
+        store.commit("setStatusLoading", false);
     } )
 }
 
@@ -341,7 +343,7 @@ onMounted(async () => {
                         </g>
                     </svg>
 
-                    <span class="text-2xl font-bold text-red-800">บันทึกรายการสินค้านำออก</span>
+                    <span class="text-2xl font-bold text-red-800">บันทึกรายการขายสินค้า</span>
                 </div>
             </div>
             <div class="w-full bg-white rounded-xl py-5">
