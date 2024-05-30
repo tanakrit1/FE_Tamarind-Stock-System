@@ -303,7 +303,7 @@ function setCurrentDate() {
               </select>
             </div>
             <div class="flex flex-col">
-              <span class="text-red-800 font-semibold">วันที่</span>
+              <span class="text-red-800 font-semibold">วันที่เริ่มต้น</span>
               <input
                 class="h-8 w-50 focus:outline-red-400 rounded bg-red-100 px-3"
                 type="date"
@@ -311,7 +311,7 @@ function setCurrentDate() {
               />
             </div>
             <div class="flex flex-col">
-              <span class="text-red-800 font-semibold">วันที่</span>
+              <span class="text-red-800 font-semibold">วันที่สิ้นสุด</span>
               <input
                 class="h-8 w-50 focus:outline-red-400 rounded bg-red-100 px-3"
                 type="date"
