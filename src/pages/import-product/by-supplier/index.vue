@@ -318,9 +318,11 @@ const onSubmit = async () => {
           title: "เเจ้งเตือน",
           body: "บันทึกข้อมูลเรียบร้อย",
         };
+        store.commit("setStatusLoading", true);
         clearData();
         onLoadData();
         onShowProduct();
+        store.commit("setStatusLoading", false);
       } else {
         formAlert.value = {
           status: true,

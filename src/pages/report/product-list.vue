@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref } from "vue";
+import { onMounted, ref, watch } from "vue";
 import tableManage from "../../components/tables/table-manage.vue";
 import { useRouter } from "vue-router";
 import paginationPage from "../../components/pagination/pagination-page.vue";
@@ -234,6 +234,21 @@ function setCurrentDate() {
   currentDateStart.value = today;
   currentDateEnd.value = today;
 }
+
+watch([currentDateStart, currentDateEnd], ([start, end]) => {
+  if (start && end) {
+    if (start > end) {
+      // วันที่เริ่มต้นต้องไม่มากกว่าวันที่สิ้นสุด
+      currentDateStart.value = '';
+      currentDateEnd.value = '';
+      formAlert.value = {
+        status: true,
+        title: "เกิดข้อผิดพลาด",
+        body: 'วันที่เริ่มต้นต้องไม่มากกว่าวันที่สิ้นสุด',
+      };
+    }
+  }
+});
 </script>
 <template>
   <div class="flex md:justify-center">

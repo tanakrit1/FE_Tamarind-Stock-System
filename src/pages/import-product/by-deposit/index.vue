@@ -1,23 +1,25 @@
 <script setup>
 import tableManage from "../../../components/tables/table-manage.vue";
 import buttonPrimaryOutline from "../../../components/buttons/button-primary-outline.vue";
-import _apiSupplierImport from "../../../api/supplier-import.js";
+import _apiDepositImport from "../../../api/deposit-import.js";
 import _apiProduct from "../../../api/master-products.js";
 import _apiSupplier from "../../../api/master-supplier.js";
 import subDistrict from "../../../assets/address/thai_tambons.json";
 import district from "../../../assets/address/thai_amphures.json";
 import province from "../../../assets/address/thai_provinces.json";
-import { onMounted, ref } from "vue";
+import { onMounted, ref, watch } from "vue";
 import alert from "../../../components/alert/alert.vue";
 import store from "../../../store";
 
 const columns = [
   { field: "specialID", label: "รหัส", width: "10%" },
   { field: "productName", label: "ชื่อสินค้า", width: "20%" },
-  { field: "typeAction", label: "ประเภทสินค้า", width: "10%" },
+  // { field: "typeAction", label: "ประเภทสินค้า", width: "10%" },
   { field: "productPrice", label: "ราคาสินค้า", width: "10%" },
   { field: "quantity", label: "ปริมาณสินค้า", width: "10%" },
-  { field: "price", label: "ราคารวม", width: "10%" },
+  { field: "remain", label: "จํานวนคงเหลือ", width: "10%" },
+  { field: "price", label: "ราคารวมฝาก", width: "10%" },
+  { field: "periodDate", label: "วันที่สิ้นสุดการฝาก", width: "10%" },
   { field: "supplierFirstName", label: "ชื่อ", width: "20%" },
   { field: "supplierLastName", label: "สกุล", width: "20%" },
   { field: "supplierAddress", label: "ที่อยู่", width: "25%" },
@@ -43,9 +45,9 @@ const formProduct = ref({
   productName: "",
   typeAction: "",
   productPrice: "0.00",
-  discription: "",
+  remain: "",
   quantity: "",
-  totalPrice: "0.00",
+  price: "0.00",
 });
 
 const formSupplier = ref({
@@ -73,7 +75,7 @@ const onCloseAlert = () => {
   formAlert.value.status = false;
 };
 
-const formSupplierActive = ref(false);
+const formDepositActive = ref(false);
 
 const onLoadData = async () => {
   const body = {
@@ -84,25 +86,23 @@ const onLoadData = async () => {
     filterModel: {
       logicOperator: "and",
       items: [
-        {
-          field: "typeAction",
-          operator: "equals",
-          value: "ฝากเก็บ",
-        },
+        
       ],
     },
   };
 
   //จัดลำดับข้อมูลให้เท่ากันก่อนนำมาใช้งาน
-  await _apiSupplierImport.searchSupplierImport(body, (response) => {
+  await _apiDepositImport.searchDepositImport(body, (response) => {
     if (response.statusCode === 200) {
       const flattenedData = response.data.map((item) => ({
         specialID: item.product.specialID,
         productName: item.product.name,
-        typeAction: item.typeAction,
+        // typeAction: item.typeAction,
         productPrice: item.product.price,
         quantity: item.quantity,
+        remain: item.remain,
         price: item.price,
+        periodDate: item.periodDate,
         supplierFirstName: item.supplier.firstName,
         supplierLastName: item.supplier.lastName,
         supplierAddress: item.supplier.address,
@@ -154,6 +154,10 @@ const onShowProduct = async () => {
   });
 };
 
+function setCurrentDate() {
+  const today = new Date().toISOString().substr(0, 10);
+  formProduct.value.periodDate = today;
+}
 const onChangeProduct = (productID) => {
   if (productID !== "") {
     formProduct.value.price = dataInput.value.listProductAll
@@ -161,27 +165,28 @@ const onChangeProduct = (productID) => {
       .price?.toLocaleString();
     formProduct.value.productID = productID;
     formProduct.value.price = "0.00";
-    formProduct.value.totalPrice = "0.00";
     formProduct.value.quantity = "1";
-    formProduct.value.discription = "";
+    formProduct.value.remain = formProduct.value.quantity;
+    // formProduct.value.periodDate = "";
     formProduct.value.productName = dataInput.value.product[0].name;
     formProduct.value.typeAction = "ฝาก";
+    setCurrentDate();
 
     // console.log("formProduct", formProduct.value);
-    console.log("dataInput", dataInput.value.product[0].name);
-    console.log("dataInput---->", dataInput.value.product);
+    // console.log("dataInput", dataInput.value.product[0].name);
+    // console.log("dataInput---->", dataInput.value.product);
   } else {
     formProduct.value.price = "0.00";
-    formProduct.value.totalPrice = "0.00";
+    formProduct.value.remain = "0.00";
     formProduct.value.quantity = "1";
-    formProduct.value.discription = "";
+    formProduct.value.periodDate = "";
+    formProduct.value.remain = formProduct.value.quantity;
+    // formProduct.value.discription = "";
     formProduct.value.productName = "";
     formProduct.value.typeAction = "";
-    formProduct.value.discription = "";
+    // formProduct.value.discription = "";
+    setCurrentDate();
   }
-};
-const onChangeQuantity = (quantity) => {
-  formProduct.value.totalPrice = formProduct.value.price * quantity;
 };
 
 const onChangeSupplier = async (phone) => {
@@ -203,7 +208,7 @@ const onChangeSupplier = async (phone) => {
     if (response.statusCode === 200) {
       if (response.data.length > 0) {
         console.log("**");
-        formSupplierActive.value = false;
+        formDepositActive.value = false;
         formSupplier.value.id = response.data[0].id;
         formSupplier.value.firstName = response.data[0].firstName;
         formSupplier.value.lastName = response.data[0].lastName;
@@ -221,7 +226,7 @@ const onChangeSupplier = async (phone) => {
           title: "เเจ้งเตือน",
           body: "ไม่พบรายชื่อลูกค้าในระบบ กรณาเพิ่มลูกค้าใหม่",
         };
-        formSupplierActive.value = true;
+        formDepositActive.value = true;
         formSupplier.value = {
           id: "",
           firstName: "",
@@ -240,7 +245,7 @@ const onChangeSupplier = async (phone) => {
         title: "เกิดข้อผิดพลาด",
         body: response.message,
       };
-      formSupplierActive.value = true;
+      formDepositActive.value = true;
       clearData();
     }
   });
@@ -275,37 +280,68 @@ const onChangeSubDistrict = async (subDistrictID) => {
 };
 
 function isEmpty(value) {
-  return value === null || value === undefined || value === '';
+  return value === null || value === undefined || value === "";
 }
 
 function validateFormProduct(product) {
-  return !isEmpty(product.quantity) && !isEmpty(product.price) && !isEmpty(product.typeAction) && !isEmpty(product.productID);
+  return (
+    !isEmpty(product.quantity) &&
+    !isEmpty(product.price) &&
+    !isEmpty(product.typeAction) &&
+    !isEmpty(product.productID) &&
+    !isEmpty(product.periodDate) &&
+    !isEmpty(product.remain) && 
+    !isEmpty(product.productName)
+  );
 }
 
 function validateFormSupplier(supplier) {
-  return !isEmpty(supplier.firstName) && !isEmpty(supplier.lastName) && !isEmpty(supplier.address) && !isEmpty(supplier.subDistrict) && !isEmpty(supplier.district) && !isEmpty(supplier.province) && !isEmpty(supplier.zipCode) && !isEmpty(supplier.phone);
+  return (
+    !isEmpty(supplier.firstName) &&
+    !isEmpty(supplier.lastName) &&
+    !isEmpty(supplier.address) &&
+    !isEmpty(supplier.subDistrict) &&
+    !isEmpty(supplier.district) &&
+    !isEmpty(supplier.province) &&
+    !isEmpty(supplier.zipCode) &&
+    !isEmpty(supplier.phone)
+  );
 }
+
+function onChangeQuantity(newValue) {
+  formProduct.value.quantity = newValue;
+  formProduct.value.remain = newValue;
+}
+
+// Watch การเปลี่ยนแปลงในค่า quantity และ remain
+watch(() => formProduct.value.quantity, onChangeQuantity);
+watch(() => formProduct.value.remain, onChangeQuantity);
 
 const onSubmit = async () => {
   console.log("***onSubmit***");
-  if (formSupplierActive.value === false) {
-    if (!validateFormProduct(formProduct.value) || !validateFormSupplier(formSupplier.value)) {
-    formAlert.value = {
-      status: true,
-      title: "เกิดข้อผิดพลาด",
-      body: "กรุณากรอกข้อมูลให้ครบถ้วน",
-    };
-    return;
-  }
+  if (formDepositActive.value === false) {
+    if (
+      !validateFormProduct(formProduct.value) ||
+      !validateFormSupplier(formSupplier.value)
+    ) {
+      formAlert.value = {
+        status: true,
+        title: "เกิดข้อผิดพลาด",
+        body: "กรุณากรอกข้อมูลให้ครบถ้วน",
+      };
+      return;
+    }
 
     const body = {
       //------transaction_import------//
-      quantity: formProduct.value.quantity,
-      price: Number(formProduct.value.price), //formProduct.value.totalPrice,
+      quantity: formProduct.value.quantity.toString(),
+      price: Number(formProduct.value.price), 
+      remain: Number(formProduct.value.remain), 
+      periodDate: formProduct.value.periodDate,
       // priceDeposit:1152.05,
       typeAction: formProduct.value.typeAction,
       //--------product----------------//
-      product_id: Number(formProduct.value.productID), //formProduct.value.productID,
+      product_id: Number(formProduct.value.productID),
       //--------supplier---------------//
       firstName: formSupplier.value.firstName,
       lastName: formSupplier.value.lastName,
@@ -317,22 +353,23 @@ const onSubmit = async () => {
       phone: formSupplier.value.phone,
     };
 
-    await _apiSupplierImport.createSupplierImport(body, (response) => {
+    await _apiDepositImport.createDepositImport(body, (response) => {
       if (response.statusCode === 200) {
         formAlert.value = {
           status: true,
           title: "เเจ้งเตือน",
           body: "บันทึกข้อมูลเรียบร้อย",
         };
-
+        store.commit("setStatusLoading", true);
         clearData();
         onLoadData();
         onShowProduct();
+        store.commit("setStatusLoading", false);
       } else {
         const mapValidation = response.message.map((item) => {
           return `<li>${item}</li>`;
         });
-        modalAlert.value = {
+        formAlert.value = {
           status: true,
           title: "กรุณาตรวจสอบ",
           body: mapValidation.join(""),
@@ -342,22 +379,25 @@ const onSubmit = async () => {
     console.log(body);
   } else {
     console.log("insertformSupplier.......");
-    if (!validateFormProduct(formProduct.value) || !validateFormSupplier(formSupplier.value)) {
-    formAlert.value = {
-      status: true,
-      title: "เกิดข้อผิดพลาด",
-      body: "กรุณากรอกข้อมูลให้ครบถ้วน",
-    };
-    return;
-  }
+    if (
+      !validateFormProduct(formProduct.value) ||
+      !validateFormSupplier(formSupplier.value)
+    ) {
+      formAlert.value = {
+        status: true,
+        title: "เกิดข้อผิดพลาด",
+        body: "กรุณากรอกข้อมูลให้ครบถ้วน",
+      };
+      return;
+    }
     const body = {
       //------transaction_import------//
-      quantity: formProduct.value.quantity,
-      price: Number(formProduct.value.price), //formProduct.value.totalPrice,
-      // priceDeposit:1152.05,
+      quantity: formProduct.value.quantity.toString(),
+      price: Number(formProduct.value.price), 
+      remain: Number(formProduct.value.remain), 
+      periodDate: formProduct.value.periodDate,
       typeAction: formProduct.value.typeAction,
-      //--------product----------------//
-      product_id: Number(formProduct.value.productID), //formProduct.value.productID,
+      product_id: Number(formProduct.value.productID),
       //--------supplier---------------//
       firstName: formSupplier.value.firstName,
       lastName: formSupplier.value.lastName,
@@ -376,14 +416,14 @@ const onSubmit = async () => {
     };
 
     console.log(body);
-    await _apiSupplierImport.createSupplierImport(body, (response) => {
+    await _apiDepositImport.createDepositImport(body, (response) => {
       if (response.statusCode === 200) {
         onSupplierCrate();
       } else {
         const mapValidation = response.message.map((item) => {
           return `<li>${item}</li>`;
         });
-        modalAlert.value = {
+        formAlert.value = {
           status: true,
           title: "กรุณาตรวจสอบ",
           body: mapValidation.join(""),
@@ -437,6 +477,8 @@ onMounted(async () => {
   await onShowProduct();
   store.commit("setStatusLoading", false);
 });
+
+
 </script>
 
 <template>
@@ -477,7 +519,6 @@ onMounted(async () => {
                 class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
                 @change="(event) => onChangeProduct(event.target.value)"
               >
-                <option value="">------เลือก------</option>
                 <option
                   v-for="(item, index) in dataInput.product"
                   :key="index"
@@ -487,7 +528,6 @@ onMounted(async () => {
                 </option>
               </select>
             </div>
-
             <div
               class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6"
             >
@@ -511,64 +551,50 @@ onMounted(async () => {
                 v-model="formProduct.typeAction"
               />
             </div>
-
             <div
               class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6"
             >
-              <span class="w-1/4 text-red-800 font-semibold">รายละเอียด</span>
-              <textarea
-                class="w-3/4 focus:outline-red-400 rounded bg-red-100 px-3 py-2"
-                rows="1"
-                type="text"
-                placeholder="รายละเอียดสินค้า"
-                v-model="formProduct.discription"
-              ></textarea>
-            </div>
-            <div
-              class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6"
-            >
-              <span class="w-1/4 text-red-800 font-semibold">ระยะเวลาการฝาก</span>
-              <textarea
-                class="w-3/4 focus:outline-red-400 rounded bg-red-100 px-3 py-2"
-                rows="1"
-                type="text"
-                placeholder="รายละเอียดสินค้า"
-                v-model="formProduct.periodDate"
-              ></textarea>
-            </div>
-
-            <div
-              class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6"
-            >
-              <span class="w-1/4 text-red-800 font-semibold">ราคาต่อหน่วย</span>
+              <span class="w-1/4 text-red-800 font-semibold"
+                >ระยะเวลาการฝาก</span
+              >
               <input
-                type="text"
+                type="date"
+                class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
+                v-model="formProduct.periodDate"
+              />
+            </div>
+            <div
+              class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6"
+            >
+              <span class="w-1/4 text-red-800 font-semibold">ราคาค่าฝาก</span>
+              <input
+                type="number"
                 class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
                 v-model="formProduct.price"
               />
+              <span class="w-1/4 text-red-800 font-semibold">บาท</span>
             </div>
-
             <div
               class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6"
             >
               <span class="w-1/4 text-red-800 font-semibold">ปริมาณ</span>
               <input
                 class="h-8 w-3/4 focus:outline-red-400 rounded bg-red-100 px-3"
-                type="text"
-                @change="(event) => onChangeQuantity(event.target.value)"
+                type="number"
                 v-model="formProduct.quantity"
               />
+              <span class="w-1/4 text-red-800 font-semibold">กิโลกรัม</span>
             </div>
             <div
               class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6"
             >
-              <span class="w-1/4 text-red-800 font-semibold">ราคา</span>
+              <span class="w-1/4 text-red-800 font-semibold">จำนวนคงเหลือ</span>
               <input
-                disabled
-                type="text"
-                class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
-                v-model="formProduct.totalPrice"
+                class="h-8 w-3/4 focus:outline-red-400 rounded bg-red-100 px-3"
+                type="number"
+                v-model="formProduct.remain"
               />
+              <span class="w-1/4 text-red-800 font-semibold">กิโลกรัม</span>
             </div>
           </div>
         </div>
@@ -581,8 +607,10 @@ onMounted(async () => {
         </div>
         <hr class="mt-2 mx-6" style="border: 1px solid #c2796a" />
         <div class="px-12 flex flex-wrap pt-10">
-          <div class="basis-1/2 px-3 space-y-2 mb-3">
-            <label class="font-semibold">เบอร์โทร</label><br />
+            <div
+              class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6"
+            >
+            <label class="w-1/4 text-red-800 font-semibold">เบอร์โทร</label>
             <input
               type="text"
               placeholder="กรอกเบอร์โทรศัพท์ (10 หลัก)"
@@ -593,20 +621,16 @@ onMounted(async () => {
               @blur="(event) => onChangeSupplier(event.target.value)"
             />
           </div>
-          <div
-            v-if="formSupplierActive"
-            class="basis-1/2 px-3 space-y-2 mb-3"
-            hidden
-          >
-            <label class="font-semibold">รหัสผู้จัดจำหน่าย</label><br />
+          <div v-if="formDepositActive" class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6" hidden>
+            <label class="w-auto text-red-800 font-semibold">รหัสผู้จัดจำหน่าย</label>
             <input
               type="text"
               class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
               v-model="formSupplier.id"
             />
           </div>
-          <div v-else class="basis-1/2 px-3 space-y-2 mb-3">
-            <label class="font-semibold">รหัสผู้จัดจำหน่าย</label><br />
+          <div v-else class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6">
+            <label class="w-1/4 text-red-800 font-semibold">รหัสผู้จัดจำหน่าย</label>
             <input
               disabled
               type="text"
@@ -614,10 +638,10 @@ onMounted(async () => {
               v-model="formSupplier.id"
             />
           </div>
-          <div class="basis-1/2 px-3 space-y-2 mb-3">
-            <label class="font-semibold">ชื่อ</label><br />
+          <div class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6">
+            <label class="w-1/4 text-red-800 font-semibold">ชื่อ</label>
             <input
-              v-if="formSupplierActive"
+              v-if="formDepositActive"
               type="text"
               class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
               v-model="formSupplier.firstName"
@@ -630,10 +654,10 @@ onMounted(async () => {
               v-model="formSupplier.firstName"
             />
           </div>
-          <div class="basis-1/2 px-3 space-y-2 mb-3">
-            <label class="font-semibold">สกุล</label><br />
+          <div class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6">
+            <label class="w-1/4 text-red-800 font-semibold">สกุล</label>
             <input
-              v-if="formSupplierActive"
+              v-if="formDepositActive"
               type="text"
               class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
               v-model="formSupplier.lastName"
@@ -647,10 +671,10 @@ onMounted(async () => {
             />
           </div>
 
-          <div class="basis-1/2 px-3 space-y-2 mb-3">
-            <label class="font-semibold">ที่อยู่</label><br />
+          <div class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6">
+            <label class="w-1/4 text-red-800 font-semibold">ที่อยู่</label>
             <input
-              v-if="formSupplierActive"
+              v-if="formDepositActive"
               type="text"
               class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
               v-model="formSupplier.address"
@@ -663,10 +687,10 @@ onMounted(async () => {
               v-model="formSupplier.address"
             />
           </div>
-          <div class="basis-1/2 px-3 space-y-2 mb-3">
-            <label class="font-semibold">จังหวัด</label><br />
+          <div class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6">
+            <label class="w-1/4 text-red-800 font-semibold">จังหวัด</label>
             <select
-              v-if="formSupplierActive"
+              v-if="formDepositActive"
               v-model="formSupplier.province"
               @change="(event) => onChangeProvince(event.target.value)"
               class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
@@ -688,10 +712,10 @@ onMounted(async () => {
               v-model="formSupplier.province"
             />
           </div>
-          <div class="basis-1/2 px-3 space-y-2 mb-3">
-            <label class="font-semibold">อำเภอ</label><br />
+          <div class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6">
+            <label class="w-1/4 text-red-800 font-semibold">อำเภอ</label>
             <select
-              v-if="formSupplierActive"
+              v-if="formDepositActive"
               v-model="formSupplier.district"
               @change="(event) => onChangeDistrict(event.target.value)"
               class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
@@ -713,10 +737,10 @@ onMounted(async () => {
               v-model="formSupplier.district"
             />
           </div>
-          <div class="basis-1/2 px-3 space-y-2 mb-3">
-            <label class="font-semibold">ตำบล</label><br />
+          <div class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6">
+            <label class="w-1/4 text-red-800 font-semibold">ตำบล</label>
             <select
-              v-if="formSupplierActive"
+              v-if="formDepositActive"
               v-model="formSupplier.subDistrict"
               @change="(event) => onChangeSubDistrict(event.target.value)"
               class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
@@ -738,8 +762,8 @@ onMounted(async () => {
               v-model="formSupplier.subDistrict"
             />
           </div>
-          <div class="basis-1/2 px-3 space-y-2 mb-3">
-            <label class="font-semibold">รหัสไปรษณีย์</label><br />
+          <div class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6">
+            <label class="w-1/4 text-red-800 font-semibold">รหัสไปรษณีย์</label>
             <input
               disabled
               type="text"
@@ -749,7 +773,6 @@ onMounted(async () => {
           </div>
         </div>
       </div>
-
       <div class="flex justify-center my-6">
         <buttonPrimaryOutline label="บันทึกข้อมูล" @click="onSubmit" />
       </div>
