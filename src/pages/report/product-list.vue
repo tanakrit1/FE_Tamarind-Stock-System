@@ -4,6 +4,7 @@ import tableManage from "../../components/tables/table-manage.vue";
 import { useRouter } from "vue-router";
 import paginationPage from "../../components/pagination/pagination-page.vue";
 import _apiSupplierImport from "../../api/supplier-import.js";
+import _apiDepositImport from "../../api/deposit-import.js";
 import _apiProduct from "../../api/master-products.js";
 import ExcelJS from "exceljs";
 import alert from "../../components/alert/alert.vue";
@@ -26,27 +27,50 @@ const onCloseAlert = () => {
   formAlert.value.status = false;
 };
 
+const columnsSupplier = [
+  { field: "specialID", label: "รหัส", width: "auto" },
+  { field: "productName", label: "ชื่อสินค้า", width: "auto" },
+  { field: "typeAction", label: "ประเภทสินค้า", width: "auto" },
+  { field: "productPrice", label: "ราคาสินค้า", width: "auto" },
+  { field: "quantity", label: "ปริมาณสินค้า", width: "auto" },
+  { field: "price", label: "ราคารวม", width: "auto" },
+  { field: "supplierFirstName", label: "ชื่อ", width: "auto" },
+  { field: "supplierLastName", label: "สกุล", width: "auto" },
+  { field: "supplierAddress", label: "ที่อยู่", width: "auto" },
+  { field: "supplierSubDistrict", label: "ตำบล", width: "auto" },
+  { field: "supplierDistrict", label: "อำเภอ", width: "auto" },
+  { field: "supplierProvince", label: "จังหวัด", width: "auto" },
+  { field: "supplierZipCode", label: "ไปรษณีย์", width: "auto" },
+];
 
-const columns = [
-  { field: "specialID", label: "รหัส", width: "10%" },
-  { field: "productName", label: "ชื่อสินค้า", width: "20%" },
-  { field: "typeAction", label: "ประเภทสินค้า", width: "10%" },
-  { field: "productPrice", label: "ราคาสินค้า", width: "10%" },
-  { field: "quantity", label: "ปริมาณสินค้า", width: "10%" },
-  { field: "price", label: "ราคารวม", width: "10%" },
-  { field: "supplierFirstName", label: "ชื่อ", width: "20%" },
-  { field: "supplierLastName", label: "สกุล", width: "20%" },
-  { field: "supplierAddress", label: "ที่อยู่", width: "25%" },
-  { field: "supplierSubDistrict", label: "ตำบล", width: "20%" },
-  { field: "supplierDistrict", label: "อำเภอ", width: "20%" },
-  { field: "supplierProvince", label: "จังหวัด", width: "20%" },
-  { field: "supplierZipCode", label: "ไปรษณีย์", width: "10%" },
+const columnsDeposit = [
+  { field: "specialID", label: "รหัส", width: "auto" },
+  { field: "productName", label: "ชื่อสินค้า", width: "auto" },
+  { field: "typeAction", label: "ประเภทสินค้า", width: "auto" },
+  { field: "productPrice", label: "ราคาสินค้า", width: "auto" },
+  { field: "quantity", label: "ปริมาณสินค้า", width: "auto" },
+  { field: "remain", label: "จํานวนคงเหลือ", width: "auto" },
+  { field: "price", label: "ราคารวม", width: "auto" },
+  { field: "periodDate", label: "วันที่สิ้นสุดการฝาก", width: "auto" },
+  { field: "supplierFirstName", label: "ชื่อ", width: "auto" },
+  { field: "supplierLastName", label: "สกุล", width: "auto" },
+  { field: "supplierAddress", label: "ที่อยู่", width: "auto" },
+  { field: "supplierSubDistrict", label: "ตำบล", width: "auto" },
+  { field: "supplierDistrict", label: "อำเภอ", width: "auto" },
+  { field: "supplierProvince", label: "จังหวัด", width: "auto" },
+  { field: "supplierZipCode", label: "ไปรษณีย์", width: "auto" },
 ];
 
 const rows = ref([]);
 let flattenedData = null;
-const currentDateStart = ref("");
-const currentDateEnd = ref("");
+
+const currentDate = ref({
+  startDate: "",
+  endDate: "",
+  startPeriodDate: "",
+  endPeriodDate: "",
+});
+
 const inputSearch = ref({
   in_productName: "",
   in_productType: "",
@@ -65,7 +89,7 @@ const onShowProduct = async () => {
   await _apiProduct.search(body, (response) => {
     if (response.statusCode === 200) {
       console.log("response --> ", response);
-      setCurrentDate();
+      // setCurrentDate();
 
       inputSearch.value = response.data.map((item) => {
         return {
@@ -77,7 +101,7 @@ const onShowProduct = async () => {
           quantity: item.quantity,
         };
       });
-    }else{
+    } else {
       formAlert.value = {
         status: true,
         title: "เกิดข้อผิดพลาด",
@@ -94,122 +118,470 @@ const onChangePagination = (val) => {
 const onSubmit = async () => {
   console.log("***onSubmit***");
 
-  const body = {
-    page: pagination.value.page,
-    limit: pagination.value.limit,
-    sortField: "id",
-    sortType: "ASC",
-    filterModel: {
-      logicOperator: "and",
-      items: [
-        {
-          field: "product_name",
-          operator: "equals",
-          value: inputSearch.value.in_productName,
+  console.log("inputSearch.value.in_productType", inputSearch.value.in_productType);
+  if (inputSearch.value.in_productType == "ฝาก") {
+    if (!currentDate.value.startDate && !currentDate.value.endDate) {
+      const body = {
+        page: pagination.value.page,
+        limit: pagination.value.limit,
+        sortField: "id",
+        sortType: "ASC",
+        filterModel: {
+          logicOperator: "and",
+          items: [
+            {
+              field: "product_name",
+              operator: "equals",
+              value: inputSearch.value.in_productName,
+            },
+            
+          ],
         },
-        {
-          field: "typeAction",
-          operator: "equals",
-          value: inputSearch.value.in_productType,
+      };
+      console.log("body --> ", body);
+      await _apiDepositImport.searchDepositImport(body, (response) => {
+        if (response.statusCode === 200) {
+          if (response.data.length > 0) {
+            console.log("response5555--> ", response);
+            flattenedData = response.data.map((item) => ({
+              specialID: item.product.specialID,
+              productName: item.product.name,
+              productPrice: item.product.price,
+              quantity: item.quantity,
+              remain: item.remain,
+              price: item.price,
+              periodDate: item.periodDate,
+              supplierFirstName: item.supplier.firstName,
+              supplierLastName: item.supplier.lastName,
+              supplierAddress: item.supplier.address,
+              supplierSubDistrict: item.supplier.subDistric,
+              supplierDistrict: item.supplier.distric,
+              supplierProvince: item.supplier.province,
+              supplierZipCode: item.supplier.zipCode,
+            }));
+            rows.value = flattenedData;
+          } else {
+            formAlert.value = {
+              status: true,
+              title: "เกิดข้อผิดพลาด",
+              body: "ไม่พบข้อมูล",
+            };
+          }
+        } else {
+          formAlert.value = {
+            status: true,
+            title: "เกิดข้อผิดพลาด",
+            body: response.message,
+          };
+        }
+      })
+    }else if(currentDate.value.startDate && currentDate.value.endDate){
+      const body = {
+        page: pagination.value.page,
+        limit: pagination.value.limit,
+        sortField: "id",
+        sortType: "ASC",
+        filterModel: {
+          logicOperator: "and",
+          items: [
+            {
+              field: "product_name",
+              operator: "equals",
+              value: inputSearch.value.in_productName,
+            },
+            {
+              field: "importDate",
+              operator: "between",
+              value: [currentDate.value.startDate, currentDate.value.endDate],
+            },
+          ],
         },
-        {
-          field: "importDate",
-          operator: "between",
-          value: [currentDateStart.value, currentDateEnd.value], // ช่วงวันที่เริ่มต้นและสิ้นสุด
-        },
-      ],
-    },
-  };
-  console.log("****body****", body);
-
-  await _apiSupplierImport.searchSupplierImport(body, (response) => {
-    if (response.statusCode === 200) {
-      if (response.data.length > 0) {
-      console.log("response5555--> ", response);
-      flattenedData = response.data.map((item) => ({
-        specialID: item.product.specialID,
-        productName: item.product.name,
-        typeAction: item.typeAction,
-        productPrice: item.product.price,
-        quantity: item.quantity,
-        price: item.price,
-        supplierFirstName: item.supplier.firstName,
-        supplierLastName: item.supplier.lastName,
-        supplierAddress: item.supplier.address,
-        supplierSubDistrict: item.supplier.subDistric,
-        supplierDistrict: item.supplier.distric,
-        supplierProvince: item.supplier.province,
-        supplierZipCode: item.supplier.zipCode,
-      }));
-      rows.value = flattenedData; 
-
-      pagination.value.totalPage = response.metadata.totalPage;
-    }else{
-      formAlert.value = {
-        status: true,
-        title: "แจ้งเตือน",
-        body: "ไม่พบข้อมูล",
       };
 
-    }
-    }else{
-      formAlert.value = {
-        status: true,
-        title: "เกิดข้อผิดพลาด",
-        body: response.message,
+      await _apiDepositImport.searchDepositImport(body, (response) => {
+        if (response.statusCode === 200) {
+          if (response.data.length > 0) {
+            console.log("response5555--> ", response);
+            flattenedData = response.data.map((item) => ({
+              specialID: item.product.specialID,
+              productName: item.product.name,
+              productPrice: item.product.price,
+              quantity: item.quantity,
+              remain: item.remain,
+              price: item.price,
+              periodDate: item.periodDate,
+              supplierFirstName: item.supplier.firstName,
+              supplierLastName: item.supplier.lastName,
+              supplierAddress: item.supplier.address,
+              supplierSubDistrict: item.supplier.subDistrict,
+              supplierDistrict: item.supplier.district,
+              supplierProvince: item.supplier.province,
+              supplierZipCode: item.supplier.zipCode,
+            }));
+            rows.value = flattenedData;
+          } else {
+            formAlert.value = {
+              status: true,
+              title: "เกิดข้อผิดพลาด",
+              body: "ไม่พบข้อมูล",
+            };
+          }
+        } else {
+          formAlert.value = {
+            status: true,
+            title: "เกิดข้อผิดพลาด",
+            body: response.message,
+          };
+        }
+      });
+    }else if(currentDate.value.startPeriodDate && currentDate.value.endPeriodDate){
+      const body = {
+        page: pagination.value.page,
+        limit: pagination.value.limit,
+        sortField: "id",
+        sortType: "ASC",
+        filterModel: {
+          logicOperator: "and",
+          items: [
+            {
+              field: "product_name",
+              operator: "equals",
+              value: inputSearch.value.in_productName,
+            },
+            {
+              field: "periodDate",
+              operator: "between",
+              value: [currentDate.value.startPeriodDate, currentDate.value.endDate],
+            },
+          ],
+        },
       };
+      await _apiDepositImport.searchDepositImport(body, (response) => {
+        if (response.statusCode === 200) {
+          if (response.data.length > 0) {
+            console.log("response5555--> ", response);
+            flattenedData = response.data.map((item) => ({
+              specialID: item.product.specialID,
+              productName: item.product.name,
+              productPrice: item.product.price,
+              quantity: item.quantity,
+              remain: item.remain,
+              price: item.price,
+              periodDate: item.periodDate,
+              supplierFirstName: item.supplier.firstName,
+              supplierLastName: item.supplier.lastName,
+              supplierAddress: item.supplier.address,
+              supplierSubDistrict: item.supplier.subDistric,
+              supplierDistrict: item.supplier.distric,
+              supplierProvince: item.supplier.province,
+              supplierZipCode: item.supplier.zipCode,
+            }));
+            rows.value = flattenedData;
+          } else {
+            formAlert.value = {
+              status: true,
+              title: "เกิดข้อผิดพลาด",
+              body: "ไม่พบข้อมูล",
+            };
+          }
+        } else {
+          formAlert.value = {
+            status: true,
+            title: "เกิดข้อผิดพลาด",
+            body: response.message,
+          };
+        }
+      });
+    }else if(currentDate.value.startDate && currentDate.value.endDate && currentDate.value.startPeriodDate && currentDate.value.endPeriodDate){
+      const body = {
+        page: pagination.value.page,
+        limit: pagination.value.limit,
+        sortField: "id",
+        sortType: "ASC",
+        filterModel: {
+          logicOperator: "and",
+          items: [
+            {
+              field: "product_name",
+              operator: "equals",
+              value: inputSearch.value.in_productName,
+            },
+            {
+              field: "periodDate",
+              operator: "between",
+              value: [currentDate.value.startPeriodDate, currentDate.value.endDate],
+            },
+            {
+              field: "importDate",
+              operator: "between",
+              value: [currentDate.value.startDate, currentDate.value.endDate],
+            },
+          ],
+        },
+      };
+      await _apiDepositImport.searchDepositImport(body, (response) => {
+        if (response.statusCode === 200) {
+          if (response.data.length > 0) {
+            console.log("response5555--> ", response);
+            flattenedData = response.data.map((item) => ({
+              specialID: item.product.specialID,
+              productName: item.product.name,
+              productPrice: item.product.price,
+              quantity: item.quantity,
+              remain: item.remain,
+              price: item.price,
+              periodDate: item.periodDate,
+              supplierFirstName: item.supplier.firstName,
+              supplierLastName: item.supplier.lastName,
+              supplierAddress: item.supplier.address,
+              supplierSubDistrict: item.supplier.subDistric,
+              supplierDistrict: item.supplier.distric,
+              supplierProvince: item.supplier.province,
+              supplierZipCode: item.supplier.zipCode,
+            }));
+            rows.value = flattenedData;
+          } else {
+            formAlert.value = {
+              status: true,
+              title: "เกิดข้อผิดพลาด",
+              body: "ไม่พบข้อมูล",
+            };
+          }
+        } else {
+          formAlert.value = {
+            status: true,
+            title: "เกิดข้อผิดพลาด",
+            body: response.message,
+          };
+        }
+      });
     }
-  });
+  } else {
+    if (!currentDate.value.startDate && !currentDate.value.endDate) {
+      const body = {
+        page: pagination.value.page,
+        limit: pagination.value.limit,
+        sortField: "id",
+        sortType: "ASC",
+        filterModel: {
+          logicOperator: "and",
+          items: [
+            {
+              field: "product_name",
+              operator: "equals",
+              value: inputSearch.value.in_productName,
+            },
+            {
+              field: "typeAction",
+              operator: "equals",
+              value: inputSearch.value.in_productType,
+            },
+          ],
+        },
+      };
+      console.log("body --> ", body);
+      await _apiSupplierImport.searchSupplierImport(body, (response) => {
+        if (response.statusCode === 200) {
+          if (response.data.length > 0) {
+            console.log("response5555--> ", response);
+            flattenedData = response.data.map((item) => ({
+              specialID: item.product.specialID,
+              productName: item.product.name,
+              typeAction: item.typeAction,
+              productPrice: item.product.price,
+              quantity: item.quantity,
+              price: item.price,
+              supplierFirstName: item.supplier.firstName,
+              supplierLastName: item.supplier.lastName,
+              supplierAddress: item.supplier.address,
+              supplierSubDistrict: item.supplier.subDistric,
+              supplierDistrict: item.supplier.distric,
+              supplierProvince: item.supplier.province,
+              supplierZipCode: item.supplier.zipCode,
+            }));
+            rows.value = flattenedData;
+
+            pagination.value.totalPage = response.metadata.totalPage;
+          } else {
+            formAlert.value = {
+              status: true,
+              title: "แจ้งเตือน",
+              body: "ไม่พบข้อมูล",
+            };
+          }
+        } else {
+          formAlert.value = {
+            status: true,
+            title: "เกิดข้อผิดพลาด",
+            body: response.message,
+          };
+        }
+      });
+    } else {
+      const body = {
+        page: pagination.value.page,
+        limit: pagination.value.limit,
+        sortField: "id",
+        sortType: "ASC",
+        filterModel: {
+          logicOperator: "and",
+          items: [
+            {
+              field: "product_name",
+              operator: "equals",
+              value: inputSearch.value.in_productName,
+            },
+            {
+              field: "typeAction",
+              operator: "equals",
+              value: inputSearch.value.in_productType,
+            },
+            {
+              field: "importDate",
+              operator: "between",
+              value: [currentDate.value.startDate, currentDate.value.endDate],
+            },
+          ],
+        },
+      };
+      console.log("body --> ", body);
+      console.log("currentDateStartDate --> ", currentDate.value.startDate);
+      console.log("currentDateEndDate --> ", currentDate.value.endDate);
+      await _apiSupplierImport.searchSupplierImport(body, (response) => {
+        if (response.statusCode === 200) {
+          if (response.data.length > 0) {
+            console.log("response5555--> ", response);
+            flattenedData = response.data.map((item) => ({
+              specialID: item.product.specialID,
+              productName: item.product.name,
+              typeAction: item.typeAction,
+              productPrice: item.product.price,
+              quantity: item.quantity,
+              price: item.price,
+              supplierFirstName: item.supplier.firstName,
+              supplierLastName: item.supplier.lastName,
+              supplierAddress: item.supplier.address,
+              supplierSubDistrict: item.supplier.subDistric,
+              supplierDistrict: item.supplier.distric,
+              supplierProvince: item.supplier.province,
+              supplierZipCode: item.supplier.zipCode,
+            }));
+            rows.value = flattenedData;
+
+            pagination.value.totalPage = response.metadata.totalPage;
+          } else {
+            formAlert.value = {
+              status: true,
+              title: "แจ้งเตือน",
+              body: "ไม่พบข้อมูล",
+            };
+          }
+        } else {
+          formAlert.value = {
+            status: true,
+            title: "เกิดข้อผิดพลาด",
+            body: response.message,
+          };
+        }
+      });
+    }
+  }
 };
 
 const onExportExcel = () => {
   console.log("***onExportExcel***");
   const workbook = new ExcelJS.Workbook();
-  const worksheet = workbook.addWorksheet('Sheet A');
+  const worksheet = workbook.addWorksheet("Sheet A");
+  if (
+    inputSearch.value.in_productType == "ซื้อ-ขาย" ||
+    inputSearch.value.in_productType == ""
+  ) {
+    // เพิ่มหัวข้อคอลัมน์ใน Excel spreadsheet
+    worksheet.columns = [
+      { header: "Special ID", key: "specialID", width: 15 },
+      { header: "Product Name", key: "productName", width: 30 },
+      { header: "Type of Action", key: "typeAction", width: 20 },
+      { header: "Product Price", key: "productPrice", width: 15 },
+      { header: "Quantity", key: "quantity", width: 15 },
+      { header: "Price", key: "price", width: 15 },
+      { header: "Supplier First Name", key: "supplierFirstName", width: 20 },
+      { header: "Supplier Last Name", key: "supplierLastName", width: 20 },
+      { header: "Supplier Address", key: "supplierAddress", width: 30 },
+      { header: "Supplier SubDistrict", key: "supplierSubDistrict", width: 20 },
+      { header: "Supplier District", key: "supplierDistrict", width: 20 },
+      { header: "Supplier Province", key: "supplierProvince", width: 20 },
+      { header: "Supplier Zip Code", key: "supplierZipCode", width: 15 },
+    ];
 
-  // เพิ่มหัวข้อคอลัมน์ใน Excel spreadsheet
-  worksheet.columns = [
-    { header: 'Special ID', key: 'specialID', width: 15 },
-    { header: 'Product Name', key: 'productName', width: 30 },
-    { header: 'Type of Action', key: 'typeAction', width: 20 },
-    { header: 'Product Price', key: 'productPrice', width: 15 },
-    { header: 'Quantity', key: 'quantity', width: 15 },
-    { header: 'Price', key: 'price', width: 15 },
-    { header: 'Supplier First Name', key: 'supplierFirstName', width: 20 },
-    { header: 'Supplier Last Name', key: 'supplierLastName', width: 20 },
-    { header: 'Supplier Address', key: 'supplierAddress', width: 30 },
-    { header: 'Supplier SubDistrict', key: 'supplierSubDistrict', width: 20 },
-    { header: 'Supplier District', key: 'supplierDistrict', width: 20 },
-    { header: 'Supplier Province', key: 'supplierProvince', width: 20 },
-    { header: 'Supplier Zip Code', key: 'supplierZipCode', width: 15 }
-  ];
-
-  // เพิ่มข้อมูลลงในแถวของ Excel spreadsheet
-  flattenedData.forEach((item, index) => {
-    worksheet.addRow({
-      specialID: item.specialID,
-      productName: item.productName,
-      typeAction: item.typeAction,
-      productPrice: item.productPrice,
-      quantity: item.quantity,
-      price: item.price,
-      supplierFirstName: item.supplierFirstName,
-      supplierLastName: item.supplierLastName,
-      supplierAddress: item.supplierAddress,
-      supplierSubDistrict: item.supplierSubDistrict,
-      supplierDistrict: item.supplierDistrict,
-      supplierProvince: item.supplierProvince,
-      supplierZipCode: item.supplierZipCode
+    // เพิ่มข้อมูลลงในแถวของ Excel spreadsheet
+    flattenedData.forEach((item, index) => {
+      worksheet.addRow({
+        specialID: item.specialID,
+        productName: item.productName,
+        typeAction: item.typeAction,
+        productPrice: item.productPrice,
+        quantity: item.quantity,
+        price: item.price,
+        supplierFirstName: item.supplierFirstName,
+        supplierLastName: item.supplierLastName,
+        supplierAddress: item.supplierAddress,
+        supplierSubDistrict: item.supplierSubDistrict,
+        supplierDistrict: item.supplierDistrict,
+        supplierProvince: item.supplierProvince,
+        supplierZipCode: item.supplierZipCode,
+      });
     });
-  });
+  } else {
+    // เพิ่มหัวข้อคอลัมน์ใน Excel spreadsheet
+    worksheet.columns = [
+      { header: "Special ID", key: "specialID", width: 15 },
+      { header: "Product Name", key: "productName", width: 30 },
+      { header: "Type of Action", key: "typeAction", width: 20 },
+      { header: "Product Price", key: "productPrice", width: 15 },
+      { header: "Quantity", key: "quantity", width: 15 },
+      { header: "Remain", key: "remain", width: 15 },
+      { header: "Price", key: "price", width: 15 },
+      { header: "Period Date", key: "periodDate", width: 15 },
+      { header: "Supplier First Name", key: "supplierFirstName", width: 20 },
+      { header: "Supplier Last Name", key: "supplierLastName", width: 20 },
+      { header: "Supplier Address", key: "supplierAddress", width: 30 },
+      { header: "Supplier SubDistrict", key: "supplierSubDistrict", width: 20 },
+      { header: "Supplier District", key: "supplierDistrict", width: 20 },
+      { header: "Supplier Province", key: "supplierProvince", width: 20 },
+      { header: "Supplier Zip Code", key: "supplierZipCode", width: 15 },
+    ];
+
+    // เพิ่มข้อมูลลงในแถวของ Excel spreadsheet
+    flattenedData.forEach((item, index) => {
+      worksheet.addRow({
+        specialID: item.specialID,
+        productName: item.productName,
+        typeAction: item.typeAction,
+        productPrice: item.productPrice,
+        quantity: item.quantity,
+        remain: item.remain,
+        price: item.price,
+        periodDate: item.periodDate,
+        supplierFirstName: item.supplierFirstName,
+        supplierLastName: item.supplierLastName,
+        supplierAddress: item.supplierAddress,
+        supplierSubDistrict: item.supplierSubDistrict,
+        supplierDistrict: item.supplierDistrict,
+        supplierProvince: item.supplierProvince,
+        supplierZipCode: item.supplierZipCode,
+      });
+    });
+  }
 
   // สร้างไฟล์ Excel
   workbook.xlsx.writeBuffer().then((data) => {
-    const blob = new Blob([data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const blob = new Blob([data], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
     const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
-    a.download = 'ExportedData.xlsx';
+    a.download = "ExportedData.xlsx";
     a.click();
   });
 };
@@ -224,29 +596,35 @@ const clearData = () => {
     in_productType: "",
     in_productName: "",
   };
-  currentDateStart.value = "";
-  currentDateEnd.value = "";
- rows.value = [];
+  currentDate.value = "";
+  rows.value = [];
   onShowProduct();
-}
-function setCurrentDate() {
-  const today = new Date().toISOString().substr(0, 10);
-  currentDateStart.value = today;
-  currentDateEnd.value = today;
-}
+};
 
-watch([currentDateStart, currentDateEnd], ([start, end]) => {
-  if (start && end) {
-    if (start > end) {
-      // วันที่เริ่มต้นต้องไม่มากกว่าวันที่สิ้นสุด
-      currentDateStart.value = '';
-      currentDateEnd.value = '';
+watch(currentDate.value, (newVal, oldVal) => {
+  // Check if both startDate and endPeriodDate are not empty
+  if (newVal.startDate && newVal.endDate) {
+    if (newVal.startDate > newVal.endDate) {
+      // ทำอะไรสักอย่างเมื่อ startDate มากกว่า endPeriodDate
+      currentDate.value.startDate = "";
+      currentDate.value.endDate = "";
       formAlert.value = {
         status: true,
         title: "เกิดข้อผิดพลาด",
-        body: 'วันที่เริ่มต้นต้องไม่มากกว่าวันที่สิ้นสุด',
+        body: "วันที่เริ่มต้นต้องไม่มากกว่าวันที่สิ้นสุด",
       };
     }
+  }
+
+  if (newVal.startPeriodDate > newVal.endPeriodDate) {
+    // ทำอะไรสักอย่างเมื่อ startPeriodDate มากกว่า endPeriodDate
+    currentDate.value.startPeriodDate = "";
+    currentDate.value.endPeriodDate = "";
+    formAlert.value = {
+      status: true,
+      title: "เกิดข้อผิดพลาด",
+      body: "วันที่เริ่มต้นต้องไม่มากกว่าวันที่สิ้นสุด",
+    };
   }
 });
 </script>
@@ -296,7 +674,6 @@ watch([currentDateStart, currentDateEnd], ([start, end]) => {
                 v-model="inputSearch.in_productName"
                 class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
               >
-                <option value="" selected>------เลือก------</option>
                 <option
                   v-for="(item, index) in inputSearch"
                   :key="index"
@@ -317,12 +694,13 @@ watch([currentDateStart, currentDateEnd], ([start, end]) => {
                 <option value="ฝาก">ฝาก</option>
               </select>
             </div>
+
             <div class="flex flex-col">
               <span class="text-red-800 font-semibold">วันที่เริ่มต้น</span>
               <input
                 class="h-8 w-50 focus:outline-red-400 rounded bg-red-100 px-3"
                 type="date"
-                v-model="currentDateStart"
+                v-model="currentDate.startDate"
               />
             </div>
             <div class="flex flex-col">
@@ -330,7 +708,32 @@ watch([currentDateStart, currentDateEnd], ([start, end]) => {
               <input
                 class="h-8 w-50 focus:outline-red-400 rounded bg-red-100 px-3"
                 type="date"
-                v-model="currentDateEnd"
+                v-model="currentDate.endDate"
+              />
+            </div>
+          </div>
+          <div
+            class="grid grid-cols-2 gap-4 px-6 mt-3"
+            v-if="inputSearch.in_productType == 'ฝาก'"
+          >
+            <div class="flex flex-col">
+              <span class="text-red-800 font-semibold"
+                >วันที่เลิกฝากเริ่มต้น</span
+              >
+              <input
+                class="h-8 w-50 focus:outline-red-400 rounded bg-red-100 px-3"
+                type="date"
+                v-model="currentDate.startPeriodDate"
+              />
+            </div>
+            <div class="flex flex-col">
+              <span class="text-red-800 font-semibold"
+                >วันที่เลิกฝากสิ้นสุด</span
+              >
+              <input
+                class="h-8 w-50 focus:outline-red-400 rounded bg-red-100 px-3"
+                type="date"
+                v-model="currentDate.endPeriodDate"
               />
             </div>
           </div>
@@ -359,8 +762,27 @@ watch([currentDateStart, currentDateEnd], ([start, end]) => {
       </div>
     </div>
   </div>
-  <div class="rounded-xl mb-10 overflow-auto mx-5">
-    <tableManage :columns="columns" :rows="rows" />
+  <div
+    v-if="
+      inputSearch.in_productType == 'ซื้อ-ขาย' || !inputSearch.in_productType
+    "
+    class="rounded-xl mb-10 overflow-auto mx-5"
+  >
+    <tableManage :columns="columnsSupplier" :rows="rows" />
+    <div class="flex justify-end py-5">
+      <paginationPage
+        v-model:currentPage="pagination.page"
+        :totalPages="pagination.totalPage"
+        :limit="pagination.limit"
+        @update:currentPage="onChangePagination"
+      />
+    </div>
+  </div>
+  <div
+    v-else-if="inputSearch.in_productType == 'ฝาก'"
+    class="rounded-xl mb-10 overflow-auto mx-5"
+  >
+    <tableManage :columns="columnsDeposit" :rows="rows" />
     <div class="flex justify-end py-5">
       <paginationPage
         v-model:currentPage="pagination.page"
