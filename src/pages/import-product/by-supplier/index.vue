@@ -120,6 +120,8 @@ const onLoadData = async () => {
 };
 
 const onShowProduct = async () => {
+  store.commit("setStatusLoading", true);
+
   const body = {
     page: 1,
     limit: 10,
@@ -144,6 +146,8 @@ const onShowProduct = async () => {
         body: response.message,
       };
     }
+    store.commit("setStatusLoading", false);
+
   });
   dataInput.value.province = province.map((item) => {
     return { label: item.name_th, value: item.id };
@@ -180,6 +184,8 @@ const onChangeQuantity = (quantity) => {
 };
 
 const onChangeSupplier = async (phone) => {
+  store.commit("setStatusLoading", true);
+
   const body = {
     page: 1,
     limit: 1,
@@ -211,6 +217,7 @@ const onChangeSupplier = async (phone) => {
 
         console.log("formSupplier", formSupplier.value);
       } else {
+
         formAlert.value = {
           status: true,
           title: "เเจ้งเตือน",
@@ -229,6 +236,8 @@ const onChangeSupplier = async (phone) => {
           phone: phone,
         };
       }
+    store.commit("setStatusLoading", false);
+
     } else {
       formAlert.value = {
         status: true,
@@ -292,6 +301,8 @@ const onSubmit = async () => {
     };
     return;
   }
+  store.commit("setStatusLoading", true);
+
     const body = {
       //------transaction_import------//
       quantity: formProduct.value.quantity,
@@ -318,11 +329,9 @@ const onSubmit = async () => {
           title: "เเจ้งเตือน",
           body: "บันทึกข้อมูลเรียบร้อย",
         };
-        store.commit("setStatusLoading", true);
         clearData();
         onLoadData();
         onShowProduct();
-        store.commit("setStatusLoading", false);
       } else {
         formAlert.value = {
           status: true,
@@ -330,10 +339,14 @@ const onSubmit = async () => {
           body: response.message,
         };
       }
+    store.commit("setStatusLoading", false);
+
     });
     console.log(body);
   } else {
     console.log("insertformSupplier.......");
+    store.commit("setStatusLoading", true);
+
     const body = {
       //------transaction_import------//
       quantity: formProduct.value.quantity,
@@ -370,6 +383,8 @@ const onSubmit = async () => {
           body: response.message,
         };
       }
+      store.commit("setStatusLoading", false);
+
     });
   }
 };
