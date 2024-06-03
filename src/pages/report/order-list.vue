@@ -1,11 +1,12 @@
 <script setup>
 import { onMounted, ref } from "vue";
-import tableBasic from "../../components/tables/table-basic.vue";
+import tableManage from "../../components/tables/table-manage.vue";
 import paginationPage from "../../components/pagination/pagination-page.vue";
 import _apiProduct from "../../api/master-products.js";
 import _apiExport from "../../api/export-product.js";
 import { useRouter } from "vue-router";
 import ExcelJS from "exceljs";
+import alert from "../../components/alert/alert.vue";
 const $router = useRouter();
 
 const pagination = ref({
@@ -27,7 +28,6 @@ const onChangePagination = (val) => {
   pagination.page = val;
 };
 
-
 const columns = [
   { field: "productName", label: "รหัส", width: "auto" },
   { field: "productName", label: "ชื่อสินค้า", width: "auto" },
@@ -46,21 +46,22 @@ const columns = [
 const rows = ref([]);
 
 let flattenedData = null;
-
-// const currentDate = ref({
-//   startDate: "",
-//   endDate: "",
-//   startPeriodDate: "",
-//   endPeriodDate: "",
-// });
+let showTable = false;
+const currentDate = ref({
+  startExportDate: "",
+  endExportDate: "",
+  startDepositDate: "",
+  endDepositDate: "",
+});
 
 const inputSearch = ref({
   in_productName: "",
-  in_exportType: "",
   in_status: "",
   in_orderID: "",
 });
-
+const selectSearch = ref({
+  in_exportType: "ขายสินค้า",
+});
 const onShowProduct = async () => {
   const body = {
     page: 1,
@@ -82,7 +83,6 @@ const onShowProduct = async () => {
           id: item.id,
           specialID: item.specialID,
           productName: item.name,
-          typeAction: item.type,
           productPrice: item.price,
           quantity: item.quantity,
         };
@@ -91,7 +91,9 @@ const onShowProduct = async () => {
   });
 };
 
-const onLoadTable = async () => {
+
+const onSubmit = async () => {
+  console.log("***onSubmit***");
   const body = {
     page: 1,
     limit: 10000,
@@ -99,43 +101,67 @@ const onLoadTable = async () => {
     sortType: "ASC",
     filterModel: {
       logicOperator: "and",
-      items: [],
+      items: [
+        {
+          field: "product_name",
+          operator: "equals",
+          value: inputSearch.value.in_productName,
+        },
+        {
+          field: "typeAction",
+          operator: "equals",
+          value: selectSearch.value.in_exportType,
+        },
+      ],
     },
-  }
-
+  };
+  console.log("body --> ", body);
   await _apiExport.search(body, (response) => {
     if (response.statusCode === 200) {
       console.log("response --> ", response);
-      if (response.data.length > 0) {
-            console.log("response5555--> ", response);
-            flattenedData = response.data.map((item) => ({
-              specialID: item.product.specialID,
-              productName: item.product.name,
-              productPrice: item.product.price,
-              quantity: item.quantity,
-              price: item.price,
-              exportDate: item.exportDate,
-              priceDeposit: item.priceDeposit,
-              typeAction: item.typeAction,
-              customerFirstName: item.customer.firstName,
-              customerLastName: item.customer.lastName,
-              customerAddress: item.customer.address,
-              customerSubDistrict: item.customer.subDistric,
-              customerDistrict: item.customer.distric,
-              customerProvince: item.customer.province,
-              customerZipCode: item.customer.zipCode,
-            }));
-            rows.value = flattenedData;
-            pagination.value.totalPage = response.metadata.totalPage;
-
-          }
-    }
+      // if (response.data.length > 0) {
+        showTable = true;
+        console.log("_apiExport--> ", response);
+        flattenedData = response.data.map((item) => ({
+          specialID: item.product.specialID,
+          productName: item.product.name,
+          productPrice: item.product.price,
+          quantity: item.quantity,
+          price: item.price,
+          exportDate: item.exportDate,
+          // priceDeposit: item.priceDeposit,
+          typeAction: item.typeAction,
+          customerFirstName: item.customer.firstName,
+          customerLastName: item.customer.lastName,
+          customerAddress: item.customer.address,
+          customerSubDistrict: item.customer.subDistric,
+          customerDistrict: item.customer.distric,
+          customerProvince: item.customer.province,
+          customerZipCode: item.customer.zipCode,
+        }));
+        rows.value = flattenedData;
+        pagination.value.totalPage = response.metadata.totalPage;
+      } else {
+        // showTable = false;
+        formAlert.value = {
+          status: true,
+          title: "เกิดข้อผิดพลาด",
+          body: "ไม่พบข้อมูล",
+        };
+      }
+    // }else{
+    //   formAlert.value = {
+    //     status: true,
+    //     title: "เกิดข้อผิดพลาด",
+    //     body: response.message,
+    //   };
+    // }
   });
 };
 
 onMounted(async () => {
-  await onShowProduct();
-  onLoadTable();
+  onShowProduct();
+  // await onLoadTable();
 });
 const onExportExcel = () => {
   const workbook = new ExcelJS.Workbook();
@@ -190,9 +216,13 @@ const onExportExcel = () => {
       </div>
       <div class="flex justify-center pb-5">
         <div class="w-full bg-white rounded-xl py-5">
-          <div class="grid grid-cols-3 gap-4 px-6 mt-3">
+          <div class="grid grid-cols-2 gap-4 px-6 mt-3">
             <div class="flex flex-col">
               <span class="text-red-800 font-semibold">ชื่อสินค้า</span>
+              <!-- <input
+                class="h-8 w-50 focus:outline-red-400 rounded bg-red-100 px-3"
+                type="text"
+              /> -->
               <select
                 v-model="inputSearch.in_productName"
                 class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
@@ -206,82 +236,98 @@ const onExportExcel = () => {
                 </option>
               </select>
             </div>
-            <div class="flex flex-col">
-              <span class="text-red-800 font-semibold">รายการสินค้า</span>
-              <input
-                class="h-8 w-50 focus:outline-red-400 rounded bg-red-100 px-3"
-                type="text"
-              />
-            </div>
 
             <div class="flex flex-col">
-              <span class="text-red-800 font-semibold"
-                >หมายเลขคำสั่งซื้อ/เบิก</span
-              >
-              <input
-                class="h-8 w-50 focus:outline-red-400 rounded bg-red-100 px-3"
-                type="text"
-              />
-            </div>
-
-            <div class="flex flex-col">
-              <span class="text-red-800 font-semibold">ประเภทสินค้านำออก</span>
+              <span class="text-red-800 font-semibold">ประเภทนำเข้าสินค้า</span>
               <select
+                v-model="selectSearch.in_exportType"
                 class="h-8 w-50 focus:outline-red-400 rounded bg-red-100 px-3"
               >
-                <option selected>ซื้อ-ขาย</option>
-                <option>การแปรรูป</option>
-                <option>ฝาก</option>
+                <option selected value="ขายสินค้า">ขายสินค้า</option>
+                <option value="แปรรูป">แปรรูป</option>
+                <option value="ฝาก">ฝาก</option>
               </select>
             </div>
+
+            <div class="flex flex-col">
+              <span class="text-red-800 font-semibold">วันที่เริ่มต้น</span>
+              <input
+                class="h-8 w-50 focus:outline-red-400 rounded bg-red-100 px-3"
+                type="date"
+                v-model="currentDate.startExportDate"
+              />
+            </div>
+            <div class="flex flex-col">
+              <span class="text-red-800 font-semibold">วันที่สิ้นสุด</span>
+              <input
+                class="h-8 w-50 focus:outline-red-400 rounded bg-red-100 px-3"
+                type="date"
+                v-model="currentDate.endExportDate"
+              />
+            </div>
+          </div>
+          <div
+            class="grid grid-cols-2 gap-4 px-6 mt-3"
+            v-if="inputSearch.in_productType == 'ฝาก'"
+          >
             <div class="flex flex-col">
               <span class="text-red-800 font-semibold"
-                >วันที่สั่งซื้อ/เบิก</span
+                >วันที่เลิกฝากเริ่มต้น</span
               >
               <input
                 class="h-8 w-50 focus:outline-red-400 rounded bg-red-100 px-3"
                 type="date"
+                v-model="currentDate.startDepositDate"
               />
             </div>
             <div class="flex flex-col">
-              <span class="text-red-800 font-semibold">สถานะ</span>
-              <select
-                class="h-8 w-50 focus:outline-red-400 rounded bg-red-100 px-3"
+              <span class="text-red-800 font-semibold"
+                >วันที่เลิกฝากสิ้นสุด</span
               >
-                <option selected>ดำเนินการเสร็จสิ้น</option>
-                <option>กำลังดำเนินการ</option>
-                <option>ยกเลิก</option>
-              </select>
+              <input
+                class="h-8 w-50 focus:outline-red-400 rounded bg-red-100 px-3"
+                type="date"
+                v-model="currentDate.endDepositDate"
+              />
             </div>
           </div>
           <div class="flex justify-center py-5 space-x-3">
             <button
-              class="h-10 w-40 btn btn-btn-error btn-wide text-xl text-red-800 font-semibold"
+              label="ค้นหา"
+              @click="onSubmit"
+              class="h-10 rounded-full w-40 btn btn-btn-error btn-wide text-xl text-red-800 font-semibold"
             >
               ค้นหา
             </button>
             <button
+              @click="clearData"
+              class="h-10 rounded-full w-40 btn btn-btn-error btn-wide text-xl text-red-800 font-semibold"
+            >
+              ยกเลิก
+            </button>
+            <button
               @click="onExportExcel"
-              class="h-10 w-40 btn btn-btn-error btn-wide text-xl text-red-800 font-semibold"
+              class="h-10 rounded-full w-40 btn btn-btn-error btn-wide text-xl text-red-800 font-semibold"
             >
               รายงาน
             </button>
           </div>
         </div>
       </div>
-      <div class="rounded-xl mb-10 overflow-auto">
-        <tableBasic :columns="columns" :rows="rows" />
-        <div class="flex justify-end py-5">
-            <paginationPage
+    </div>
+  </div>
+  <div class="rounded-xl mb-10 overflow-auto mx-5" v-if="showTable">
+    <tableManage :columns="columns" :rows="rows" />
+    <div class="flex justify-end py-5">
+      <paginationPage
         v-model:currentPage="pagination.page"
         :totalPages="pagination.totalPage"
         :limit="pagination.limit"
         @update:currentPage="onChangePagination"
       />
-        </div>
-      </div>
     </div>
   </div>
+
   <alert
     :titleMessage="formAlert.title"
     :bodyMessage="formAlert.body"
