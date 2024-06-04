@@ -7,6 +7,7 @@ import _apiExport from "../../api/export-product.js";
 import { useRouter } from "vue-router";
 import ExcelJS from "exceljs";
 import alert from "../../components/alert/alert.vue";
+import store from "../../store";
 const $router = useRouter();
 
 const pagination = ref({
@@ -32,10 +33,13 @@ const columns = [
   { field: "productName", label: "รหัส", width: "auto" },
   { field: "productName", label: "ชื่อสินค้า", width: "auto" },
   { field: "quantity", label: "ปริมาณสินค้า", width: "auto" },
+  { field: "productInPrice", label: "ราคารับซื้อ", width: "auto" },
+  { field: "productOutPrice", label: "ราคาขายออก", width: "auto" },
   { field: "price", label: "ราคารวม", width: "auto" },
   { field: "typeAction", label: "ประเภทสินค้านำออก", width: "auto" },
   { field: "customerFirstName", label: "ชื่อ", width: "auto" },
   { field: "customerLastName", label: "สกุล", width: "auto" },
+  { field: "customerPhone", label: "เบอร์โทร", width: "auto" },
   { field: "customerAddress", label: "ที่อยู่", width: "auto" },
   { field: "customerSubDistrict", label: "ตำบล", width: "auto" },
   { field: "customerDistrict", label: "อำเภอ", width: "auto" },
@@ -46,7 +50,7 @@ const columns = [
 const rows = ref([]);
 
 let flattenedData = null;
-let showTable = false;
+const showTable = ref(false);
 const currentDate = ref({
   startExportDate: "",
   endExportDate: "",
@@ -77,7 +81,6 @@ const onShowProduct = async () => {
     if (response.statusCode === 200) {
       console.log("response --> ", response);
       // setCurrentDate();
-
       inputSearch.value = response.data.map((item) => {
         return {
           id: item.id,
@@ -91,86 +94,233 @@ const onShowProduct = async () => {
   });
 };
 
-
 const onSubmit = async () => {
   console.log("***onSubmit***");
-  const body = {
-    page: 1,
-    limit: 10000,
-    sortField: "id",
-    sortType: "ASC",
-    filterModel: {
-      logicOperator: "and",
-      items: [
-        {
-          field: "product_name",
-          operator: "equals",
-          value: inputSearch.value.in_productName,
-        },
-        {
-          field: "typeAction",
-          operator: "equals",
-          value: selectSearch.value.in_exportType,
-        },
-      ],
-    },
-  };
-  console.log("body --> ", body);
-  await _apiExport.search(body, (response) => {
-    if (response.statusCode === 200) {
-      console.log("response --> ", response);
-      // if (response.data.length > 0) {
-        showTable = true;
-        console.log("_apiExport--> ", response);
-        flattenedData = response.data.map((item) => ({
-          specialID: item.product.specialID,
-          productName: item.product.name,
-          productPrice: item.product.price,
-          quantity: item.quantity,
-          price: item.price,
-          exportDate: item.exportDate,
-          // priceDeposit: item.priceDeposit,
-          typeAction: item.typeAction,
-          customerFirstName: item.customer.firstName,
-          customerLastName: item.customer.lastName,
-          customerAddress: item.customer.address,
-          customerSubDistrict: item.customer.subDistric,
-          customerDistrict: item.customer.distric,
-          customerProvince: item.customer.province,
-          customerZipCode: item.customer.zipCode,
-        }));
-        rows.value = flattenedData;
-        pagination.value.totalPage = response.metadata.totalPage;
+  if (
+    currentDate.value.startExportDate === "" ||
+    currentDate.value.endExportDate === ""
+  ) {
+    store.commit("setStatusLoading", true);
+
+    const body = {
+      page: 1,
+      limit: 10000,
+      sortField: "id",
+      sortType: "ASC",
+      filterModel: {
+        logicOperator: "and",
+        items: [
+          {
+            field: "product_name",
+            operator: "equals",
+            value: inputSearch.value.in_productName,
+          },
+          {
+            field: "typeAction",
+            operator: "equals",
+            value: selectSearch.value.in_exportType,
+          },
+        ],
+      },
+    };
+    console.log("body --> ", body);
+    await _apiExport.search(body, (response) => {
+      if (response.statusCode === 200) {
+        
+        console.log("response --> ", response);
+        if (response.data.length > 0) {
+          store.commit("setStatusLoading", false);
+          console.log("_apiExport--> ", response);
+          showTable.value = true;
+          flattenedData = response.data.map((item) => ({
+            specialID: item.product.specialID,
+            productName: item.product.name,
+            productInPrice: item.product.price,
+            productOutPrice: item.product.priceOut,
+            quantity: item.quantity,
+            price: item.price,
+            exportDate: item.exportDate,
+            priceDeposit: item.priceDeposit,
+            typeAction: item.typeAction,
+            customerPhone: item.customer.phone,
+            customerFirstName: item.customer.firstName,
+            customerLastName: item.customer.lastName,
+            customerAddress: item.customer.address,
+            customerSubDistrict: item.customer.subDistric,
+            customerDistrict: item.customer.distric,
+            customerProvince: item.customer.province,
+            customerZipCode: item.customer.zipCode,
+          }));
+          console.log("showTable --> ", showTable);
+          console.log("flattenedData --> ", flattenedData);
+          rows.value = flattenedData;
+          pagination.value.totalPage = response.metadata.totalPage;
+
+        } else {
+          showTable.value = false;
+          formAlert.value = {
+            status: true,
+            title: "เกิดข้อผิดพลาด",
+            body: "ไม่พบข้อมูล",
+          };
+
+          store.commit("setStatusLoading", false);
+        }
       } else {
-        // showTable = false;
+        showTable.value = false;
         formAlert.value = {
           status: true,
           title: "เกิดข้อผิดพลาด",
-          body: "ไม่พบข้อมูล",
+          body: response.message,
+        };
+
+        store.commit("setStatusLoading", false);
+      }
+    });
+    console.log("ไม่มีวันที่")
+  }else if(currentDate.value.startExportDate !== "" || currentDate.value.endExportDate !== ""){
+    console.log("มีวันที่นำออกข้อมูล")
+    store.commit("setStatusLoading", true);
+
+    const body = {
+      page: 1,
+      limit: 10000,
+      sortField: "id",
+      sortType: "ASC",
+      filterModel: {
+        logicOperator: "and",
+        items: [
+          {
+            field: "product_name",
+            operator: "equals",
+            value: inputSearch.value.in_productName,
+          },
+          {
+            field: "typeAction",
+            operator: "equals",
+            value: selectSearch.value.in_exportType,
+          },
+          {
+            field: "exportDate",
+            operator: "between",
+            value: [
+              currentDate.value.startExportDate,
+              currentDate.value.endExportDate,
+            ],
+          },
+        ],
+      },
+    };
+    console.log("body --> ", body);
+    await _apiExport.search(body, (response) => {
+      if (response.statusCode === 200) {
+        console.log("response --> ", response);
+        if (response.data.length > 0) {
+          console.log("_apiExport--> ", response);
+          showTable.value = true;
+          flattenedData = response.data.map((item) => ({
+            specialID: item.product.specialID,
+            productName: item.product.name,
+            productInPrice: item.product.price,
+            productOutPrice: item.product.priceOut,
+            quantity: item.quantity,
+            price: item.price,
+            exportDate: item.exportDate,
+            priceDeposit: item.priceDeposit,
+            typeAction: item.typeAction,
+            customerPhone: item.customer.phone,
+            customerFirstName: item.customer.firstName,
+            customerLastName: item.customer.lastName,
+            customerAddress: item.customer.address,
+            customerSubDistrict: item.customer.subDistric,
+            customerDistrict: item.customer.distric,
+            customerProvince: item.customer.province,
+            customerZipCode: item.customer.zipCode,
+          }));
+          console.log("showTable --> ", showTable);
+          console.log("flattenedData --> ", flattenedData);
+          rows.value = flattenedData;
+          pagination.value.totalPage = response.metadata.totalPage;
+
+        } else {
+          store.commit("setStatusLoading", false);
+
+          showTable.value = false;
+          formAlert.value = {
+            status: true,
+            title: "เกิดข้อผิดพลาด",
+            body: "ไม่พบข้อมูล",
+          };
+        }
+      } else {
+        store.commit("setStatusLoading", false);
+        showTable.value = false;
+        formAlert.value = {
+          status: true,
+          title: "เกิดข้อผิดพลาด",
+          body: response.message,
         };
       }
-    // }else{
-    //   formAlert.value = {
-    //     status: true,
-    //     title: "เกิดข้อผิดพลาด",
-    //     body: response.message,
-    //   };
-    // }
-  });
+    });
+  }
 };
 
 onMounted(async () => {
-  onShowProduct();
+  store.commit("setStatusLoading", true);
+  await onShowProduct();
   // await onLoadTable();
+  store.commit("setStatusLoading", false);
 });
 const onExportExcel = () => {
+  console.log("***onExportExcel***");
   const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet("Sheet A");
-  worksheet.getCell("A1").value = "ชื่อ";
-  worksheet.getCell("B1").value = "สกุล";
-  worksheet.getCell("A2").value = "XXXXXXXXXXXXXX";
-  worksheet.getCell("B2").value = "AAAAAAAAAAAAAA";
+    // เพิ่มหัวข้อคอลัมน์ใน Excel spreadsheet
+    worksheet.columns = [
+      { header: "Special ID", key: "specialID", width: 15 },
+      { header: "Product Name", key: "productName", width: 30 },
+      { header: "Type of Action", key: "typeAction", width: 20 },
+      { header: "Product Price", key: "productPrice", width: 15 },
+      { header: "Product Out Price", key: "productOutPrice", width: 15 },
+      { header: "Quantity", key: "quantity", width: 15 },
+      { header: "Price", key: "price", width: 15 },
+      { header: "Price Deposit", key: "priceDeposit", width: 15 },
+      { header: "Export Date", key: "exportDate", width: 15 },
+      { header: "Customer First Name", key: "customerFirstName", width: 20 },
+      { header: "Customer Last Name", key: "customerLastName", width: 20 },
+      { header: "Customer Phone", key: "customerPhone", width: 15 },
+      { header: "Customer Address", key: "customerAddress", width: 30 },
+      { header: "Customer SubDistrict", key: "customerSubDistrict", width: 20 },
+      { header: "Customer District", key: "customerDistrict", width: 20 },
+      { header: "Customer Province", key: "customerProvince", width: 20 },
+      { header: "Customer Zip Code", key: "customerZipCode", width: 15 },
 
+    ];
+
+    // เพิ่มข้อมูลลงในแถวของ Excel spreadsheet
+    flattenedData.forEach((item, index) => {
+      worksheet.addRow({
+        specialID: item.specialID,
+        productName: item.productName,
+        typeAction: item.typeAction,
+        productInPrice: item.productInPrice,
+        productOutPrice: item.productOutPrice,
+        quantity: item.quantity,
+        price: item.price,
+        priceDeposit: item.priceDeposit,
+        exportDate: item.exportDate,
+        customerPhone: item.customerPhone,
+        customerFirstName: item.customerFirstName,
+        customerLastName: item.customerLastName,
+        customerAddress: item.customerAddress,
+        customerSubDistrict: item.customerSubDistrict,
+        customerDistrict: item.customerDistrict,
+        customerProvince: item.customerProvince,
+        customerZipCode: item.customerZipCode,
+      });
+    });
+
+  // สร้างไฟล์ Excel
   workbook.xlsx.writeBuffer().then((data) => {
     const blob = new Blob([data], {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -178,7 +328,7 @@ const onExportExcel = () => {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "Test.xlsx";
+    a.download = "ExportedData.xlsx";
     a.click();
   });
 };

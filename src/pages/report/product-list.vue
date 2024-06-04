@@ -36,6 +36,7 @@ const columnsSupplier = [
   { field: "price", label: "ราคารวม", width: "auto" },
   { field: "supplierFirstName", label: "ชื่อ", width: "auto" },
   { field: "supplierLastName", label: "สกุล", width: "auto" },
+  { field: "supplierPhone", label: "เบอร์โทร", width: "auto" },
   { field: "supplierAddress", label: "ที่อยู่", width: "auto" },
   { field: "supplierSubDistrict", label: "ตำบล", width: "auto" },
   { field: "supplierDistrict", label: "อำเภอ", width: "auto" },
@@ -54,6 +55,7 @@ const columnsDeposit = [
   { field: "periodDate", label: "วันที่สิ้นสุดการฝาก", width: "auto" },
   { field: "supplierFirstName", label: "ชื่อ", width: "auto" },
   { field: "supplierLastName", label: "สกุล", width: "auto" },
+  { field: "supplierPhone", label: "เบอร์โทร", width: "auto" },
   { field: "supplierAddress", label: "ที่อยู่", width: "auto" },
   { field: "supplierSubDistrict", label: "ตำบล", width: "auto" },
   { field: "supplierDistrict", label: "อำเภอ", width: "auto" },
@@ -63,6 +65,7 @@ const columnsDeposit = [
 
 const rows = ref([]);
 let flattenedData = null;
+const showTable = ref(false);
 
 const currentDate = ref({
   startDate: "",
@@ -117,8 +120,11 @@ const onChangePagination = (val) => {
 
 const onSubmit = async () => {
   console.log("***onSubmit***");
-
-  console.log("inputSearch.value.in_productType", inputSearch.value.in_productType);
+  store.commit("setStatusLoading", true);
+  console.log(
+    "inputSearch.value.in_productType",
+    inputSearch.value.in_productType
+  );
   if (inputSearch.value.in_productType == "ฝาก") {
     if (!currentDate.value.startDate && !currentDate.value.endDate) {
       const body = {
@@ -134,7 +140,6 @@ const onSubmit = async () => {
               operator: "equals",
               value: inputSearch.value.in_productName,
             },
-            
           ],
         },
       };
@@ -142,6 +147,8 @@ const onSubmit = async () => {
       await _apiDepositImport.searchDepositImport(body, (response) => {
         if (response.statusCode === 200) {
           if (response.data.length > 0) {
+            showTable.value = true;
+            store.commit("setStatusLoading", false);
             console.log("response5555--> ", response);
             flattenedData = response.data.map((item) => ({
               specialID: item.product.specialID,
@@ -153,6 +160,7 @@ const onSubmit = async () => {
               periodDate: item.periodDate,
               supplierFirstName: item.supplier.firstName,
               supplierLastName: item.supplier.lastName,
+              supplierPhone: item.supplier.phone,
               supplierAddress: item.supplier.address,
               supplierSubDistrict: item.supplier.subDistric,
               supplierDistrict: item.supplier.distric,
@@ -161,6 +169,8 @@ const onSubmit = async () => {
             }));
             rows.value = flattenedData;
           } else {
+            store.commit("setStatusLoading", false);
+            showTable.value = false;
             formAlert.value = {
               status: true,
               title: "เกิดข้อผิดพลาด",
@@ -168,14 +178,17 @@ const onSubmit = async () => {
             };
           }
         } else {
+          store.commit("setStatusLoading", false);
+          showTable.value = false;
           formAlert.value = {
             status: true,
             title: "เกิดข้อผิดพลาด",
             body: response.message,
           };
         }
-      })
-    }else if(currentDate.value.startDate && currentDate.value.endDate){
+      });
+    } else if (currentDate.value.startDate && currentDate.value.endDate) {
+      store.commit("setStatusLoading", true);
       const body = {
         page: pagination.value.page,
         limit: pagination.value.limit,
@@ -201,6 +214,8 @@ const onSubmit = async () => {
       await _apiDepositImport.searchDepositImport(body, (response) => {
         if (response.statusCode === 200) {
           if (response.data.length > 0) {
+            showTable.value = true;
+            store.commit("setStatusLoading", false);
             console.log("response5555--> ", response);
             flattenedData = response.data.map((item) => ({
               specialID: item.product.specialID,
@@ -212,6 +227,7 @@ const onSubmit = async () => {
               periodDate: item.periodDate,
               supplierFirstName: item.supplier.firstName,
               supplierLastName: item.supplier.lastName,
+              supplierPhone: item.supplier.phone,
               supplierAddress: item.supplier.address,
               supplierSubDistrict: item.supplier.subDistrict,
               supplierDistrict: item.supplier.district,
@@ -220,6 +236,8 @@ const onSubmit = async () => {
             }));
             rows.value = flattenedData;
           } else {
+            store.commit("setStatusLoading", false);
+            showTable.value = false;
             formAlert.value = {
               status: true,
               title: "เกิดข้อผิดพลาด",
@@ -227,6 +245,8 @@ const onSubmit = async () => {
             };
           }
         } else {
+          store.commit("setStatusLoading", false);
+          showTable.value = false;
           formAlert.value = {
             status: true,
             title: "เกิดข้อผิดพลาด",
@@ -234,7 +254,11 @@ const onSubmit = async () => {
           };
         }
       });
-    }else if(currentDate.value.startPeriodDate && currentDate.value.endPeriodDate){
+    } else if (
+      currentDate.value.startPeriodDate &&
+      currentDate.value.endPeriodDate
+    ) {
+      store.commit("setStatusLoading", true);
       const body = {
         page: pagination.value.page,
         limit: pagination.value.limit,
@@ -251,7 +275,10 @@ const onSubmit = async () => {
             {
               field: "periodDate",
               operator: "between",
-              value: [currentDate.value.startPeriodDate, currentDate.value.endDate],
+              value: [
+                currentDate.value.startPeriodDate,
+                currentDate.value.endDate,
+              ],
             },
           ],
         },
@@ -259,6 +286,8 @@ const onSubmit = async () => {
       await _apiDepositImport.searchDepositImport(body, (response) => {
         if (response.statusCode === 200) {
           if (response.data.length > 0) {
+            showTable.value = true;
+            store.commit("setStatusLoading", false);
             console.log("response5555--> ", response);
             flattenedData = response.data.map((item) => ({
               specialID: item.product.specialID,
@@ -270,6 +299,7 @@ const onSubmit = async () => {
               periodDate: item.periodDate,
               supplierFirstName: item.supplier.firstName,
               supplierLastName: item.supplier.lastName,
+              supplierPhone: item.supplier.phone,
               supplierAddress: item.supplier.address,
               supplierSubDistrict: item.supplier.subDistric,
               supplierDistrict: item.supplier.distric,
@@ -278,6 +308,8 @@ const onSubmit = async () => {
             }));
             rows.value = flattenedData;
           } else {
+            store.commit("setStatusLoading", false);
+            showTable.value = false;
             formAlert.value = {
               status: true,
               title: "เกิดข้อผิดพลาด",
@@ -285,6 +317,8 @@ const onSubmit = async () => {
             };
           }
         } else {
+          store.commit("setStatusLoading", false);
+          showTable.value = false;
           formAlert.value = {
             status: true,
             title: "เกิดข้อผิดพลาด",
@@ -292,7 +326,13 @@ const onSubmit = async () => {
           };
         }
       });
-    }else if(currentDate.value.startDate && currentDate.value.endDate && currentDate.value.startPeriodDate && currentDate.value.endPeriodDate){
+    } else if (
+      currentDate.value.startDate &&
+      currentDate.value.endDate &&
+      currentDate.value.startPeriodDate &&
+      currentDate.value.endPeriodDate
+    ) {
+      store.commit("setStatusLoading", true);
       const body = {
         page: pagination.value.page,
         limit: pagination.value.limit,
@@ -309,7 +349,10 @@ const onSubmit = async () => {
             {
               field: "periodDate",
               operator: "between",
-              value: [currentDate.value.startPeriodDate, currentDate.value.endDate],
+              value: [
+                currentDate.value.startPeriodDate,
+                currentDate.value.endDate,
+              ],
             },
             {
               field: "importDate",
@@ -322,6 +365,8 @@ const onSubmit = async () => {
       await _apiDepositImport.searchDepositImport(body, (response) => {
         if (response.statusCode === 200) {
           if (response.data.length > 0) {
+            showTable.value = true;
+            store.commit("setStatusLoading", false);
             console.log("response5555--> ", response);
             flattenedData = response.data.map((item) => ({
               specialID: item.product.specialID,
@@ -333,6 +378,7 @@ const onSubmit = async () => {
               periodDate: item.periodDate,
               supplierFirstName: item.supplier.firstName,
               supplierLastName: item.supplier.lastName,
+              supplierPhone: item.supplier.phone,
               supplierAddress: item.supplier.address,
               supplierSubDistrict: item.supplier.subDistric,
               supplierDistrict: item.supplier.distric,
@@ -341,6 +387,8 @@ const onSubmit = async () => {
             }));
             rows.value = flattenedData;
           } else {
+            store.commit("setStatusLoading", false);
+            showTable.value = false;
             formAlert.value = {
               status: true,
               title: "เกิดข้อผิดพลาด",
@@ -348,6 +396,8 @@ const onSubmit = async () => {
             };
           }
         } else {
+          store.commit("setStatusLoading", false);
+          showTable.value = false;
           formAlert.value = {
             status: true,
             title: "เกิดข้อผิดพลาด",
@@ -358,6 +408,7 @@ const onSubmit = async () => {
     }
   } else {
     if (!currentDate.value.startDate && !currentDate.value.endDate) {
+      store.commit("setStatusLoading", true);
       const body = {
         page: pagination.value.page,
         limit: pagination.value.limit,
@@ -383,6 +434,8 @@ const onSubmit = async () => {
       await _apiSupplierImport.searchSupplierImport(body, (response) => {
         if (response.statusCode === 200) {
           if (response.data.length > 0) {
+            showTable.value = true;
+            store.commit("setStatusLoading", false);
             console.log("response5555--> ", response);
             flattenedData = response.data.map((item) => ({
               specialID: item.product.specialID,
@@ -393,6 +446,7 @@ const onSubmit = async () => {
               price: item.price,
               supplierFirstName: item.supplier.firstName,
               supplierLastName: item.supplier.lastName,
+              supplierPhone: item.supplier.phone,
               supplierAddress: item.supplier.address,
               supplierSubDistrict: item.supplier.subDistric,
               supplierDistrict: item.supplier.distric,
@@ -400,9 +454,10 @@ const onSubmit = async () => {
               supplierZipCode: item.supplier.zipCode,
             }));
             rows.value = flattenedData;
-
             pagination.value.totalPage = response.metadata.totalPage;
           } else {
+            store.commit("setStatusLoading", false);
+            showTable.value = false;
             formAlert.value = {
               status: true,
               title: "แจ้งเตือน",
@@ -410,6 +465,8 @@ const onSubmit = async () => {
             };
           }
         } else {
+          store.commit("setStatusLoading", false);
+          showTable.value = false;
           formAlert.value = {
             status: true,
             title: "เกิดข้อผิดพลาด",
@@ -418,6 +475,7 @@ const onSubmit = async () => {
         }
       });
     } else {
+      store.commit("setStatusLoading", true);
       const body = {
         page: pagination.value.page,
         limit: pagination.value.limit,
@@ -450,6 +508,8 @@ const onSubmit = async () => {
       await _apiSupplierImport.searchSupplierImport(body, (response) => {
         if (response.statusCode === 200) {
           if (response.data.length > 0) {
+            showTable.value = true;
+            store.commit("setStatusLoading", false);
             console.log("response5555--> ", response);
             flattenedData = response.data.map((item) => ({
               specialID: item.product.specialID,
@@ -460,6 +520,7 @@ const onSubmit = async () => {
               price: item.price,
               supplierFirstName: item.supplier.firstName,
               supplierLastName: item.supplier.lastName,
+              supplierPhone: item.supplier.phone,
               supplierAddress: item.supplier.address,
               supplierSubDistrict: item.supplier.subDistric,
               supplierDistrict: item.supplier.distric,
@@ -467,9 +528,10 @@ const onSubmit = async () => {
               supplierZipCode: item.supplier.zipCode,
             }));
             rows.value = flattenedData;
-
             pagination.value.totalPage = response.metadata.totalPage;
           } else {
+            store.commit("setStatusLoading", false);
+            showTable.value = false;
             formAlert.value = {
               status: true,
               title: "แจ้งเตือน",
@@ -477,6 +539,8 @@ const onSubmit = async () => {
             };
           }
         } else {
+          store.commit("setStatusLoading", false);
+          showTable.value = false;
           formAlert.value = {
             status: true,
             title: "เกิดข้อผิดพลาด",
@@ -506,6 +570,7 @@ const onExportExcel = () => {
       { header: "Price", key: "price", width: 15 },
       { header: "Supplier First Name", key: "supplierFirstName", width: 20 },
       { header: "Supplier Last Name", key: "supplierLastName", width: 20 },
+      { header: "Supplier Phone", key: "supplierPhone", width: 20 },
       { header: "Supplier Address", key: "supplierAddress", width: 30 },
       { header: "Supplier SubDistrict", key: "supplierSubDistrict", width: 20 },
       { header: "Supplier District", key: "supplierDistrict", width: 20 },
@@ -524,6 +589,7 @@ const onExportExcel = () => {
         price: item.price,
         supplierFirstName: item.supplierFirstName,
         supplierLastName: item.supplierLastName,
+        supplierPhone: item.supplierPhone,
         supplierAddress: item.supplierAddress,
         supplierSubDistrict: item.supplierSubDistrict,
         supplierDistrict: item.supplierDistrict,
@@ -544,6 +610,7 @@ const onExportExcel = () => {
       { header: "Period Date", key: "periodDate", width: 15 },
       { header: "Supplier First Name", key: "supplierFirstName", width: 20 },
       { header: "Supplier Last Name", key: "supplierLastName", width: 20 },
+      { header: "Supplier Phone", key: "supplierPhone", width: 20 },
       { header: "Supplier Address", key: "supplierAddress", width: 30 },
       { header: "Supplier SubDistrict", key: "supplierSubDistrict", width: 20 },
       { header: "Supplier District", key: "supplierDistrict", width: 20 },
@@ -564,6 +631,7 @@ const onExportExcel = () => {
         periodDate: item.periodDate,
         supplierFirstName: item.supplierFirstName,
         supplierLastName: item.supplierLastName,
+        supplierPhone: item.supplierPhone,
         supplierAddress: item.supplierAddress,
         supplierSubDistrict: item.supplierSubDistrict,
         supplierDistrict: item.supplierDistrict,
@@ -762,12 +830,7 @@ watch(currentDate.value, (newVal, oldVal) => {
       </div>
     </div>
   </div>
-  <div
-    v-if="
-      inputSearch.in_productType == 'ซื้อ-ขาย' || !inputSearch.in_productType
-    "
-    class="rounded-xl mb-10 overflow-auto mx-5"
-  >
+  <div v-if="showTable" class="rounded-xl mb-10 overflow-auto mx-5">
     <tableManage :columns="columnsSupplier" :rows="rows" />
     <div class="flex justify-end py-5">
       <paginationPage
