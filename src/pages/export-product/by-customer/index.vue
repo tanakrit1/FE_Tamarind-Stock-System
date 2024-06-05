@@ -223,6 +223,7 @@ const fnValidate = async (pFormOrder, pFormCustomer) => {
 }
 
 const onCreateTransection = async (pFormOrder, pFormCustomer) => {
+    console.log("pFormCustomer--> ", pFormCustomer)
     store.commit("setStatusLoading", true);
     const body = {
         quantity: pFormOrder.quantity.toString(),
@@ -233,9 +234,9 @@ const onCreateTransection = async (pFormOrder, pFormCustomer) => {
         firstName: pFormCustomer.firstName,
         lastName: pFormCustomer.lastName,
         address: pFormCustomer.address,
-        subDistric: subDistrict.find(item => item.id == pFormCustomer.subDistrict).name_th,
-        distric: district.find(item => item.id == pFormCustomer.district).name_th,
-        province: province.find(item => item.id == pFormCustomer.province).name_th,
+        subDistric: formCustomerActive.value===false ? pFormCustomer.subDistrict : subDistrict.find(item => item.id == pFormCustomer.subDistrict).name_th,
+        distric: formCustomerActive.value===false ? pFormCustomer.district : district.find(item => item.id == pFormCustomer.district).name_th,
+        province: formCustomerActive.value===false ? pFormCustomer.province : province.find(item => item.id == pFormCustomer.province).name_th,
         zipCode: pFormCustomer.zipCode.toString(),
         phone: pFormCustomer.phone
     }
