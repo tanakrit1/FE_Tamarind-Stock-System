@@ -10,6 +10,7 @@ import province from "../../../assets/address/thai_provinces.json";
 import { onMounted, ref, watch } from "vue";
 import alert from "../../../components/alert/alert.vue";
 import store from "../../../store";
+import paginationPage from "../../../components/pagination/pagination-page.vue";
 
 const columns = [
   { field: "specialID", label: "รหัส", width: "10%" },
@@ -30,6 +31,16 @@ const columns = [
 ];
 
 const rows = ref([]);
+
+const pagination = ref({
+  page: 1,
+  limit: 5,
+  totalPage: 0,
+});
+
+const onChangePagination = (val) => {
+  pagination.page = val;
+};
 
 //จัดลำดับข้อมูลให้เท่ากันก่อนนำมาใช้งาน
 const dataInput = ref({
@@ -62,6 +73,8 @@ const formSupplier = ref({
   phone: "",
 });
 
+const showTable = ref(false);
+
 const clearData = () => {
   formSupplier.value = [];
   formProduct.value = [];
@@ -78,22 +91,23 @@ const onCloseAlert = () => {
 const formDepositActive = ref(false);
 
 const onLoadData = async () => {
+  showTable.value = false;
   const body = {
-    page: 1,
-    limit: 10,
+    page: pagination.value.page,
+    limit: pagination.value.limit,
     sortField: "id",
     sortType: "ASC",
     filterModel: {
       logicOperator: "and",
-      items: [
-        
-      ],
+      items: [],
     },
   };
 
   //จัดลำดับข้อมูลให้เท่ากันก่อนนำมาใช้งาน
   await _apiDepositImport.searchDepositImport(body, (response) => {
     if (response.statusCode === 200) {
+      if (response.data.length > 0) {
+      showTable.value = true;
       const flattenedData = response.data.map((item) => ({
         specialID: item.product.specialID,
         productName: item.product.name,
@@ -112,8 +126,15 @@ const onLoadData = async () => {
         supplierZipCode: item.supplier.zipCode,
       }));
       rows.value = flattenedData;
+      pagination.value.totalPage = response.metadata.totalPage;
+    }else{
+      showTable.value = false;
+
+    }
       console.log("response", rows.value);
     } else {
+      showTable.value = false;
+
       formAlert.value = {
         status: true,
         title: "เกิดข้อผิดพลาด",
@@ -290,7 +311,7 @@ function validateFormProduct(product) {
     !isEmpty(product.typeAction) &&
     !isEmpty(product.productID) &&
     !isEmpty(product.periodDate) &&
-    !isEmpty(product.remain) && 
+    !isEmpty(product.remain) &&
     !isEmpty(product.productName)
   );
 }
@@ -335,8 +356,8 @@ const onSubmit = async () => {
     const body = {
       //------transaction_import------//
       quantity: formProduct.value.quantity.toString(),
-      price: Number(formProduct.value.price), 
-      remain: Number(formProduct.value.remain), 
+      price: Number(formProduct.value.price),
+      remain: Number(formProduct.value.remain),
       periodDate: formProduct.value.periodDate,
       // priceDeposit:1152.05,
       typeAction: formProduct.value.typeAction,
@@ -393,8 +414,8 @@ const onSubmit = async () => {
     const body = {
       //------transaction_import------//
       quantity: formProduct.value.quantity.toString(),
-      price: Number(formProduct.value.price), 
-      remain: Number(formProduct.value.remain), 
+      price: Number(formProduct.value.price),
+      remain: Number(formProduct.value.remain),
       periodDate: formProduct.value.periodDate,
       typeAction: formProduct.value.typeAction,
       product_id: Number(formProduct.value.productID),
@@ -477,8 +498,6 @@ onMounted(async () => {
   await onShowProduct();
   store.commit("setStatusLoading", false);
 });
-
-
 </script>
 
 <template>
@@ -607,9 +626,9 @@ onMounted(async () => {
         </div>
         <hr class="mt-2 mx-6" style="border: 1px solid #c2796a" />
         <div class="px-12 flex flex-wrap pt-10">
-            <div
-              class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6"
-            >
+          <div
+            class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6"
+          >
             <label class="w-1/4 text-red-800 font-semibold">เบอร์โทร</label>
             <input
               type="text"
@@ -621,16 +640,27 @@ onMounted(async () => {
               @blur="(event) => onChangeSupplier(event.target.value)"
             />
           </div>
-          <div v-if="formDepositActive" class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6" hidden>
-            <label class="w-auto text-red-800 font-semibold">รหัสผู้จัดจำหน่าย</label>
+          <div
+            v-if="formDepositActive"
+            class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6"
+            hidden
+          >
+            <label class="w-auto text-red-800 font-semibold"
+              >รหัสผู้จัดจำหน่าย</label
+            >
             <input
               type="text"
               class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
               v-model="formSupplier.id"
             />
           </div>
-          <div v-else class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6">
-            <label class="w-1/4 text-red-800 font-semibold">รหัสผู้จัดจำหน่าย</label>
+          <div
+            v-else
+            class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6"
+          >
+            <label class="w-1/4 text-red-800 font-semibold"
+              >รหัสผู้จัดจำหน่าย</label
+            >
             <input
               disabled
               type="text"
@@ -638,7 +668,9 @@ onMounted(async () => {
               v-model="formSupplier.id"
             />
           </div>
-          <div class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6">
+          <div
+            class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6"
+          >
             <label class="w-1/4 text-red-800 font-semibold">ชื่อ</label>
             <input
               v-if="formDepositActive"
@@ -654,7 +686,9 @@ onMounted(async () => {
               v-model="formSupplier.firstName"
             />
           </div>
-          <div class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6">
+          <div
+            class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6"
+          >
             <label class="w-1/4 text-red-800 font-semibold">สกุล</label>
             <input
               v-if="formDepositActive"
@@ -671,7 +705,9 @@ onMounted(async () => {
             />
           </div>
 
-          <div class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6">
+          <div
+            class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6"
+          >
             <label class="w-1/4 text-red-800 font-semibold">ที่อยู่</label>
             <input
               v-if="formDepositActive"
@@ -687,7 +723,9 @@ onMounted(async () => {
               v-model="formSupplier.address"
             />
           </div>
-          <div class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6">
+          <div
+            class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6"
+          >
             <label class="w-1/4 text-red-800 font-semibold">จังหวัด</label>
             <select
               v-if="formDepositActive"
@@ -712,7 +750,9 @@ onMounted(async () => {
               v-model="formSupplier.province"
             />
           </div>
-          <div class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6">
+          <div
+            class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6"
+          >
             <label class="w-1/4 text-red-800 font-semibold">อำเภอ</label>
             <select
               v-if="formDepositActive"
@@ -737,7 +777,9 @@ onMounted(async () => {
               v-model="formSupplier.district"
             />
           </div>
-          <div class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6">
+          <div
+            class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6"
+          >
             <label class="w-1/4 text-red-800 font-semibold">ตำบล</label>
             <select
               v-if="formDepositActive"
@@ -762,7 +804,9 @@ onMounted(async () => {
               v-model="formSupplier.subDistrict"
             />
           </div>
-          <div class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6">
+          <div
+            class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6"
+          >
             <label class="w-1/4 text-red-800 font-semibold">รหัสไปรษณีย์</label>
             <input
               disabled
@@ -778,8 +822,16 @@ onMounted(async () => {
       </div>
     </div>
   </div>
-  <div class="rounded-xl mb-10 overflow-auto mx-5">
+  <div v-if="showTable" class="rounded-xl mb-10 overflow-auto mx-5">
     <tableManage :columns="columns" :rows="rows" />
+    <div class="flex justify-end py-5">
+      <paginationPage
+        v-model:currentPage="pagination.page"
+        :totalPages="pagination.totalPage"
+        :limit="pagination.limit"
+        @update:currentPage="onChangePagination"
+      />
+    </div>
   </div>
   <alert
     :titleMessage="formAlert.title"

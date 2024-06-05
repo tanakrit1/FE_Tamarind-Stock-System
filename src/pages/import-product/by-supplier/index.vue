@@ -10,6 +10,8 @@ import province from "../../../assets/address/thai_provinces.json";
 import {  onMounted, ref } from "vue";
 import alert from "../../../components/alert/alert.vue";
 import store from "../../../store";
+import paginationPage from "../../../components/pagination/pagination-page.vue";
+
 
 const columns = [
   { field: "specialID", label: "รหัส", width: "10%" },
@@ -29,6 +31,15 @@ const columns = [
 
 const rows = ref([]);
 
+const pagination = ref({
+  page: 1,
+  limit: 5,
+  totalPage: 0,
+});
+
+const onChangePagination = (val) => {
+  pagination.page = val;
+};
 //จัดลำดับข้อมูลให้เท่ากันก่อนนำมาใช้งาน
 const dataInput = ref({
   product: [],
@@ -74,11 +85,13 @@ const onCloseAlert = () => {
 };
 
 const formSupplierActive = ref(false);
+const showTable = ref(false);
 
 const onLoadData = async () => {
+  showTable.value = false;
   const body = {
-    page: 1,
-    limit: 10,
+    page: pagination.value.page,
+    limit: pagination.value.limit,
     sortField: "id",
     sortType: "ASC",
     filterModel: {
@@ -92,6 +105,8 @@ const onLoadData = async () => {
   //จัดลำดับข้อมูลให้เท่ากันก่อนนำมาใช้งาน
   await _apiSupplierImport.searchSupplierImport(body, (response) => {
     if (response.statusCode === 200) {
+      showTable.value = true;
+      if (response.data.length > 0) {
       const flattenedData = response.data.map((item) => ({
         specialID: item.product.specialID,
         productName: item.product.name,
@@ -108,8 +123,14 @@ const onLoadData = async () => {
         supplierZipCode: item.supplier.zipCode,
       }));
       rows.value = flattenedData;
+      pagination.value.totalPage = response.metadata.totalPage;
+    }else{
+      showTable.value = false;
+      
+    }
       console.log("response", rows.value);
     } else {
+      showTable.value = false;
       formAlert.value = {
         status: true,
         title: "เกิดข้อผิดพลาด",
@@ -740,8 +761,16 @@ onMounted(async () => {
       </div>
     </div>
   </div>
-  <div class="rounded-xl mb-10 overflow-auto mx-5">
+  <div v-if="showTable" class="rounded-xl mb-10 overflow-auto mx-5">
     <tableManage :columns="columns" :rows="rows" />
+    <div class="flex justify-end py-5">
+      <paginationPage
+        v-model:currentPage="pagination.page"
+        :totalPages="pagination.totalPage"
+        :limit="pagination.limit"
+        @update:currentPage="onChangePagination"
+      />
+    </div>
   </div>
   <alert
     :titleMessage="formAlert.title"
