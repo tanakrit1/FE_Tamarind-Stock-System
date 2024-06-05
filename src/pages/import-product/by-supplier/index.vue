@@ -33,7 +33,7 @@ const rows = ref([]);
 
 const pagination = ref({
   page: 1,
-  limit: 5,
+  limit: 10,
   totalPage: 0,
 });
 
