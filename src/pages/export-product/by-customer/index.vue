@@ -221,7 +221,7 @@ const fnValidate = async (pFormOrder, pFormCustomer) => {
     const totalForm = { ...pFormOrder, ...pFormCustomer }
     for (let i = 0; i < Object.keys(totalForm).length; i++) {
         const key = Object.keys(totalForm)[i]
-        if (totalForm[key] == "") {
+        if (totalForm[key] === "") {
             return false
         }
     }
