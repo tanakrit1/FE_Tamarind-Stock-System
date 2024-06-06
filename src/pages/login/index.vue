@@ -3,6 +3,7 @@ import { ref } from 'vue';
 import _apiAuthen from '../../api/auth'
 import { setLoginStorage } from '../../helpers/set-storage';
 import Alert from '../../components/alert/alert.vue';
+import store from '../../store';
 
 const emit = defineEmits()
 const formLogin = ref({
@@ -20,6 +21,7 @@ const onCloseAlert = () => {
 }
 
 const onLogin = async () => {
+    store.commit('setStatusLoading', true)
     await _apiAuthen.onLogin(formLogin.value, response => {
         console.log("response--> ", response)
         if (response?.statusCode === 200) {
@@ -32,7 +34,7 @@ const onLogin = async () => {
                 bodyMessage: response?.data?.description
             }
         }
-
+        store.commit('setStatusLoading', false)
     })
     // emit('login-success')
 }

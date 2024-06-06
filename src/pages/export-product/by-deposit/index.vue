@@ -7,7 +7,8 @@ import province from "../../../assets/address/thai_provinces.json"
 import { onMounted, ref } from "vue";
 import _apiProduct from "../../../api/master-products"
 import _apiCustomer from "../../../api/master-customer"
-import _apiTranExport from "../../../api/export-product"
+import _apiTranExport from "../../../api/deposit-export"
+import _apiTranImport from '../../../api/deposit-import'
 import alert from "../../../components/alert/alert.vue"
 import store from "../../../store";
 import paginationPage from "../../../components/pagination/pagination-page.vue"
@@ -15,16 +16,20 @@ import paginationPage from "../../../components/pagination/pagination-page.vue"
 const columns = [
     { field: "productName", label: "ชื่อสินค้า", width: "20%" },
     { field: "quantity", label: "ปริมาณสินค้า", width: "10%" },
+    { field: "remain", label: "คงเหลือ", width: "10%" },
     { field: "price", label: "ราคารวม", width: "10%" },
-    { field: "customerFirstName", label: "ชื่อ", width: "20%" },
-    { field: "customerLastName", label: "สกุล", width: "20%" },
-    { field: "customerAddress", label: "ที่อยู่", width: "25%" },
-    { field: "customerSubDistrict", label: "ตำบล", width: "20%" },
-    { field: "customerDistrict", label: "อำเภอ", width: "20%" },
-    { field: "customerProvince", label: "จังหวัด", width: "20%" },
-    { field: "customerZipCode", label: "ไปรษณีย์", width: "10%" },
+    { field: "supplierFirstName", label: "ชื่อ", width: "20%" },
+    { field: "supplierLastName", label: "สกุล", width: "20%" },
+
+    // { field: "supplierAddress", label: "ที่อยู่", width: "25%" },
+    // { field: "supplierSubDistrict", label: "ตำบล", width: "20%" },
+    // { field: "supplierDistrict", label: "อำเภอ", width: "20%" },
+    // { field: "supplierProvince", label: "จังหวัด", width: "20%" },
+    // { field: "supplierZipCode", label: "ไปรษณีย์", width: "10%" },
 ]
 const rows = ref([]);
+const rowsOriginal = ref([])
+const rowAction = ref(null)
 const ddl = ref({
     province: [],
     district: [],
@@ -32,7 +37,7 @@ const ddl = ref({
     product: [],
     listProductAll: []
 })
-const formCustomerActive = ref(false)
+const formSupplierActive = ref(false)
 
 const pagination = ref({
     page: 1,
@@ -53,7 +58,7 @@ const formOrder = ref({
     totalPrice: "0"
 })
 
-const formCustomer = ref({
+const formSupplier = ref({
     firstName: "",
     lastName: "",
     address: "",
@@ -64,9 +69,8 @@ const formCustomer = ref({
     phone: "",
 })
 
-const onClearFormCustomer = () => {
-    formCustomer.value = {
-        id: "",
+const onClearFormSupplier = () => {
+    formSupplier.value = {
         firstName: "",
         lastName: "",
         address: "",
@@ -109,105 +113,116 @@ const onLoadDDL = async () => {
             })
             ddl.value.listProductAll = response.data
         } else {
+            const mapValidation = response.message.map((item) => {
+                return `<li>${item}</li>`;
+            });
             formAlert.value = {
                 status: true,
-                title: "เกิดข้อผิดพลาด",
-                body: response.message
-            }
+                title: "กรุณาตรวจสอบ",
+                body: mapValidation.join(""),
+            };
         }
 
     })
-    ddl.value.province = province.map(item => {
-        return { label: item.name_th, value: item.id }
-    })
+    // ddl.value.province = province.map(item => {
+    //     return { label: item.name_th, value: item.id }
+    // })
 }
 
-const onSearchCustomer = async (phone) => {
-    store.commit("setStatusLoading", true);
-    const body = {
-        page: 1,
-        limit: 1,
-        filterModel: {
-            logicOperator: "and",
-            items: [
-                {
-                    field: "phone",
-                    operator: "equals",
-                    value: phone
-                }
-            ]
-        }
-    }
-    await _apiCustomer.search(body, response => {
-        if (response.statusCode === 200) {
-            if (response.data.length > 0) {
-                formCustomerActive.value = false
-                formCustomer.value.firstName = response.data[0].firstName
-                formCustomer.value.lastName = response.data[0].lastName
-                formCustomer.value.address = response.data[0].address
-                formCustomer.value.province = response.data[0].province
-                formCustomer.value.district = response.data[0].distric
-                formCustomer.value.subDistrict = response.data[0].subDistric
-                formCustomer.value.zipCode = response.data[0].zipCode
-                formCustomer.value.phone = response.data[0].phone
-            } else {
-                formAlert.value = {
-                    status: true,
-                    title: "เเจ้งเตือน",
-                    body: "ไม่พบรายชื่อลูกค้าในระบบ กรณาเพิ่มลูกค้าใหม่"
-                }
-                formCustomerActive.value = true
-                formCustomer.value = {
-                    firstName: "",
-                    lastName: "",
-                    address: "",
-                    province: "",
-                    district: "",
-                    subDistrict: "",
-                    zipCode: "",
-                    phone: phone,
-                }
-            }
-        } else {
-            formAlert.value = {
-                status: true,
-                title: "เกิดข้อผิดพลาด",
-                body: response.message
-            }
-            formCustomerActive.value = true
-            onClearFormCustomer()
-        }
-        store.commit("setStatusLoading", false);
-    })
-}
+// const onSearchCustomer = async (phone) => {
+//     store.commit("setStatusLoading", true);
+//     const body = {
+//         page: 1,
+//         limit: 1,
+//         filterModel: {
+//             logicOperator: "and",
+//             items: [
+//                 {
+//                     field: "phone",
+//                     operator: "equals",
+//                     value: phone
+//                 }
+//             ]
+//         }
+//     }
+//     await _apiCustomer.search(body, response => {
+//         if (response.statusCode === 200) {
+//             if (response.data.length > 0) {
+//                 formCustomerActive.value = false
+//                 formCustomer.value.firstName = response.data[0].firstName
+//                 formCustomer.value.lastName = response.data[0].lastName
+//                 formCustomer.value.address = response.data[0].address
+//                 formCustomer.value.province = response.data[0].province
+//                 formCustomer.value.district = response.data[0].distric
+//                 formCustomer.value.subDistrict = response.data[0].subDistric
+//                 formCustomer.value.zipCode = response.data[0].zipCode
+//                 formCustomer.value.phone = response.data[0].phone
+//             } else {
+//                 formAlert.value = {
+//                     status: true,
+//                     title: "เเจ้งเตือน",
+//                     body: "ไม่พบรายชื่อลูกค้าในระบบ กรณาเพิ่มลูกค้าใหม่"
+//                 }
+//                 formCustomerActive.value = true
+//                 formCustomer.value = {
+//                     firstName: "",
+//                     lastName: "",
+//                     address: "",
+//                     province: "",
+//                     district: "",
+//                     subDistrict: "",
+//                     zipCode: "",
+//                     phone: phone,
+//                 }
+//             }
+//         } else {
+//             formAlert.value = {
+//                 status: true,
+//                 title: "เกิดข้อผิดพลาด",
+//                 body: response.message
+//             }
+//             formCustomerActive.value = true
+//             onClearFormCustomer()
+//         }
+//         store.commit("setStatusLoading", false);
+//     })
+// }
 
-const fnValidate = async (pFormOrder, pFormCustomer) => {
-    const totalForm = { ...pFormOrder, ...pFormCustomer }
+const fnValidateRequired = async (pFormOrder, pFormSupplier) => {
+    const totalForm = { ...pFormOrder, ...pFormSupplier }
     for (let i = 0; i < Object.keys(totalForm).length; i++) {
         const key = Object.keys(totalForm)[i]
-        if (totalForm[key] == "") {
+        if (totalForm[key] === "") {
             return false
         }
     }
     return true
 }
 
-const onCreateTransection = async (pFormOrder, pFormCustomer) => {
+const fnValidateQuantity = async (pFormOrder, rowActionData) => {
+    if (rowActionData.remain < pFormOrder.quantity) {
+        return false
+    }
+    return true
+}
+
+const onCreateTransection = async (pFormOrder, rowActionData) => {
+    // console.log("rowAction--> ", rowActionData)
     store.commit("setStatusLoading", true);
     const body = {
         quantity: pFormOrder.quantity.toString(),
-        price: Number(pFormOrder.totalPrice),
-        typeAction: "ซื้อ-ขาย",
+        // price: Number(pFormOrder.totalPrice),
         product_id: pFormOrder.productID,
+        Import_Deposit_id: rowActionData.id,
 
-        firstName: pFormCustomer.firstName,
-        lastName: pFormCustomer.lastName,
-        address: pFormCustomer.address,
-        subDistric: subDistrict.find(item => item.id == pFormCustomer.subDistrict).name_th,
-        distric: district.find(item => item.id == pFormCustomer.district).name_th,
-        province: province.find(item => item.id == pFormCustomer.province).name_th,
-        zipCode: pFormCustomer.zipCode.toString(),
-        phone: pFormCustomer.phone
+        firstName: rowActionData.supplier.firstName,
+        lastName: rowActionData.supplier.lastName,
+        address: rowActionData.supplier.address,
+        subDistric: rowActionData.supplier.subDistric,
+        distric: rowActionData.supplier.distric,
+        province: rowActionData.supplier.province,
+        zipCode: rowActionData.supplier.zipCode.toString(),
+        phone: rowActionData.supplier.phone
     }
     await _apiTranExport.create(body, response => {
         console.log("response : ", response)
@@ -217,79 +232,129 @@ const onCreateTransection = async (pFormOrder, pFormCustomer) => {
                 title: "สำเร็จ",
                 body: "เพิ่มข้อมูลเรียบร้อย"
             }
-            onClearFormCustomer()
+            rowAction.value = null
+            onClearFormSupplier()
             onClearFormOrder()
+
             onLoadTable()
         } else {
+            const mapValidation = response.message.map((item) => {
+                return `<li>${item}</li>`;
+            });
             formAlert.value = {
                 status: true,
-                title: "เเจ้งเตือน",
-                body: response.message
-            }
+                title: "กรุณาตรวจสอบ",
+                body: mapValidation.join(""),
+            };
+            // formAlert.value = {
+            //     status: true,
+            //     title: "เเจ้งเตือน",
+            //     body: response.message
+            // }
         }
         store.commit("setStatusLoading", false);
     })
 }
 
 const onSubmitForm = async () => {
-    const resultValid = await fnValidate(formOrder.value, formCustomer.value)
-    if (resultValid) {
-        await onCreateTransection(formOrder.value, formCustomer.value)
+    // console.log("formSupplier--> ", formSupplier.value)
+    // console.log("formOrder--> ", formOrder.value)
+    const resultValidRequired = await fnValidateRequired(formOrder.value, formSupplier.value)
+    const resultValidQuantity = await fnValidateQuantity(formOrder.value, rowAction.value)
+    if (resultValidRequired && resultValidQuantity) {
+        console.log("Success")
+        await onCreateTransection(formOrder.value, rowAction.value)
     } else {
-        formAlert.value = {
-            status: true,
-            title: "เเจ้งเตือน",
-            body: "กรุณากรอกข้อมูลให้ครบถ้วน"
+        if (resultValidRequired === false) {
+            formAlert.value = {
+                status: true,
+                title: "เเจ้งเตือน",
+                body: "กรุณากรอกข้อมูลให้ครบถ้วน"
+            }
         }
+
+        if (resultValidQuantity === false) {
+            formAlert.value = {
+                status: true,
+                title: "เเจ้งเตือน",
+                body: "ไม่สามารถเบิกสินค้าได้ เนื่องจากสินค้ามีจํานวนน้อยกว่าจํานวนที่เบิก"
+            }
+        }
+
     }
 }
 
 const onLoadTable = async () => {
     store.commit("setStatusLoading", true);
     const body = {
-        page: 1,
-        limit: 10,
+        page: pagination.value.page.toString(),
+        limit: pagination.value.limit.toString(),
         sortField: "createdAt",
         sortType: "DESC",
         filterModel: {
             logicOperator: "and",
             items: [
                 {
-                    field: "typeAction",
-                    operator: "equals",
-                    value: "ซื้อ-ขาย"
+                    field: "remain",
+                    operator: "notEqual",
+                    value: "0"
                 }
             ]
 
         }
     }
 
-    await _apiTranExport.search(body, response => {
+    await _apiTranImport.searchDepositImport(body, response => {
         console.log("response : ", response)
+        pagination.value.totalPage = response.metadata.totalPage
+        rowsOriginal.value = response.data
         rows.value = response.data.map(item => {
             return {
+                id: item.id,
                 productName: item.product.name,
                 quantity: item.quantity,
                 price: item.price,
-                customerFirstName: item.customer.firstName,
-                customerLastName: item.customer.lastName,
-                customerAddress: item.customer.address,
-                customerSubDistrict: item.customer.subDistric,
-                customerDistrict: item.customer.distric,
-                customerProvince: item.customer.province,
-                customerZipCode: item.customer.zipCode
+                remain: item.remain,
+                supplierFirstName: item.supplier.firstName,
+                supplierLastName: item.supplier.lastName,
+                supplierAddress: item.supplier.address,
+                supplierSubDistrict: item.supplier.subDistric,
+                supplierDistrict: item.supplier.distric,
+                supplierProvince: item.supplier.province,
+                supplierZipCode: item.supplier.zipCode
             }
         })
         store.commit("setStatusLoading", false);
     })
 }
 
-const onChangePagination =(result) => {
-    console.log("result: ", result)
+const onChangePagination = (result) => {
+    pagination.value.page = result
+    onLoadTable()
 }
 
 const onTranform = (row) => {
     console.log("**onTranform**", row)
+    const findRows = rowsOriginal.value.find(item => item.id == row.id)
+    rowAction.value = findRows
+    console.log("findRows--> ", findRows)
+    formOrder.value = {
+        productID: findRows.product.id,
+        quantity: findRows.quantity,
+        price: "0",
+        totalPrice: "0"
+    }
+
+    formSupplier.value = {
+        firstName: findRows.supplier.firstName,
+        lastName: findRows.supplier.lastName,
+        address: findRows.supplier.address,
+        province: findRows.supplier.province,
+        district: findRows.supplier.distric,
+        subDistrict: findRows.supplier.subDistric,
+        zipCode: findRows.supplier.zipCode,
+        phone: findRows.supplier.phone,
+    }
 }
 
 onMounted(async () => {
@@ -336,6 +401,8 @@ onMounted(async () => {
             <div class="w-full bg-white rounded-xl py-5 mb-5">
                 <div class="px-6">
                     <span class="text-lg font-semibold text-red-800">รายละเอียดการเบิกซื้อสินค้า</span>
+                    <span v-if="rowAction" class="rounded-full bg-red-800 text-white px-8 ml-2">#{{ rowAction?.id
+                        }}</span>
                 </div>
                 <hr class="mt-2 mx-6" style="border: 1px solid #c2796a" />
                 <div class="grid grid-cols-2 gap-4 px-6">
@@ -344,8 +411,15 @@ onMounted(async () => {
                             <div class="grid gap-4 grid-cols-2">
                                 <div class="mb-3">
                                     <span class="text-red-800 font-semibold">ชื่อสินค้า</span>
-                                    <input v-model="formOrder.productID"
-                                        class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3" />
+                                    <select v-model="formOrder.productID" disabled
+                                        class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3">
+                                        <option value="">------เลือก------</option>
+                                        <option v-for="(item, index) in ddl.product" :key="index" :value="item.value">
+                                            {{ item.label }}
+                                        </option>
+                                    </select>
+                                    <!-- <input v-model="formOrder.productID"
+                                        class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3" /> -->
                                 </div>
                             </div>
                         </div>
@@ -355,6 +429,7 @@ onMounted(async () => {
                                     <div>
                                         <span class="text-red-800 font-semibold">ปริมาณสินค้า</span>
                                         <input class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
+                                            :disabled="!rowAction"
                                             @change="(event) => onChangeQuantity(event.target.value)" type="number"
                                             v-model="formOrder.quantity" />
                                     </div>
@@ -424,51 +499,51 @@ onMounted(async () => {
                 <div class="flex flex-row flex-wrap px-10 mt-3 ">
                     <div class="sm:basis-full md:basis-1/2 lg:basis-2/6 flex flex-col px-3 mb-3">
                         <span class="text-red-800 font-semibold">เบอร์โทร</span>
-                        <input pattern="[0-9]*" maxlength="10"
+                        <input pattern="[0-9]*" maxlength="10" :disabled="!formSupplierActive"
                             class="h-8  focus:outline-red-400 rounded bg-red-100 px-3" type="text"
-                            v-model="formCustomer.phone" @blur="(event) => onSearchCustomer(event.target.value)" />
+                            v-model="formSupplier.phone" />
                     </div>
                     <div class="sm:basis-full md:basis-1/2 lg:basis-2/6 flex flex-col px-3 mb-3">
                         <span class="text-red-800 font-semibold">ชื่อ</span>
                         <input class="h-8 focus:outline-red-400 rounded bg-red-100 px-3" type="text"
-                            v-model="formCustomer.firstName" />
+                            :disabled="!formSupplierActive" v-model="formSupplier.firstName" />
                     </div>
                     <div class="sm:basis-full md:basis-1/2 lg:basis-2/6 flex flex-col px-3 mb-3">
                         <span class="text-red-800 font-semibold">สกุล</span>
                         <input class="h-8 focus:outline-red-400 rounded bg-red-100 px-3" type="text"
-                            v-model="formCustomer.lastName" />
+                            :disabled="!formSupplierActive" v-model="formSupplier.lastName" />
                     </div>
 
 
                     <div class="sm:basis-full md:basis-1/2 lg:basis-2/6 flex flex-col px-3 mb-3">
                         <span class="text-red-800 font-semibold">ที่อยู่</span>
                         <input class="h-8 focus:outline-red-400 rounded bg-red-100 px-3" type="text"
-                            v-model="formCustomer.address" />
+                            :disabled="!formSupplierActive" v-model="formSupplier.address" />
                     </div>
                     <div class="sm:basis-full md:basis-1/2 lg:basis-2/6 flex flex-col px-3 mb-3">
                         <span class="text-red-800 font-semibold">จังหวัด</span>
                         <input class="h-8 focus:outline-red-400 rounded bg-red-100 px-3" type="text"
-                            v-model="formCustomer.province" />
+                            :disabled="!formSupplierActive" v-model="formSupplier.province" />
                     </div>
                     <div class="sm:basis-full md:basis-1/2 lg:basis-2/6 flex flex-col px-3 mb-3">
                         <span class="text-red-800 font-semibold">อำเภอ</span>
                         <input class="h-8 focus:outline-red-400 rounded bg-red-100 px-3" type="text"
-                            v-model="formCustomer.district" />
+                            :disabled="!formSupplierActive" v-model="formSupplier.district" />
                     </div>
                     <div class="sm:basis-full md:basis-1/2 lg:basis-2/6 flex flex-col px-3">
                         <span class="text-red-800 font-semibold">ตำบล</span>
                         <input class="h-8 focus:outline-red-400 rounded bg-red-100 px-3" type="text"
-                            v-model="formCustomer.subDistrict" />
+                            :disabled="!formSupplierActive" v-model="formSupplier.subDistrict" />
                     </div>
                     <div class="sm:basis-full md:basis-1/2 lg:basis-2/6 flex flex-col px-3">
                         <span class="text-red-800 font-semibold">ไปรษณีย์</span>
                         <input class="h-8 focus:outline-red-400 rounded bg-red-100 px-3" type="text"
-                            v-model="formCustomer.zipCode" />
+                            :disabled="!formSupplierActive" v-model="formSupplier.zipCode" />
                     </div>
 
                 </div>
             </div>
-            <div class="flex justify-center py-10">
+            <div class="flex justify-center py-10" v-if="rowAction !== null">
                 <buttonPrimaryOutline @click="onSubmitForm" label="บันทึกข้อมูล" />
             </div>
         </div>

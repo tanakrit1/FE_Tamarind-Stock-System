@@ -140,11 +140,14 @@ const onLoadDDL = async () => {
             })
             ddl.value.listProductAll = response.data
         } else {
+            const mapValidation = response.message.map((item) => {
+                return `<li>${item}</li>`;
+            });
             formAlert.value = {
                 status: true,
-                title: "เกิดข้อผิดพลาด",
-                body: response.message
-            }
+                title: "กรุณาตรวจสอบ",
+                body: mapValidation.join(""),
+            };
         }
 
     })
@@ -200,11 +203,14 @@ const onSearchCustomer = async (phone) => {
                 }
             }
         } else {
+            const mapValidation = response.message.map((item) => {
+                return `<li>${item}</li>`;
+            });
             formAlert.value = {
                 status: true,
-                title: "เกิดข้อผิดพลาด",
-                body: response.message
-            }
+                title: "กรุณาตรวจสอบ",
+                body: mapValidation.join(""),
+            };
             formCustomerActive.value = true
             onClearFormCustomer()
         }
@@ -252,11 +258,14 @@ const onCreateTransection = async (pFormOrder, pFormCustomer) => {
             onClearFormOrder()
             onLoadTable()
         } else {
+            const mapValidation = response.message.map((item) => {
+                return `<li>${item}</li>`;
+            });
             formAlert.value = {
                 status: true,
-                title: "เเจ้งเตือน",
-                body: response.message
-            }
+                title: "กรุณาตรวจสอบ",
+                body: mapValidation.join(""),
+            };
         }
         store.commit("setStatusLoading", false);
     })

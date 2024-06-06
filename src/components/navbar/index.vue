@@ -1,6 +1,9 @@
-6+3<script setup>
+6+3
+<script setup>
 import { onMounted, ref } from 'vue';
 import { getLoginStorage } from '../../helpers/set-storage';
+import buttonPrimary from '../buttons/button-primary.vue';
+import buttonPrimaryOutline from '../buttons/button-primary-outline.vue';
 // import confirm from '../alert/confirm.vue';
 import menuItem from './menu.vue'
 const emit = defineEmits()
@@ -27,12 +30,14 @@ const onCoonfirmLogout = () => {
 // }
 
 const onResultConfirm = (result) => {
+    console.log("res---> ", result)
     formModalConfirm.value.status = result
     // statusConfirm.value = result
-    if( result === true ){
-        emit("logout-logout")
-    }else{
+    if (result === true) {
+        emit("logout-success")
+    } else {
         statusConfirm.value = false
+        document.getElementById("confirm-logout").close()
     }
 }
 
@@ -44,7 +49,8 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="h-16 top-0 absolute w-full flex items-center justify-between px-6 " style="background-color: #A2422C; z-index: 100">
+    <div class="h-16 top-0 absolute w-full flex items-center justify-between px-6 "
+        style="background-color: #A2422C; z-index: 100">
         <div class="flex space-x-8 items-center">
             <img src="../../assets/images/logo.png" class="rounded-full h-14 w-12 cursor-pointer" />
             <menuItem>
@@ -69,13 +75,23 @@ onMounted(() => {
                 <h3 class="font-bold text-lg">{{ formModalConfirm.titleMessage }}</h3>
                 <p class="py-4">{{ formModalConfirm.bodyMessage }}</p>
                 <div class="modal-action">
-                        <buttonPrimary label="ใช่" @click="onResultConfirm(true)" />
-                        <buttonPrimaryOutline label="ไม่ใช่"  @click="onResultConfirm(false)"/>
+                    <button type="button" @click="onResultConfirm(true)"
+                        class="font-semibold px-8 py-2 border-red-800 rounded-full text-white bg-red-800 hover:bg-white hover:text-red-800 hover:outline hover:outline-1 ">
+                        <div class="flex justify-center items-center space-x-3">
+                            <span>ใช่</span>
+                        </div>
+                    </button>
+                    <button type="button" @click="onResultConfirm(false)"
+                        class="font-semibold px-8 py-2 border border-2 border-red-800 rounded-full text-red-800 hover:bg-red-800 hover:text-white">
+                        ไม่ใช่
+                    </button>
+                    <!-- <buttonPrimary label="ใช่" @click="onResultConfirm(true)" />
+                    <buttonPrimaryOutline label="ไม่ใช่" @click="onResultConfirm(false)" /> -->
                 </div>
             </div>
         </dialog>
     </div>
-    
+
 </template>
 
 

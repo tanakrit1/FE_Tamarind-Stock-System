@@ -139,11 +139,14 @@ const onLoadDDL = async () => {
             })
             ddl.value.listProductAll = response.data
         } else {
+            const mapValidation = response.message.map((item) => {
+                return `<li>${item}</li>`;
+            });
             formAlert.value = {
                 status: true,
-                title: "เกิดข้อผิดพลาด",
-                body: response.message
-            }
+                title: "กรุณาตรวจสอบ",
+                body: mapValidation.join(""),
+            };
         }
 
     })
@@ -199,11 +202,14 @@ const onSearchCustomer = async (phone) => {
                 }
             }
         } else {
+            const mapValidation = response.message.map((item) => {
+                return `<li>${item}</li>`;
+            });
             formAlert.value = {
                 status: true,
-                title: "เกิดข้อผิดพลาด",
-                body: response.message
-            }
+                title: "กรุณาตรวจสอบ",
+                body: mapValidation.join(""),
+            };
             formCustomerActive.value = true
             onClearFormCustomer()
         }
@@ -234,9 +240,9 @@ const onCreateTransection = async (pFormOrder, pFormCustomer) => {
         firstName: pFormCustomer.firstName,
         lastName: pFormCustomer.lastName,
         address: pFormCustomer.address,
-        subDistric: formCustomerActive.value===false ? pFormCustomer.subDistrict : subDistrict.find(item => item.id == pFormCustomer.subDistrict).name_th,
-        distric: formCustomerActive.value===false ? pFormCustomer.district : district.find(item => item.id == pFormCustomer.district).name_th,
-        province: formCustomerActive.value===false ? pFormCustomer.province : province.find(item => item.id == pFormCustomer.province).name_th,
+        subDistric: formCustomerActive.value === false ? pFormCustomer.subDistrict : subDistrict.find(item => item.id == pFormCustomer.subDistrict).name_th,
+        distric: formCustomerActive.value === false ? pFormCustomer.district : district.find(item => item.id == pFormCustomer.district).name_th,
+        province: formCustomerActive.value === false ? pFormCustomer.province : province.find(item => item.id == pFormCustomer.province).name_th,
         zipCode: pFormCustomer.zipCode.toString(),
         phone: pFormCustomer.phone
     }
@@ -252,11 +258,14 @@ const onCreateTransection = async (pFormOrder, pFormCustomer) => {
             onClearFormOrder()
             onLoadTable()
         } else {
+            const mapValidation = response.message.map((item) => {
+                return `<li>${item}</li>`;
+            });
             formAlert.value = {
                 status: true,
-                title: "เเจ้งเตือน",
-                body: response.message
-            }
+                title: "กรุณาตรวจสอบ",
+                body: mapValidation.join(""),
+            };
         }
         store.commit("setStatusLoading", false);
     })
@@ -275,13 +284,13 @@ const onSubmitForm = async () => {
     }
 }
 
-const onLoadTable = async() => {
+const onLoadTable = async () => {
     store.commit("setStatusLoading", true);
     const body = {
         page: 1,
         limit: 10,
-        sortField:"createdAt",
-        sortType:"DESC",
+        sortField: "createdAt",
+        sortType: "DESC",
         filterModel: {
             logicOperator: "and",
             items: [
@@ -291,13 +300,13 @@ const onLoadTable = async() => {
                     value: "ซื้อ-ขาย"
                 }
             ]
-            
+
         }
     }
 
-    await _apiTranExport.search( body, response => {
+    await _apiTranExport.search(body, response => {
         console.log("response : ", response)
-        rows.value = response.data.map( item => {
+        rows.value = response.data.map(item => {
             return {
                 productName: item.product.name,
                 quantity: item.quantity,
@@ -310,9 +319,9 @@ const onLoadTable = async() => {
                 customerProvince: item.customer.province,
                 customerZipCode: item.customer.zipCode
             }
-        } )
+        })
         store.commit("setStatusLoading", false);
-    } )
+    })
 }
 
 onMounted(async () => {

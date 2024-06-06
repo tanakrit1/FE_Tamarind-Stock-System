@@ -11,7 +11,7 @@ export default {
   },
 
  
-  async searchDepositImport(body, result) {
+  async search(body, result) {
     await Axios.post("import_deposit/search", body, this.config_authen())
       .then((response) => {
         result(response.data);
@@ -20,8 +20,8 @@ export default {
         result(error);
       });
   },
-  async createDepositImport(body, result) {
-    await Axios.post("import_deposit", body, this.config_authen())
+  async create(body, result) {
+    await Axios.post("export_deposit", body, this.config_authen())
       .then((response) => {
         result(response.data);
       })
