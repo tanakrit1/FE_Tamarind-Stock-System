@@ -7,11 +7,10 @@ import _apiSupplier from "../../../api/master-supplier.js";
 import subDistrict from "../../../assets/address/thai_tambons.json";
 import district from "../../../assets/address/thai_amphures.json";
 import province from "../../../assets/address/thai_provinces.json";
-import {  onMounted, ref } from "vue";
+import { onMounted, ref } from "vue";
 import alert from "../../../components/alert/alert.vue";
 import store from "../../../store";
 import paginationPage from "../../../components/pagination/pagination-page.vue";
-
 
 const columns = [
   { field: "specialID", label: "รหัส", width: "10%" },
@@ -33,12 +32,13 @@ const rows = ref([]);
 
 const pagination = ref({
   page: 1,
-  limit: 10,
+  limit: 5,
   totalPage: 0,
 });
 
 const onChangePagination = (val) => {
   pagination.page = val;
+  onLoadData();
 };
 //จัดลำดับข้อมูลให้เท่ากันก่อนนำมาใช้งาน
 const dataInput = ref({
@@ -92,13 +92,11 @@ const onLoadData = async () => {
   const body = {
     page: pagination.value.page,
     limit: pagination.value.limit,
-    sortField: "id",
-    sortType: "ASC",
+    sortField: "createdAt",
+    sortType: "DESC",
     filterModel: {
       logicOperator: "and",
-      items: [
-        
-      ],
+      items: [],
     },
   };
 
@@ -107,27 +105,26 @@ const onLoadData = async () => {
     if (response.statusCode === 200) {
       showTable.value = true;
       if (response.data.length > 0) {
-      const flattenedData = response.data.map((item) => ({
-        specialID: item.product.specialID,
-        productName: item.product.name,
-        typeAction: item.typeAction,
-        productPrice: item.product.price,
-        quantity: item.quantity,
-        price: item.price,
-        supplierFirstName: item.supplier.firstName,
-        supplierLastName: item.supplier.lastName,
-        supplierAddress: item.supplier.address,
-        supplierSubDistrict: item.supplier.subDistric,
-        supplierDistrict: item.supplier.distric,
-        supplierProvince: item.supplier.province,
-        supplierZipCode: item.supplier.zipCode,
-      }));
-      rows.value = flattenedData;
-      pagination.value.totalPage = response.metadata.totalPage;
-    }else{
-      showTable.value = false;
-      
-    }
+        const flattenedData = response.data.map((item) => ({
+          specialID: item.product.specialID,
+          productName: item.product.name,
+          typeAction: item.typeAction,
+          productPrice: item.product.price,
+          quantity: item.quantity,
+          price: item.price,
+          supplierFirstName: item.supplier.firstName,
+          supplierLastName: item.supplier.lastName,
+          supplierAddress: item.supplier.address,
+          supplierSubDistrict: item.supplier.subDistric,
+          supplierDistrict: item.supplier.distric,
+          supplierProvince: item.supplier.province,
+          supplierZipCode: item.supplier.zipCode,
+        }));
+        rows.value = flattenedData;
+        pagination.value.totalPage = response.metadata.totalPage;
+      } else {
+        showTable.value = false;
+      }
       console.log("response", rows.value);
     } else {
       showTable.value = false;
@@ -168,7 +165,6 @@ const onShowProduct = async () => {
       };
     }
     store.commit("setStatusLoading", false);
-
   });
   dataInput.value.province = province.map((item) => {
     return { label: item.name_th, value: item.id };
@@ -238,7 +234,6 @@ const onChangeSupplier = async (phone) => {
 
         console.log("formSupplier", formSupplier.value);
       } else {
-
         formAlert.value = {
           status: true,
           title: "เเจ้งเตือน",
@@ -257,8 +252,7 @@ const onChangeSupplier = async (phone) => {
           phone: phone,
         };
       }
-    store.commit("setStatusLoading", false);
-
+      store.commit("setStatusLoading", false);
     } else {
       formAlert.value = {
         status: true,
@@ -300,29 +294,46 @@ const onChangeSubDistrict = async (subDistrictID) => {
 };
 
 function isEmpty(value) {
-  return value === null || value === undefined || value === '';
+  return value === null || value === undefined || value === "";
 }
 
 function validateFormProduct(product) {
-  return !isEmpty(product.quantity) && !isEmpty(product.price) && !isEmpty(product.typeAction) && !isEmpty(product.productID);
+  return (
+    !isEmpty(product.quantity) &&
+    !isEmpty(product.price) &&
+    !isEmpty(product.typeAction) &&
+    !isEmpty(product.productID)
+  );
 }
 
 function validateFormSupplier(supplier) {
-  return !isEmpty(supplier.firstName) && !isEmpty(supplier.lastName) && !isEmpty(supplier.address) && !isEmpty(supplier.subDistrict) && !isEmpty(supplier.district) && !isEmpty(supplier.province) && !isEmpty(supplier.zipCode) && !isEmpty(supplier.phone);
+  return (
+    !isEmpty(supplier.firstName) &&
+    !isEmpty(supplier.lastName) &&
+    !isEmpty(supplier.address) &&
+    !isEmpty(supplier.subDistrict) &&
+    !isEmpty(supplier.district) &&
+    !isEmpty(supplier.province) &&
+    !isEmpty(supplier.zipCode) &&
+    !isEmpty(supplier.phone)
+  );
 }
 
 const onSubmit = async () => {
   console.log("***onSubmit***");
   if (formSupplierActive.value === false) {
-    if (!validateFormProduct(formProduct.value) || !validateFormSupplier(formSupplier.value)) {
-    formAlert.value = {
-      status: true,
-      title: "เกิดข้อผิดพลาด",
-      body: "กรุณากรอกข้อมูลให้ครบถ้วน",
-    };
-    return;
-  }
-  store.commit("setStatusLoading", true);
+    if (
+      !validateFormProduct(formProduct.value) ||
+      !validateFormSupplier(formSupplier.value)
+    ) {
+      formAlert.value = {
+        status: true,
+        title: "เกิดข้อผิดพลาด",
+        body: "กรุณากรอกข้อมูลให้ครบถ้วน",
+      };
+      return;
+    }
+    store.commit("setStatusLoading", true);
 
     const body = {
       //------transaction_import------//
@@ -360,8 +371,7 @@ const onSubmit = async () => {
           body: response.message,
         };
       }
-    store.commit("setStatusLoading", false);
-
+      store.commit("setStatusLoading", false);
     });
     console.log(body);
   } else {
@@ -405,48 +415,47 @@ const onSubmit = async () => {
         };
       }
       store.commit("setStatusLoading", false);
-
     });
   }
 };
 
-const onSupplierCrate = async() => {
+const onSupplierCrate = async () => {
   const bodySupplier = {
-      firstName: formSupplier.value.firstName,
-      lastName: formSupplier.value.lastName,
-      address: formSupplier.value.address,
-      subDistric:
-        subDistrict.find((item) => item.id == formSupplier.value.subDistrict)
-          ?.name_th || "",
-      distric:
-        district.find((item) => item.id == formSupplier.value.district)
-          ?.name_th || "",
-      province:
-        province.find((item) => item.id == formSupplier.value.province)
-          ?.name_th || "",
-      zipCode: formSupplier.value.zipCode.toString(),
-      phone: formSupplier.value.phone,
-    };
+    firstName: formSupplier.value.firstName,
+    lastName: formSupplier.value.lastName,
+    address: formSupplier.value.address,
+    subDistric:
+      subDistrict.find((item) => item.id == formSupplier.value.subDistrict)
+        ?.name_th || "",
+    distric:
+      district.find((item) => item.id == formSupplier.value.district)
+        ?.name_th || "",
+    province:
+      province.find((item) => item.id == formSupplier.value.province)
+        ?.name_th || "",
+    zipCode: formSupplier.value.zipCode.toString(),
+    phone: formSupplier.value.phone,
+  };
 
-    await _apiSupplier.create(bodySupplier, (response) => {
-      if (response.statusCode === 200) {
-        formAlert.value = {
-          status: true,
-          title: "เเจ้งเตือน",
-          body: "เพิ่มข้อมูลเรียบร้อย",
-        };
-        clearData();
-        onLoadData();
-        onShowProduct();
-      } else {
-        formAlert.value = {
-          status: true,
-          title: "เกิดข้อผิดพลาด",
-          body: response.message,
-        };
-      }
-    });
-}
+  await _apiSupplier.create(bodySupplier, (response) => {
+    if (response.statusCode === 200) {
+      formAlert.value = {
+        status: true,
+        title: "เเจ้งเตือน",
+        body: "เพิ่มข้อมูลเรียบร้อย",
+      };
+      clearData();
+      onLoadData();
+      onShowProduct();
+    } else {
+      formAlert.value = {
+        status: true,
+        title: "เกิดข้อผิดพลาด",
+        body: response.message,
+      };
+    }
+  });
+};
 onMounted(async () => {
   store.commit("setStatusLoading", true);
   clearData();
@@ -480,8 +489,24 @@ onMounted(async () => {
           >
         </div>
         <div class="w-full bg-white rounded-xl py-3">
-          <div class="px-6">
+          <div class="flex justify-between px-6">
             <span class="text-lg font-semibold text-red-800">ข้อมูลสินค้า</span>
+            <div @click="clearData()"
+              class="flex space-x-2 items-center rounded-full px-3 bg-red-100 cursor-pointer"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="32"
+                height="32"
+                viewBox="0 0 512 512"
+              >
+                <path
+                  d="M256 48C141.1 48 48 141.1 48 256s93.1 208 208 208 208-93.1 208-208S370.9 48 256 48zm0 336.1c-70.7 0-128-57.3-128-128.1s57.3-128.1 128-128.1v-37c0-6.4 7.1-10.2 12.4-6.7l72.9 52.6c4.9 3.3 4.7 10.6-.4 13.6L268 196.7c-5.3 3.1-12-.8-12-6.9v-41.9c-60.3 0-109.2 49.7-108.1 110.2 1.1 59.1 50.3 106.7 109.5 106 55.9-.7 101.8-43.7 106.3-99 .4-5.2 4.7-9.1 9.9-9.1 5.8 0 10.4 4.9 9.9 10.7-5.4 66-60.4 117.4-127.5 117.4z"
+                  fill="#A2422C"
+                />
+              </svg>
+              <span class="text-sm font-bold text-red-800">ล้างฟอร์ม</span>
+            </div>
           </div>
           <hr class="mt-2 mx-6" style="border: 1px solid #c2796a" />
           <div class="px-12 flex flex-wrap pt-10">
@@ -542,7 +567,6 @@ onMounted(async () => {
               ></textarea>
             </div>
 
-
             <div
               class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6"
             >
@@ -588,10 +612,9 @@ onMounted(async () => {
         </div>
         <hr class="mt-2 mx-6" style="border: 1px solid #c2796a" />
         <div class="px-12 flex flex-wrap pt-10">
-          
-            <div
-              class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6"
-            >
+          <div
+            class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6"
+          >
             <label class="w-1/4 text-red-800 font-semibold">เบอร์โทร</label>
             <input
               type="text"
@@ -603,16 +626,27 @@ onMounted(async () => {
               @blur="(event) => onChangeSupplier(event.target.value)"
             />
           </div>
-          <div v-if="formSupplierActive" class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6" hidden>
-            <label class="w-auto text-red-800 font-semibold">รหัสผู้จัดจำหน่าย</label>
+          <div
+            v-if="formSupplierActive"
+            class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6"
+            hidden
+          >
+            <label class="w-auto text-red-800 font-semibold"
+              >รหัสผู้จัดจำหน่าย</label
+            >
             <input
               type="text"
               class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
               v-model="formSupplier.id"
             />
           </div>
-          <div v-else class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6">
-            <label class="w-1/4 text-red-800 font-semibold">รหัสผู้จัดจำหน่าย</label>
+          <div
+            v-else
+            class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6"
+          >
+            <label class="w-1/4 text-red-800 font-semibold"
+              >รหัสผู้จัดจำหน่าย</label
+            >
             <input
               disabled
               type="text"
@@ -620,7 +654,9 @@ onMounted(async () => {
               v-model="formSupplier.id"
             />
           </div>
-          <div class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6">
+          <div
+            class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6"
+          >
             <label class="w-1/4 text-red-800 font-semibold">ชื่อ</label>
             <input
               v-if="formSupplierActive"
@@ -636,7 +672,9 @@ onMounted(async () => {
               v-model="formSupplier.firstName"
             />
           </div>
-          <div class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6">
+          <div
+            class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6"
+          >
             <label class="w-1/4 text-red-800 font-semibold">สกุล</label>
             <input
               v-if="formSupplierActive"
@@ -653,7 +691,9 @@ onMounted(async () => {
             />
           </div>
 
-          <div class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6">
+          <div
+            class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6"
+          >
             <label class="w-1/4 text-red-800 font-semibold">ที่อยู่</label>
             <input
               v-if="formSupplierActive"
@@ -669,7 +709,9 @@ onMounted(async () => {
               v-model="formSupplier.address"
             />
           </div>
-          <div class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6">
+          <div
+            class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6"
+          >
             <label class="w-1/4 text-red-800 font-semibold">จังหวัด</label>
             <select
               v-if="formSupplierActive"
@@ -694,7 +736,9 @@ onMounted(async () => {
               v-model="formSupplier.province"
             />
           </div>
-          <div class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6">
+          <div
+            class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6"
+          >
             <label class="w-1/4 text-red-800 font-semibold">อำเภอ</label>
             <select
               v-if="formSupplierActive"
@@ -719,7 +763,9 @@ onMounted(async () => {
               v-model="formSupplier.district"
             />
           </div>
-          <div class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6">
+          <div
+            class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6"
+          >
             <label class="w-1/4 text-red-800 font-semibold">ตำบล</label>
             <select
               v-if="formSupplierActive"
@@ -744,7 +790,9 @@ onMounted(async () => {
               v-model="formSupplier.subDistrict"
             />
           </div>
-          <div class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6">
+          <div
+            class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6"
+          >
             <label class="w-1/4 text-red-800 font-semibold">รหัสไปรษณีย์</label>
             <input
               disabled

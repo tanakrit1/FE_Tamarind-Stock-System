@@ -17,6 +17,10 @@ const pagination = ref({
   limit: 5,
   totalPage: 0,
 });
+const onChangePagination = (val) => {
+  pagination.page = val;
+  onSubmit();
+};
 
 const formAlert = ref({
   status: false,
@@ -114,17 +118,7 @@ const onShowProduct = async () => {
   });
 };
 
-const onChangePagination = (val) => {
-  pagination.page = val;
-};
-
-const onSubmit = async () => {
-  console.log("***onSubmit***");
-  store.commit("setStatusLoading", true);
-  console.log(
-    "inputSearch.value.in_productType",
-    inputSearch.value.in_productType
-  );
+const onLoadTable = async () => {
   if (inputSearch.value.in_productType == "ฝาก") {
     if (!currentDate.value.startDate && !currentDate.value.endDate) {
       const body = {
@@ -552,6 +546,56 @@ const onSubmit = async () => {
   }
 };
 
+const CheckCurrentDate = () => {
+  console.log("***CheckCurrentDate***");
+  if (currentDate.value.startDate > currentDate.value.endDate) {
+    formAlert.value = {
+      status: true,
+      title: "เกิดข้อผิดพลาด",
+      body: "วันที่เริ่มต้นต้องน้อยกว่าวันที่สิ้นสุด",
+    }
+    currentDate.value.startDate = "";
+    currentDate.value.endDate = "";
+  }else if(currentDate.value.endDate < currentDate.value.startDate){
+    formAlert.value = {
+      status: true,
+      title: "เกิดข้อผิดพลาด",
+      body: "วันที่สิ้นสุดต้องมากกว่าวันที่เริ่มต้น",
+    }
+    currentDate.value.startDate = "";
+    currentDate.value.endDate = "";
+  }else if(currentDate.value.startDate != "" && currentDate.value.endDate == ""){
+    formAlert.value = {
+      status: true,
+      title: "เกิดข้อผิดพลาด",
+      body: "กรุณากรอกวันที่สิ้นสุด",
+    }
+    currentDate.value.startDate = "";
+    currentDate.value.endDate = "";
+  }else if(currentDate.value.startDate == "" && currentDate.value.endDate != ""){
+    formAlert.value = {
+      status: true,
+      title: "เกิดข้อผิดพลาด",
+      body: "กรุณากรอกวันที่เริ่มต้น",
+    }
+    currentDate.value.startDate = "";
+    currentDate.value.endDate = "";
+  }
+}
+const onSubmit = async () => {
+  console.log("***onSubmit***");
+  store.commit("setStatusLoading", true);
+  if(currentDate.value.startDate != "" || currentDate.value.endDate != ""){
+    CheckCurrentDate();
+    store.commit("setStatusLoading", false);
+    showTable.value = false;
+
+  }else{
+    await onLoadTable();
+    store.commit("setStatusLoading", false);
+  }
+};
+
 const onExportExcel = () => {
   console.log("***onExportExcel***");
   const workbook = new ExcelJS.Workbook();
@@ -577,6 +621,18 @@ const onExportExcel = () => {
       { header: "Supplier Province", key: "supplierProvince", width: 20 },
       { header: "Supplier Zip Code", key: "supplierZipCode", width: 15 },
     ];
+
+    // เข้าถึงแถวหัวของ Excel spreadsheet
+const headerRow = worksheet.getRow(1); // แถวหัวเริ่มที่ index 1
+
+// กำหนดสีพื้นหลังให้กับแต่ละ cell ในแถวหัว
+headerRow.eachCell((cell) => {
+  cell.fill = {
+    type: 'pattern',
+    pattern: 'solid',
+    fgColor: { argb: 'FFFF00' } // สีที่คุณต้องการ
+  };
+});
 
     // เพิ่มข้อมูลลงในแถวของ Excel spreadsheet
     flattenedData.forEach((item, index) => {
@@ -669,32 +725,6 @@ const clearData = () => {
   onShowProduct();
 };
 
-watch(currentDate.value, (newVal, oldVal) => {
-  // Check if both startDate and endPeriodDate are not empty
-  if (newVal.startDate && newVal.endDate) {
-    if (newVal.startDate > newVal.endDate) {
-      // ทำอะไรสักอย่างเมื่อ startDate มากกว่า endPeriodDate
-      currentDate.value.startDate = "";
-      currentDate.value.endDate = "";
-      formAlert.value = {
-        status: true,
-        title: "เกิดข้อผิดพลาด",
-        body: "วันที่เริ่มต้นต้องไม่มากกว่าวันที่สิ้นสุด",
-      };
-    }
-  }
-
-  if (newVal.startPeriodDate > newVal.endPeriodDate) {
-    // ทำอะไรสักอย่างเมื่อ startPeriodDate มากกว่า endPeriodDate
-    currentDate.value.startPeriodDate = "";
-    currentDate.value.endPeriodDate = "";
-    formAlert.value = {
-      status: true,
-      title: "เกิดข้อผิดพลาด",
-      body: "วันที่เริ่มต้นต้องไม่มากกว่าวันที่สิ้นสุด",
-    };
-  }
-});
 </script>
 <template>
   <div class="flex md:justify-center">
@@ -819,7 +849,7 @@ watch(currentDate.value, (newVal, oldVal) => {
             >
               ยกเลิก
             </button>
-            <button
+            <button v-if="showTable"
               @click="onExportExcel"
               class="h-10 rounded-full w-40 btn btn-btn-error btn-wide text-xl text-red-800 font-semibold"
             >

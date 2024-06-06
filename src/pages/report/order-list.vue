@@ -27,6 +27,7 @@ const onCloseAlert = () => {
 
 const onChangePagination = (val) => {
   pagination.page = val;
+  onSubmit();
 };
 
 const columns = [
@@ -126,7 +127,6 @@ const onSubmit = async () => {
     console.log("body --> ", body);
     await _apiExport.search(body, (response) => {
       if (response.statusCode === 200) {
-        
         console.log("response --> ", response);
         if (response.data.length > 0) {
           store.commit("setStatusLoading", false);
@@ -155,7 +155,6 @@ const onSubmit = async () => {
           console.log("flattenedData --> ", flattenedData);
           rows.value = flattenedData;
           pagination.value.totalPage = response.metadata.totalPage;
-
         } else {
           showTable.value = false;
           formAlert.value = {
@@ -177,9 +176,12 @@ const onSubmit = async () => {
         store.commit("setStatusLoading", false);
       }
     });
-    console.log("ไม่มีวันที่")
-  }else if(currentDate.value.startExportDate !== "" || currentDate.value.endExportDate !== ""){
-    console.log("มีวันที่นำออกข้อมูล")
+    console.log("ไม่มีวันที่");
+  } else if (
+    currentDate.value.startExportDate !== "" ||
+    currentDate.value.endExportDate !== ""
+  ) {
+    console.log("มีวันที่นำออกข้อมูล");
     store.commit("setStatusLoading", true);
 
     const body = {
@@ -241,7 +243,6 @@ const onSubmit = async () => {
           console.log("flattenedData --> ", flattenedData);
           rows.value = flattenedData;
           pagination.value.totalPage = response.metadata.totalPage;
-
         } else {
           store.commit("setStatusLoading", false);
 
@@ -275,50 +276,59 @@ const onExportExcel = () => {
   console.log("***onExportExcel***");
   const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet("Sheet A");
-    // เพิ่มหัวข้อคอลัมน์ใน Excel spreadsheet
-    worksheet.columns = [
-      { header: "Special ID", key: "specialID", width: 15 },
-      { header: "Product Name", key: "productName", width: 30 },
-      { header: "Type of Action", key: "typeAction", width: 20 },
-      { header: "Product Price", key: "productPrice", width: 15 },
-      { header: "Product Out Price", key: "productOutPrice", width: 15 },
-      { header: "Quantity", key: "quantity", width: 15 },
-      { header: "Price", key: "price", width: 15 },
-      { header: "Price Deposit", key: "priceDeposit", width: 15 },
-      { header: "Export Date", key: "exportDate", width: 15 },
-      { header: "Customer First Name", key: "customerFirstName", width: 20 },
-      { header: "Customer Last Name", key: "customerLastName", width: 20 },
-      { header: "Customer Phone", key: "customerPhone", width: 15 },
-      { header: "Customer Address", key: "customerAddress", width: 30 },
-      { header: "Customer SubDistrict", key: "customerSubDistrict", width: 20 },
-      { header: "Customer District", key: "customerDistrict", width: 20 },
-      { header: "Customer Province", key: "customerProvince", width: 20 },
-      { header: "Customer Zip Code", key: "customerZipCode", width: 15 },
+  // เพิ่มหัวข้อคอลัมน์ใน Excel spreadsheet
+  worksheet.columns = [
+    { header: "Special ID", key: "specialID", width: 15 },
+    { header: "Product Name", key: "productName", width: 30 },
+    { header: "Type of Action", key: "typeAction", width: 20 },
+    { header: "Product Price", key: "productPrice", width: 15 },
+    { header: "Product Out Price", key: "productOutPrice", width: 15 },
+    { header: "Quantity", key: "quantity", width: 15 },
+    { header: "Price", key: "price", width: 15 },
+    { header: "Price Deposit", key: "priceDeposit", width: 15 },
+    { header: "Export Date", key: "exportDate", width: 15 },
+    { header: "Customer First Name", key: "customerFirstName", width: 20 },
+    { header: "Customer Last Name", key: "customerLastName", width: 20 },
+    { header: "Customer Phone", key: "customerPhone", width: 15 },
+    { header: "Customer Address", key: "customerAddress", width: 30 },
+    { header: "Customer SubDistrict", key: "customerSubDistrict", width: 20 },
+    { header: "Customer District", key: "customerDistrict", width: 20 },
+    { header: "Customer Province", key: "customerProvince", width: 20 },
+    { header: "Customer Zip Code", key: "customerZipCode", width: 15 },
+  ];
 
-    ];
+  const headerRow = worksheet.getRow(1); // แถวหัวเริ่มที่ index 1
 
-    // เพิ่มข้อมูลลงในแถวของ Excel spreadsheet
-    flattenedData.forEach((item, index) => {
-      worksheet.addRow({
-        specialID: item.specialID,
-        productName: item.productName,
-        typeAction: item.typeAction,
-        productInPrice: item.productInPrice,
-        productOutPrice: item.productOutPrice,
-        quantity: item.quantity,
-        price: item.price,
-        priceDeposit: item.priceDeposit,
-        exportDate: item.exportDate,
-        customerPhone: item.customerPhone,
-        customerFirstName: item.customerFirstName,
-        customerLastName: item.customerLastName,
-        customerAddress: item.customerAddress,
-        customerSubDistrict: item.customerSubDistrict,
-        customerDistrict: item.customerDistrict,
-        customerProvince: item.customerProvince,
-        customerZipCode: item.customerZipCode,
-      });
+  // กำหนดสีพื้นหลังให้กับแต่ละ cell ในแถวหัว
+  headerRow.eachCell((cell) => {
+    cell.fill = {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: { argb: "FFFF00" }, // สีที่คุณต้องการ
+    };
+  });
+  // เพิ่มข้อมูลลงในแถวของ Excel spreadsheet
+  flattenedData.forEach((item, index) => {
+    worksheet.addRow({
+      specialID: item.specialID,
+      productName: item.productName,
+      typeAction: item.typeAction,
+      productInPrice: item.productInPrice,
+      productOutPrice: item.productOutPrice,
+      quantity: item.quantity,
+      price: item.price,
+      priceDeposit: item.priceDeposit,
+      exportDate: item.exportDate,
+      customerPhone: item.customerPhone,
+      customerFirstName: item.customerFirstName,
+      customerLastName: item.customerLastName,
+      customerAddress: item.customerAddress,
+      customerSubDistrict: item.customerSubDistrict,
+      customerDistrict: item.customerDistrict,
+      customerProvince: item.customerProvince,
+      customerZipCode: item.customerZipCode,
     });
+  });
 
   // สร้างไฟล์ Excel
   workbook.xlsx.writeBuffer().then((data) => {
