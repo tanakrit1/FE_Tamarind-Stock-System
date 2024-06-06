@@ -288,7 +288,7 @@ const onLoadTable = async() => {
                 {
                     field: "typeAction",
                     operator: "equals",
-                    value: "ซื้อ-ขาย"
+                    value: "แปรรูป"
                 }
             ]
             
