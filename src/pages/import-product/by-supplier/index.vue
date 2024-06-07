@@ -86,6 +86,7 @@ const onCloseAlert = () => {
 
 const formSupplierActive = ref(false);
 const showTable = ref(false);
+let formattedMessages;
 
 const onLoadData = async () => {
   showTable.value = false;
@@ -128,10 +129,18 @@ const onLoadData = async () => {
       console.log("response", rows.value);
     } else {
       showTable.value = false;
+      if (typeof response.message === "string") {
+        const messages = response.message;
+        formattedMessages = messages
+          .map((message) => `<li>${message}</li>`)
+          .join("<br>");
+      } else {
+        formattedMessages = response.message.toString();
+      }
       formAlert.value = {
         status: true,
         title: "เกิดข้อผิดพลาด",
-        body: response.message,
+        body: formattedMessages,
       };
     }
   });
@@ -157,18 +166,30 @@ const onShowProduct = async () => {
       });
       dataInput.value.listProductAll = response.data;
       dataInput.value.product = response.data;
+
+      store.commit("setStatusLoading", false);
     } else {
+      if (typeof response.message === "string") {
+        const messages = response.message;
+        formattedMessages = messages
+          .map((message) => `<li>${message}</li>`)
+          .join("<br>");
+      } else {
+        formattedMessages = response.message.toString();
+      }
       formAlert.value = {
         status: true,
         title: "เกิดข้อผิดพลาด",
-        body: response.message,
+        body: formattedMessages,
       };
+      store.commit("setStatusLoading", false);
     }
-    store.commit("setStatusLoading", false);
   });
-  dataInput.value.province = province.map((item) => {
-    return { label: item.name_th, value: item.id };
-  });
+  dataInput.value.province = province
+    .map((item) => {
+      return { label: item.name_th, value: item.id };
+    })
+    .sort((a, b) => a.label.localeCompare(b.label, "th"));
 };
 
 const onChangeProduct = (productID) => {
@@ -233,6 +254,7 @@ const onChangeSupplier = async (phone) => {
         formSupplier.value.phone = response.data[0].phone;
 
         console.log("formSupplier", formSupplier.value);
+        store.commit("setStatusLoading", false);
       } else {
         formAlert.value = {
           status: true,
@@ -251,13 +273,22 @@ const onChangeSupplier = async (phone) => {
           zipCode: "",
           phone: phone,
         };
+
+        store.commit("setStatusLoading", false);
       }
-      store.commit("setStatusLoading", false);
     } else {
+      if (typeof response.message === "string") {
+        const messages = response.message;
+        formattedMessages = messages
+          .map((message) => `<li>${message}</li>`)
+          .join("<br>");
+      } else {
+        formattedMessages = response.message.toString();
+      }
       formAlert.value = {
         status: true,
         title: "เกิดข้อผิดพลาด",
-        body: response.message,
+        body: formattedMessages,
       };
       formSupplierActive.value = true;
       clearData();
@@ -321,7 +352,7 @@ function validateFormSupplier(supplier) {
 
 const onSubmit = async () => {
   console.log("***onSubmit***");
-  if (formSupplierActive.value === false) {
+  store.commit("setStatusLoading", true);
     if (
       !validateFormProduct(formProduct.value) ||
       !validateFormSupplier(formSupplier.value)
@@ -347,10 +378,10 @@ const onSubmit = async () => {
       firstName: formSupplier.value.firstName,
       lastName: formSupplier.value.lastName,
       address: formSupplier.value.address,
-      subDistric: formSupplier.value.subDistrict,
-      distric: formSupplier.value.district,
-      province: formSupplier.value.province,
-      zipCode: formSupplier.value.zipCode,
+      distric: formSupplierActive.value === false ? formSupplier.value.district : district.find(item => item.id === formSupplier.value.district).name_th,
+      province: formSupplierActive.value === false ? formSupplier.value.province : province.find(item => item.id === formSupplier.value.province).name_th,
+      subDistric: formSupplierActive.value === false ? formSupplier.value.subDistrict : subDistrict.find(item => item.id === formSupplier.value.subDistrict).name_th,
+      zipCode: formSupplier.value.zipCode.toString(),
       phone: formSupplier.value.phone,
     };
 
@@ -365,97 +396,23 @@ const onSubmit = async () => {
         onLoadData();
         onShowProduct();
       } else {
+        const messages = response.message;
+        const formattedMessages = messages
+          .map((message) => `<li>${message}</li>`)
+          .join("<br>");
         formAlert.value = {
           status: true,
           title: "เกิดข้อผิดพลาด",
-          body: response.message,
+          body: formattedMessages,
         };
       }
       store.commit("setStatusLoading", false);
     });
     console.log(body);
-  } else {
-    console.log("insertformSupplier.......");
-    store.commit("setStatusLoading", true);
-
-    const body = {
-      //------transaction_import------//
-      quantity: formProduct.value.quantity,
-      price: Number(formProduct.value.price), //formProduct.value.totalPrice,
-      // priceDeposit:1152.05,
-      typeAction: formProduct.value.typeAction,
-      //--------product----------------//
-      product_id: Number(formProduct.value.productID), //formProduct.value.productID,
-      //--------supplier---------------//
-      firstName: formSupplier.value.firstName,
-      lastName: formSupplier.value.lastName,
-      address: formSupplier.value.address,
-      subDistric:
-        subDistrict.find((item) => item.id == formSupplier.value.subDistrict)
-          ?.name_th || "",
-      distric:
-        district.find((item) => item.id == formSupplier.value.district)
-          ?.name_th || "",
-      province:
-        province.find((item) => item.id == formSupplier.value.province)
-          ?.name_th || "",
-      zipCode: formSupplier.value.zipCode.toString(),
-      phone: formSupplier.value.phone,
-    };
-
-    console.log(body);
-    await _apiSupplierImport.createSupplierImport(body, (response) => {
-      if (response.statusCode === 200) {
-        onSupplierCrate();
-      } else {
-        formAlert.value = {
-          status: true,
-          title: "เกิดข้อผิดพลาด",
-          body: response.message,
-        };
-      }
-      store.commit("setStatusLoading", false);
-    });
-  }
+  
 };
 
-const onSupplierCrate = async () => {
-  const bodySupplier = {
-    firstName: formSupplier.value.firstName,
-    lastName: formSupplier.value.lastName,
-    address: formSupplier.value.address,
-    subDistric:
-      subDistrict.find((item) => item.id == formSupplier.value.subDistrict)
-        ?.name_th || "",
-    distric:
-      district.find((item) => item.id == formSupplier.value.district)
-        ?.name_th || "",
-    province:
-      province.find((item) => item.id == formSupplier.value.province)
-        ?.name_th || "",
-    zipCode: formSupplier.value.zipCode.toString(),
-    phone: formSupplier.value.phone,
-  };
 
-  await _apiSupplier.create(bodySupplier, (response) => {
-    if (response.statusCode === 200) {
-      formAlert.value = {
-        status: true,
-        title: "เเจ้งเตือน",
-        body: "เพิ่มข้อมูลเรียบร้อย",
-      };
-      clearData();
-      onLoadData();
-      onShowProduct();
-    } else {
-      formAlert.value = {
-        status: true,
-        title: "เกิดข้อผิดพลาด",
-        body: response.message,
-      };
-    }
-  });
-};
 onMounted(async () => {
   store.commit("setStatusLoading", true);
   clearData();
@@ -491,7 +448,8 @@ onMounted(async () => {
         <div class="w-full bg-white rounded-xl py-3">
           <div class="flex justify-between px-6">
             <span class="text-lg font-semibold text-red-800">ข้อมูลสินค้า</span>
-            <div @click="clearData()"
+            <div
+              @click="clearData()"
               class="flex space-x-2 items-center rounded-full px-3 bg-red-100 cursor-pointer"
             >
               <svg
@@ -554,7 +512,7 @@ onMounted(async () => {
               />
             </div>
 
-            <div
+            <!-- <div
               class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6"
             >
               <span class="w-1/4 text-red-800 font-semibold">รายละเอียด</span>
@@ -565,7 +523,7 @@ onMounted(async () => {
                 placeholder="รายละเอียดสินค้า"
                 v-model="formProduct.discription"
               ></textarea>
-            </div>
+            </div> -->
 
             <div
               class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6"
@@ -626,7 +584,7 @@ onMounted(async () => {
               @blur="(event) => onChangeSupplier(event.target.value)"
             />
           </div>
-          <div
+          <!-- <div
             v-if="formSupplierActive"
             class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6"
             hidden
@@ -653,7 +611,7 @@ onMounted(async () => {
               class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
               v-model="formSupplier.id"
             />
-          </div>
+          </div> -->
           <div
             class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6"
           >

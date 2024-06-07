@@ -11,7 +11,7 @@ import paginationPage from "../../../components/pagination/pagination-page.vue";
 
 const pagination = ref({
   page: 1,
-  limit: 1,
+  limit: 10,
   totalPage: 0,
 });
 
