@@ -199,7 +199,7 @@ const onChangeProduct = (productID) => {
       .price?.toLocaleString();
     formProduct.value.productID = productID;
     formProduct.value.totalPrice = formProduct.value.price;
-    formProduct.value.quantity = "1";
+    formProduct.value.quantity = "0";
     formProduct.value.discription = "";
     formProduct.value.productName = dataInput.value.product[0].name;
     formProduct.value.typeAction = "ซื้อ-ขาย";
@@ -353,19 +353,29 @@ function validateFormSupplier(supplier) {
 const onSubmit = async () => {
   console.log("***onSubmit***");
   store.commit("setStatusLoading", true);
-    if (
-      !validateFormProduct(formProduct.value) ||
-      !validateFormSupplier(formSupplier.value)
-    ) {
+  if (
+    !validateFormProduct(formProduct.value) ||
+    !validateFormSupplier(formSupplier.value) ||
+    formProduct.value.quantity === "0"
+  ) {
+    if (formProduct.value.quantity === "0") {
+      formAlert.value = {
+        status: true,
+        title: "เกิดข้อผิดพลาด",
+        body: "จํานวนสินค้าต้องไม่เป็น 0",
+      };
+      store.commit("setStatusLoading", false);
+      return;
+    } else {
       formAlert.value = {
         status: true,
         title: "เกิดข้อผิดพลาด",
         body: "กรุณากรอกข้อมูลให้ครบถ้วน",
       };
+      store.commit("setStatusLoading", false);
       return;
     }
-    store.commit("setStatusLoading", true);
-
+  } else {
     const body = {
       //------transaction_import------//
       quantity: formProduct.value.quantity,
@@ -378,9 +388,22 @@ const onSubmit = async () => {
       firstName: formSupplier.value.firstName,
       lastName: formSupplier.value.lastName,
       address: formSupplier.value.address,
-      distric: formSupplierActive.value === false ? formSupplier.value.district : district.find(item => item.id === formSupplier.value.district).name_th,
-      province: formSupplierActive.value === false ? formSupplier.value.province : province.find(item => item.id === formSupplier.value.province).name_th,
-      subDistric: formSupplierActive.value === false ? formSupplier.value.subDistrict : subDistrict.find(item => item.id === formSupplier.value.subDistrict).name_th,
+      distric:
+        formSupplierActive.value === false
+          ? formSupplier.value.district
+          : district.find((item) => item.id === formSupplier.value.district)
+              .name_th,
+      province:
+        formSupplierActive.value === false
+          ? formSupplier.value.province
+          : province.find((item) => item.id === formSupplier.value.province)
+              .name_th,
+      subDistric:
+        formSupplierActive.value === false
+          ? formSupplier.value.subDistrict
+          : subDistrict.find(
+              (item) => item.id === formSupplier.value.subDistrict
+            ).name_th,
       zipCode: formSupplier.value.zipCode.toString(),
       phone: formSupplier.value.phone,
     };
@@ -409,9 +432,8 @@ const onSubmit = async () => {
       store.commit("setStatusLoading", false);
     });
     console.log(body);
-  
+  }
 };
-
 
 onMounted(async () => {
   store.commit("setStatusLoading", true);
