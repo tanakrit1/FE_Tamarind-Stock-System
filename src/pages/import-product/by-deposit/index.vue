@@ -40,7 +40,7 @@ const pagination = ref({
 
 const onChangePagination = (val) => {
   pagination.page = val;
-  onLoadData();       
+  onLoadData();
 };
 
 //จัดลำดับข้อมูลให้เท่ากันก่อนนำมาใช้งาน
@@ -58,7 +58,7 @@ const formProduct = ref({
   typeAction: "",
   productPrice: "0.00",
   remain: "",
-  quantity: "",
+  quantity: "0",
   price: "0.00",
 });
 
@@ -74,8 +74,6 @@ const formSupplier = ref({
   phone: "",
 });
 
-const showTable = ref(false);
-
 const clearData = () => {
   formSupplier.value = [];
   formProduct.value = [];
@@ -90,6 +88,8 @@ const onCloseAlert = () => {
 };
 
 const formDepositActive = ref(false);
+const showTable = ref(false);
+let formattedMessages;
 
 const onLoadData = async () => {
   showTable.value = false;
@@ -108,44 +108,49 @@ const onLoadData = async () => {
   await _apiDepositImport.searchDepositImport(body, (response) => {
     if (response.statusCode === 200) {
       if (response.data.length > 0) {
-      showTable.value = true;
-      const flattenedData = response.data.map((item) => ({
-        specialID: item.product.specialID,
-        productName: item.product.name,
-        // typeAction: item.typeAction,
-        productPrice: item.product.price,
-        quantity: item.quantity,
-        remain: item.remain,
-        price: item.price,
-        periodDate: item.periodDate,
-        supplierFirstName: item.supplier.firstName,
-        supplierLastName: item.supplier.lastName,
-        supplierAddress: item.supplier.address,
-        supplierSubDistrict: item.supplier.subDistric,
-        supplierDistrict: item.supplier.distric,
-        supplierProvince: item.supplier.province,
-        supplierZipCode: item.supplier.zipCode,
-      }));
-      rows.value = flattenedData;
-      pagination.value.totalPage = response.metadata.totalPage;
-    }else{
-      showTable.value = false;
-
-    }
+        showTable.value = true;
+        const flattenedData = response.data.map((item) => ({
+          specialID: item.product.specialID,
+          productName: item.product.name,
+          // typeAction: item.typeAction,
+          productPrice: item.product.price,
+          quantity: item.quantity,
+          remain: item.remain,
+          price: item.price,
+          periodDate: item.periodDate,
+          supplierFirstName: item.supplier.firstName,
+          supplierLastName: item.supplier.lastName,
+          supplierAddress: item.supplier.address,
+          supplierSubDistrict: item.supplier.subDistric,
+          supplierDistrict: item.supplier.distric,
+          supplierProvince: item.supplier.province,
+          supplierZipCode: item.supplier.zipCode,
+        }));
+        rows.value = flattenedData;
+        pagination.value.totalPage = response.metadata.totalPage;
+      } else {
+        showTable.value = false;
+      }
       console.log("response", rows.value);
     } else {
       showTable.value = false;
 
+      const messages = response.message;
+      const formattedMessages = messages
+        .map((message) => `<li>${message}</li>`)
+        .join("<br>");
       formAlert.value = {
         status: true,
         title: "เกิดข้อผิดพลาด",
-        body: response.message,
+        body: formattedMessages,
       };
     }
   });
 };
 
 const onShowProduct = async () => {
+  store.commit("setStatusLoading", true);
+
   const body = {
     page: 1,
     limit: 10,
@@ -164,16 +169,22 @@ const onShowProduct = async () => {
       dataInput.value.listProductAll = response.data;
       dataInput.value.product = response.data;
     } else {
+      const messages = response.message;
+      const formattedMessages = messages
+        .map((message) => `<li>${message}</li>`)
+        .join("<br>");
       formAlert.value = {
         status: true,
         title: "เกิดข้อผิดพลาด",
-        body: response.message,
+        body: formattedMessages,
       };
     }
   });
-  dataInput.value.province = province.map((item) => {
-    return { label: item.name_th, value: item.id };
-  });
+  dataInput.value.province = province
+    .map((item) => {
+      return { label: item.name_th, value: item.id };
+    })
+    .sort((a, b) => a.label.localeCompare(b.label, "th"));
 };
 
 function setCurrentDate() {
@@ -187,7 +198,7 @@ const onChangeProduct = (productID) => {
       .price?.toLocaleString();
     formProduct.value.productID = productID;
     formProduct.value.price = "0.00";
-    formProduct.value.quantity = "1";
+    formProduct.value.quantity = "0";
     formProduct.value.remain = formProduct.value.quantity;
     // formProduct.value.periodDate = "";
     formProduct.value.productName = dataInput.value.product[0].name;
@@ -200,7 +211,7 @@ const onChangeProduct = (productID) => {
   } else {
     formProduct.value.price = "0.00";
     formProduct.value.remain = "0.00";
-    formProduct.value.quantity = "1";
+    formProduct.value.quantity = "0";
     formProduct.value.periodDate = "";
     formProduct.value.remain = formProduct.value.quantity;
     // formProduct.value.discription = "";
@@ -212,6 +223,8 @@ const onChangeProduct = (productID) => {
 };
 
 const onChangeSupplier = async (phone) => {
+  store.commit("setStatusLoading", true);
+
   const body = {
     page: 1,
     limit: 1,
@@ -243,6 +256,8 @@ const onChangeSupplier = async (phone) => {
 
         console.log("formSupplier", formSupplier.value);
       } else {
+        store.commit("setStatusLoading", false);
+
         formAlert.value = {
           status: true,
           title: "เเจ้งเตือน",
@@ -262,13 +277,19 @@ const onChangeSupplier = async (phone) => {
         };
       }
     } else {
+      const messages = response.message;
+      const formattedMessages = messages
+        .map((message) => `<li>${message}</li>`)
+        .join("<br>");
       formAlert.value = {
         status: true,
         title: "เกิดข้อผิดพลาด",
-        body: response.message,
+        body: formattedMessages,
       };
       formDepositActive.value = true;
       clearData();
+
+      store.commit("setStatusLoading", false);
     }
   });
 };
@@ -341,157 +362,91 @@ watch(() => formProduct.value.remain, onChangeQuantity);
 
 const onSubmit = async () => {
   console.log("***onSubmit***");
-  if (formDepositActive.value === false) {
-    if (
-      !validateFormProduct(formProduct.value) ||
-      !validateFormSupplier(formSupplier.value)
-    ) {
+  store.commit("setStatusLoading", true);
+  if (
+    !validateFormProduct(formProduct.value) ||
+    !validateFormSupplier(formSupplier.value) || formProduct.value.quantity === "0"
+  ) {
+    if (formProduct.value.quantity === "0") {
+      formAlert.value = {
+        status: true,
+        title: "เกิดข้อผิดพลาด",
+        body: "จํานวนสินค้าต้องไม่เป็น 0",
+      };
+      store.commit("setStatusLoading", false);
+      return;
+    } else {
       formAlert.value = {
         status: true,
         title: "เกิดข้อผิดพลาด",
         body: "กรุณากรอกข้อมูลให้ครบถ้วน",
       };
+      store.commit("setStatusLoading", false);
       return;
     }
-
-    const body = {
-      //------transaction_import------//
-      quantity: formProduct.value.quantity.toString(),
-      price: Number(formProduct.value.price),
-      remain: Number(formProduct.value.remain),
-      periodDate: formProduct.value.periodDate,
-      // priceDeposit:1152.05,
-      typeAction: formProduct.value.typeAction,
-      //--------product----------------//
-      product_id: Number(formProduct.value.productID),
-      //--------supplier---------------//
-      firstName: formSupplier.value.firstName,
-      lastName: formSupplier.value.lastName,
-      address: formSupplier.value.address,
-      subDistric: formSupplier.value.subDistrict,
-      distric: formSupplier.value.district,
-      province: formSupplier.value.province,
-      zipCode: formSupplier.value.zipCode,
-      phone: formSupplier.value.phone,
-    };
-
-    await _apiDepositImport.createDepositImport(body, (response) => {
-      if (response.statusCode === 200) {
-        formAlert.value = {
-          status: true,
-          title: "เเจ้งเตือน",
-          body: "บันทึกข้อมูลเรียบร้อย",
-        };
-        store.commit("setStatusLoading", true);
-        clearData();
-        onLoadData();
-        onShowProduct();
-        store.commit("setStatusLoading", false);
-      } else {
-        const mapValidation = response.message.map((item) => {
-          return `<li>${item}</li>`;
-        });
-        formAlert.value = {
-          status: true,
-          title: "กรุณาตรวจสอบ",
-          body: mapValidation.join(""),
-        };
-      }
-    });
-    console.log(body);
-  } else {
-    console.log("insertformSupplier.......");
-    if (
-      !validateFormProduct(formProduct.value) ||
-      !validateFormSupplier(formSupplier.value)
-    ) {
-      formAlert.value = {
-        status: true,
-        title: "เกิดข้อผิดพลาด",
-        body: "กรุณากรอกข้อมูลให้ครบถ้วน",
-      };
-      return;
-    }
-    const body = {
-      //------transaction_import------//
-      quantity: formProduct.value.quantity.toString(),
-      price: Number(formProduct.value.price),
-      remain: Number(formProduct.value.remain),
-      periodDate: formProduct.value.periodDate,
-      typeAction: formProduct.value.typeAction,
-      product_id: Number(formProduct.value.productID),
-      //--------supplier---------------//
-      firstName: formSupplier.value.firstName,
-      lastName: formSupplier.value.lastName,
-      address: formSupplier.value.address,
-      subDistric:
-        subDistrict.find((item) => item.id == formSupplier.value.subDistrict)
-          ?.name_th || "",
-      distric:
-        district.find((item) => item.id == formSupplier.value.district)
-          ?.name_th || "",
-      province:
-        province.find((item) => item.id == formSupplier.value.province)
-          ?.name_th || "",
-      zipCode: formSupplier.value.zipCode.toString(),
-      phone: formSupplier.value.phone,
-    };
-
-    console.log(body);
-    await _apiDepositImport.createDepositImport(body, (response) => {
-      if (response.statusCode === 200) {
-        onSupplierCrate();
-      } else {
-        const mapValidation = response.message.map((item) => {
-          return `<li>${item}</li>`;
-        });
-        formAlert.value = {
-          status: true,
-          title: "กรุณาตรวจสอบ",
-          body: mapValidation.join(""),
-        };
-      }
-    });
-  }
-};
-
-const onSupplierCrate = async () => {
-  const bodySupplier = {
+  }else{
+    
+  const body = {
+    //------transaction_import------//
+    quantity: formProduct.value.quantity.toString(),
+    price: Number(formProduct.value.price),
+    remain: Number(formProduct.value.remain),
+    periodDate: formProduct.value.periodDate,
+    // priceDeposit:1152.05,
+    typeAction: formProduct.value.typeAction,
+    //--------product----------------//
+    product_id: Number(formProduct.value.productID),
+    //--------supplier---------------//
     firstName: formSupplier.value.firstName,
     lastName: formSupplier.value.lastName,
     address: formSupplier.value.address,
-    subDistric:
-      subDistrict.find((item) => item.id == formSupplier.value.subDistrict)
-        ?.name_th || "",
     distric:
-      district.find((item) => item.id == formSupplier.value.district)
-        ?.name_th || "",
+      formDepositActive.value === false
+        ? formSupplier.value.district
+        : district.find((item) => item.id === formSupplier.value.district)
+            .name_th,
     province:
-      province.find((item) => item.id == formSupplier.value.province)
-        ?.name_th || "",
+      formDepositActive.value === false
+        ? formSupplier.value.province
+        : province.find((item) => item.id === formSupplier.value.province)
+            .name_th,
+    subDistric:
+      formDepositActive.value === false
+        ? formSupplier.value.subDistrict
+        : subDistrict.find((item) => item.id === formSupplier.value.subDistrict)
+            .name_th,
     zipCode: formSupplier.value.zipCode.toString(),
     phone: formSupplier.value.phone,
   };
 
-  await _apiSupplier.create(bodySupplier, (response) => {
+  await _apiDepositImport.createDepositImport(body, (response) => {
     if (response.statusCode === 200) {
       formAlert.value = {
         status: true,
         title: "เเจ้งเตือน",
-        body: "เพิ่มข้อมูลเรียบร้อย",
+        body: "บันทึกข้อมูลเรียบร้อย",
       };
       clearData();
       onLoadData();
       onShowProduct();
     } else {
+      const messages = response.message;
+      const formattedMessages = messages
+        .map((message) => `<li>${message}</li>`)
+        .join("<br>");
       formAlert.value = {
         status: true,
         title: "เกิดข้อผิดพลาด",
-        body: response.message,
+        body: formattedMessages,
       };
     }
   });
+  console.log(body);
+  store.commit("setStatusLoading", false);
+  }
+
 };
+
 onMounted(async () => {
   store.commit("setStatusLoading", true);
   clearData();
@@ -527,7 +482,8 @@ onMounted(async () => {
         <div class="w-full bg-white rounded-xl py-3">
           <div class="flex justify-between px-6">
             <span class="text-lg font-semibold text-red-800">ข้อมูลสินค้า</span>
-            <div @click="clearData()"
+            <div
+              @click="clearData()"
               class="flex space-x-2 items-center rounded-full px-3 bg-red-100 cursor-pointer"
             >
               <svg
@@ -657,7 +613,7 @@ onMounted(async () => {
               @blur="(event) => onChangeSupplier(event.target.value)"
             />
           </div>
-          <div
+          <!-- <div
             v-if="formDepositActive"
             class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6"
             hidden
@@ -684,7 +640,7 @@ onMounted(async () => {
               class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
               v-model="formSupplier.id"
             />
-          </div>
+          </div> -->
           <div
             class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6"
           >
