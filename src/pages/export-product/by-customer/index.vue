@@ -57,6 +57,27 @@ const formCustomer = ref({
     phone: "",
 })
 
+const onClearAllForm = () => {
+    formCustomerActive.value = false
+    formCustomer.value = {
+        firstName: "",
+        lastName: "",
+        address: "",
+        province: "",
+        district: "",
+        subDistrict: "",
+        zipCode: "",
+        phone: "",
+    }
+
+    formOrder.value = {
+        productID: "",
+        quantity: "",
+        price: "",
+        totalPrice: "0"
+    }
+}
+
 const onClearFormCustomer = () => {
     formCustomer.value = {
         id: "",
@@ -152,7 +173,7 @@ const onLoadDDL = async () => {
     })
     ddl.value.province = province.map(item => {
         return { label: item.name_th, value: item.id }
-    })
+    }).sort((a, b) => a.label.localeCompare(b.label))
 }
 
 const onSearchCustomer = async (phone) => {
@@ -357,8 +378,17 @@ onMounted(async () => {
                 </div>
             </div>
             <div class="w-full bg-white rounded-xl py-5">
-                <div class="px-6">
+                <div class="flex justify-between px-6">
                     <span class="text-lg font-semibold text-red-800">รายละเอียดการสั่งซื้อสินค้า</span>
+                    <div class="flex space-x-2 items-center rounded-full px-3  bg-red-100 cursor-pointer"
+                        @click="onClearAllForm">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 512 512">
+                            <path
+                                d="M256 48C141.1 48 48 141.1 48 256s93.1 208 208 208 208-93.1 208-208S370.9 48 256 48zm0 336.1c-70.7 0-128-57.3-128-128.1s57.3-128.1 128-128.1v-37c0-6.4 7.1-10.2 12.4-6.7l72.9 52.6c4.9 3.3 4.7 10.6-.4 13.6L268 196.7c-5.3 3.1-12-.8-12-6.9v-41.9c-60.3 0-109.2 49.7-108.1 110.2 1.1 59.1 50.3 106.7 109.5 106 55.9-.7 101.8-43.7 106.3-99 .4-5.2 4.7-9.1 9.9-9.1 5.8 0 10.4 4.9 9.9 10.7-5.4 66-60.4 117.4-127.5 117.4z"
+                                fill="#A2422C" />
+                        </svg>
+                        <span class="text-sm font-bold text-red-800">ล้างฟอร์ม</span>
+                    </div>
                 </div>
                 <hr class="mt-2 mx-6" style="border: 1px solid #c2796a" />
                 <div class="grid grid-cols-2 gap-4 px-6">

@@ -63,7 +63,8 @@ const formModal = ref({
 
 onMounted(async () => {
     store.commit("setStatusLoading", true);
-    ddl.value.province = province;
+    // ddl.value.province = province;
+    ddl.value.province = province.sort((a, b) => a.name_th.localeCompare(b.name_th));
     await onLoadData();
     modalAlert.value = {
         status: false,
