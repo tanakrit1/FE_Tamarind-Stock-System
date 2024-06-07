@@ -133,7 +133,7 @@ const onLoadData = async () => {
         const messages = response.message;
         formattedMessages = messages
           .map((message) => `<li>${message}</li>`)
-          .join("<br>");
+          .join("");
       } else {
         formattedMessages = response.message.toString();
       }
@@ -173,7 +173,7 @@ const onShowProduct = async () => {
         const messages = response.message;
         formattedMessages = messages
           .map((message) => `<li>${message}</li>`)
-          .join("<br>");
+          .join("");
       } else {
         formattedMessages = response.message.toString();
       }
@@ -281,7 +281,7 @@ const onChangeSupplier = async (phone) => {
         const messages = response.message;
         formattedMessages = messages
           .map((message) => `<li>${message}</li>`)
-          .join("<br>");
+          .join("");
       } else {
         formattedMessages = response.message.toString();
       }
@@ -422,7 +422,7 @@ const onSubmit = async () => {
         const messages = response.message;
         const formattedMessages = messages
           .map((message) => `<li>${message}</li>`)
-          .join("<br>");
+          .join("");
         formAlert.value = {
           status: true,
           title: "เกิดข้อผิดพลาด",

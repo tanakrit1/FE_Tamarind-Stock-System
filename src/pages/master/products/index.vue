@@ -129,6 +129,7 @@ const onSubmitModal = async () => {
       priceOut: Number(formModal.value.in_price_out),
       type: formModal.value.in_type,
     };
+    console.log("body --> ", body);
     await _apiProduct.create(body, async (response) => {
       console.log("responseCreate --> ", response);
       if (response.statusCode === 200) {

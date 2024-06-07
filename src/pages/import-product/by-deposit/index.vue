@@ -138,7 +138,7 @@ const onLoadData = async () => {
       const messages = response.message;
       const formattedMessages = messages
         .map((message) => `<li>${message}</li>`)
-        .join("<br>");
+        .join("");
       formAlert.value = {
         status: true,
         title: "เกิดข้อผิดพลาด",
@@ -172,7 +172,7 @@ const onShowProduct = async () => {
       const messages = response.message;
       const formattedMessages = messages
         .map((message) => `<li>${message}</li>`)
-        .join("<br>");
+        .join("");
       formAlert.value = {
         status: true,
         title: "เกิดข้อผิดพลาด",
@@ -256,7 +256,6 @@ const onChangeSupplier = async (phone) => {
 
         console.log("formSupplier", formSupplier.value);
       } else {
-        store.commit("setStatusLoading", false);
 
         formAlert.value = {
           status: true,
@@ -276,11 +275,13 @@ const onChangeSupplier = async (phone) => {
           phone: phone,
         };
       }
+      store.commit("setStatusLoading", false);
+
     } else {
       const messages = response.message;
       const formattedMessages = messages
         .map((message) => `<li>${message}</li>`)
-        .join("<br>");
+        .join("");
       formAlert.value = {
         status: true,
         title: "เกิดข้อผิดพลาด",
@@ -433,7 +434,7 @@ const onSubmit = async () => {
       const messages = response.message;
       const formattedMessages = messages
         .map((message) => `<li>${message}</li>`)
-        .join("<br>");
+        .join("");
       formAlert.value = {
         status: true,
         title: "เกิดข้อผิดพลาด",
