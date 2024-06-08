@@ -21,6 +21,7 @@ const columns = [
   { field: "price", label: "ราคารวม", width: "10%" },
   { field: "supplierFirstName", label: "ชื่อ", width: "20%" },
   { field: "supplierLastName", label: "สกุล", width: "20%" },
+  { field: "supplierPhone", label: "เบอร์โทร", width: "20%" },
   { field: "supplierAddress", label: "ที่อยู่", width: "25%" },
   { field: "supplierSubDistrict", label: "ตำบล", width: "20%" },
   { field: "supplierDistrict", label: "อำเภอ", width: "20%" },
@@ -115,6 +116,7 @@ const onLoadData = async () => {
           price: item.price,
           supplierFirstName: item.supplier.firstName,
           supplierLastName: item.supplier.lastName,
+          supplierPhone: item.supplier.phone,
           supplierAddress: item.supplier.address,
           supplierSubDistrict: item.supplier.subDistric,
           supplierDistrict: item.supplier.distric,
@@ -259,7 +261,7 @@ const onChangeSupplier = async (phone) => {
         formAlert.value = {
           status: true,
           title: "เเจ้งเตือน",
-          body: "ไม่พบรายชื่อลูกค้าในระบบ กรณาเพิ่มลูกค้าใหม่",
+          body: "ไม่พบรายชื่อลูกค้าในระบบ กรุณาเพิ่มลูกค้าใหม่",
         };
         formSupplierActive.value = true;
         formSupplier.value = {
@@ -379,7 +381,7 @@ const onSubmit = async () => {
     const body = {
       //------transaction_import------//
       quantity: formProduct.value.quantity,
-      price: Number(formProduct.value.price), //formProduct.value.totalPrice,
+      price: Number(formProduct.value.totalPrice), //formProduct.value.totalPrice, formProduct.totalPrice
       // priceDeposit:1152.05,
       typeAction: formProduct.value.typeAction,
       //--------product----------------//
@@ -493,7 +495,7 @@ onMounted(async () => {
             <div
               class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6"
             >
-              <span class="w-1/4 text-red-800 font-semibold">รหัสสินค้า</span>
+              <span class="w-1/4 text-red-800 font-semibold">ชื่อสินค้า</span>
               <select
                 v-model="formProduct.productID"
                 class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
@@ -505,23 +507,10 @@ onMounted(async () => {
                   :key="index"
                   :value="item.id"
                 >
-                  {{ item.specialID }}
+                  {{ item.name }}
                 </option>
               </select>
             </div>
-
-            <div
-              class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6"
-            >
-              <span class="w-1/4 text-red-800 font-semibold">ชื่อสินค้า</span>
-              <input
-                disabled
-                type="text"
-                class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
-                v-model="formProduct.productName"
-              />
-            </div>
-
             <div
               class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6"
             >

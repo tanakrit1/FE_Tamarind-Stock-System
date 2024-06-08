@@ -69,36 +69,36 @@ const onClickEdit = (row) => {
   onOpenModal("edit");
 };
 
-const onClickRemove = async (row) => {
-  console.log("onClickRemove--> ", row);
-  await _apiProduct.delete(row.id, async (response) => {
-    if (response.statusCode === 200) {
-      modalAlert.value = {
-        status: true,
-        title: "สำเร็จ",
-        body: "ลบข้อมูลสำเร็จ",
-      };
-      await onLoadData();
-    } else {
-      //   console.log("response.message --> ", response.message);
-      let mapValidation = "";
-      if (Array.isArray(response.message)) {
-        mapValidation = response.message
-          .map((item) => {
-            return `<li>${item}</li>`;
-          })
-          .join("");
-      } else {
-        mapValidation = response.message; // Assuming response.message is a string
-      }
-      modalAlert.value = {
-        status: true,
-        title: "กรุณาตรวจสอบ",
-        body: mapValidation,
-      };
-    }
-  });
-};
+// const onClickRemove = async (row) => {
+//   console.log("onClickRemove--> ", row);
+//   await _apiProduct.delete(row.id, async (response) => {
+//     if (response.statusCode === 200) {
+//       modalAlert.value = {
+//         status: true,
+//         title: "สำเร็จ",
+//         body: "ลบข้อมูลสำเร็จ",
+//       };
+//       await onLoadData();
+//     } else {
+//       //   console.log("response.message --> ", response.message);
+//       let mapValidation = "";
+//       if (Array.isArray(response.message)) {
+//         mapValidation = response.message
+//           .map((item) => {
+//             return `<li>${item}</li>`;
+//           })
+//           .join("");
+//       } else {
+//         mapValidation = response.message; // Assuming response.message is a string
+//       }
+//       modalAlert.value = {
+//         status: true,
+//         title: "กรุณาตรวจสอบ",
+//         body: mapValidation,
+//       };
+//     }
+//   });
+// };
 
 const onOpenModal = (mode) => {
   modeModal.value = mode;
@@ -266,9 +266,7 @@ onMounted(async () => {
             :columns="columns"
             :rows="rows"
             :rowEdit="true"
-            :rowRemove="true"
             @onClickEdit="onClickEdit"
-            @onClickRemove="onClickRemove"
           />
         </div>
 
@@ -325,7 +323,7 @@ onMounted(async () => {
           <div class="basis-1/2 px-3 space-y-2">
             <label>ราคาขื้อเข้า</label><br />
             <input
-              type="text"
+              type="number"
               class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
               v-model="formModal.in_price"
             />
@@ -333,7 +331,7 @@ onMounted(async () => {
           <div class="basis-1/2 px-3 space-y-2">
             <label>ราคาขายออก</label><br />
             <input
-              type="text"
+              type="number"
               class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
               v-model="formModal.in_price_out"
             />

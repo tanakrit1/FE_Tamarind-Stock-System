@@ -40,6 +40,12 @@ const router = createRouter({
             props: true 
         },
         {
+            path: "/report/stock-list",
+            name: "stock-list",
+            component: () => import("./pages/report/stock-list.vue"),
+            props: true
+        },
+        {
             path: "/by-deposit",
             name: "by-deposit",
             component: () => import("./pages/export-product/by-deposit/index.vue"),

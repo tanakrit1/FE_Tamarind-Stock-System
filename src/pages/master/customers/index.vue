@@ -136,27 +136,27 @@ const onClickEdit = (row) => {
     onOpenModal("edit");
 };
 
-const onClickRemove = async (row) => {
-    await _apiCustomer.delete(row.id, async (response) => {
-        if (response.statusCode === 200) {
-            modalAlert.value = {
-                status: true,
-                title: "สำเร็จ",
-                body: "ลบข้อมูลสำเร็จ",
-            };
-            await onLoadData();
-        } else {
-            const mapValidation = response.message.map((item) => {
-                return `<li>${item}</li>`;
-            });
-            modalAlert.value = {
-                status: true,
-                title: "กรุณาตรวจสอบ",
-                body: mapValidation.join(""),
-            };
-        }
-    });
-};
+// const onClickRemove = async (row) => {
+//     await _apiCustomer.delete(row.id, async (response) => {
+//         if (response.statusCode === 200) {
+//             modalAlert.value = {
+//                 status: true,
+//                 title: "สำเร็จ",
+//                 body: "ลบข้อมูลสำเร็จ",
+//             };
+//             await onLoadData();
+//         } else {
+//             const mapValidation = response.message.map((item) => {
+//                 return `<li>${item}</li>`;
+//             });
+//             modalAlert.value = {
+//                 status: true,
+//                 title: "กรุณาตรวจสอบ",
+//                 body: mapValidation.join(""),
+//             };
+//         }
+//     });
+// };
 
 const onOpenModal = async (mode) => {
     modeModal.value = mode;
@@ -304,8 +304,8 @@ const onCloseModal = () => {
                 </div>
 
                 <div class="rounded-xl mb-10 overflow-auto">
-                    <tableManage :columns="columns" :rows="rows" :rowEdit="true" :rowRemove="true"
-                        @onClickEdit="onClickEdit" @onClickRemove="onClickRemove" />
+                    <tableManage :columns="columns" :rows="rows" :rowEdit="true"
+                        @onClickEdit="onClickEdit" />
                 </div>
                 <div class="flex justify-end">
                     <paginationPage v-model:currentPage="pagination.page" :totalPages="pagination.totalPage"

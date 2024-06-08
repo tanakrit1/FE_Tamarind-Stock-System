@@ -71,6 +71,10 @@ const itemNavbar = ref([
                 name: 'รายงานการนำออกสินค้า',
                 path: '/report/order-list'
             },
+            {
+                name: 'รายงานสินค้าคงเหลือ',
+                path: '/report/stock-list'
+            },
         ]
     },
     

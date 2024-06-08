@@ -65,27 +65,27 @@ const onClickEdit = (row) => {
 
 }
 
-const onClickRemove = async (row) => {
-    await _apiUser.delete(row.username, async (response) => {
-        if (response.statusCode === 200) {
-            modalAlert.value = {
-                status: true,
-                title: "สำเร็จ",
-                body: "ลบข้อมูลสำเร็จ"
-            }
-            await onLoadData()
-        } else {
-            const mapValidation = response.message.map(item => {
-                return `<li>${item}</li>`
-            })
-            modalAlert.value = {
-                status: true,
-                title: "กรุณาตรวจสอบ",
-                body: mapValidation.join('')
-            }
-        }
-    })
-}
+// const onClickRemove = async (row) => {
+//     await _apiUser.delete(row.username, async (response) => {
+//         if (response.statusCode === 200) {
+//             modalAlert.value = {
+//                 status: true,
+//                 title: "สำเร็จ",
+//                 body: "ลบข้อมูลสำเร็จ"
+//             }
+//             await onLoadData()
+//         } else {
+//             const mapValidation = response.message.map(item => {
+//                 return `<li>${item}</li>`
+//             })
+//             modalAlert.value = {
+//                 status: true,
+//                 title: "กรุณาตรวจสอบ",
+//                 body: mapValidation.join('')
+//             }
+//         }
+//     })
+// }
 
 const onOpenModal = (mode) => {
     modeModal.value = mode
@@ -245,8 +245,8 @@ onMounted(async () => {
                 </div>
 
                 <div class="rounded-xl mb-10 overflow-auto ">
-                    <tableManage :columns="columns" :rows="rows" :rowEdit="true" :rowRemove="true"
-                        @onClickEdit="onClickEdit" @onClickRemove="onClickRemove" />
+                    <tableManage :columns="columns" :rows="rows" :rowEdit="true"
+                        @onClickEdit="onClickEdit"  />
                 </div>
                 <div class="flex justify-end py-5">
           <paginationPage
