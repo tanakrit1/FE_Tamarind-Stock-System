@@ -197,86 +197,108 @@ const onOpenModal = async (mode) => {
 };
 
 const onSubmitModal = async () => {
-    if (modeModal.value === "add") {
-        const body = {
-            firstName: formModal.value.in_firstName,
-            lastName: formModal.value.in_lastName,
-            address: formModal.value.in_address,
-            subDistric:
-                subDistrict.find((item) => item.id == formModal.value.in_subDistrict)
-                    ?.name_th || "",
-            distric:
-                district.find((item) => item.id == formModal.value.in_district)
-                    ?.name_th || "",
-            province:
-                province.find((item) => item.id == formModal.value.in_province)
-                    ?.name_th || "",
-            zipCode: formModal.value.in_zipCode.toString(),
-            phone: formModal.value.in_phone.toString(),
-        };
-        await _apiSupplier.create(body, async (response) => {
-            if (response.statusCode === 200) {
-                modalAlert.value = {
-                    status: true,
-                    title: "สำเร็จ",
-                    body: "บันทึกข้อมูลสำเร็จ",
-                };
-                onCloseModal();
-                await onLoadData();
-            } else {
-                const mapValidation = response.message.map((item) => {
-                    return `<li>${item}</li>`;
-                });
-                modalAlert.value = {
-                    status: true,
-                    title: "กรุณาตรวจสอบ",
-                    body: mapValidation.join(""),
-                };
-            }
-        });
+    store.commit("setStatusLoading", true);
+    const resultValidatePhone = validatePhone()
+    console.log("resultValidatePhone--> ", resultValidatePhone)
+    if (resultValidatePhone) {
+        if (modeModal.value === "add") {
+            const body = {
+                firstName: formModal.value.in_firstName,
+                lastName: formModal.value.in_lastName,
+                address: formModal.value.in_address,
+                subDistric:
+                    subDistrict.find((item) => item.id == formModal.value.in_subDistrict)
+                        ?.name_th || "",
+                distric:
+                    district.find((item) => item.id == formModal.value.in_district)
+                        ?.name_th || "",
+                province:
+                    province.find((item) => item.id == formModal.value.in_province)
+                        ?.name_th || "",
+                zipCode: formModal.value.in_zipCode.toString(),
+                phone: formModal.value.in_phone.toString(),
+            };
+            await _apiSupplier.create(body, async (response) => {
+                if (response.statusCode === 200) {
+                    modalAlert.value = {
+                        status: true,
+                        title: "สำเร็จ",
+                        body: "บันทึกข้อมูลสำเร็จ",
+                    };
+                    onCloseModal();
+                    await onLoadData();
+                } else {
+                    const mapValidation = response.message.map((item) => {
+                        return `<li>${item}</li>`;
+                    });
+                    modalAlert.value = {
+                        status: true,
+                        title: "กรุณาตรวจสอบ",
+                        body: mapValidation.join(""),
+                    };
+                }
+            });
+        } else {
+            const body = {
+                firstName: formModal.value.in_firstName,
+                lastName: formModal.value.in_lastName,
+                address: formModal.value.in_address,
+                subDistric:
+                    subDistrict.find((item) => item.id == formModal.value.in_subDistrict)
+                        ?.name_th || "",
+                distric:
+                    district.find((item) => item.id == formModal.value.in_district)
+                        ?.name_th || "",
+                province:
+                    province.find((item) => item.id == formModal.value.in_province)
+                        ?.name_th || "",
+                zipCode: formModal.value.in_zipCode.toString(),
+                phone: formModal.value.in_phone.toString(),
+            };
+            await _apiSupplier.update(body, rowAction.value.id, async (response) => {
+                if (response.statusCode === 200) {
+                    modalAlert.value = {
+                        status: true,
+                        title: "สำเร็จ",
+                        body: "บันทึกข้อมูลสำเร็จ",
+                    };
+                    onCloseModal();
+                    await onLoadData();
+                } else {
+                    const mapValidation = response.message.map((item) => {
+                        return `<li>${item}</li>`;
+                    });
+                    modalAlert.value = {
+                        status: true,
+                        title: "กรุณาตรวจสอบ",
+                        body: mapValidation.join(""),
+                    };
+                }
+            });
+        }
     } else {
-        const body = {
-            firstName: formModal.value.in_firstName,
-            lastName: formModal.value.in_lastName,
-            address: formModal.value.in_address,
-            subDistric:
-                subDistrict.find((item) => item.id == formModal.value.in_subDistrict)
-                    ?.name_th || "",
-            distric:
-                district.find((item) => item.id == formModal.value.in_district)
-                    ?.name_th || "",
-            province:
-                province.find((item) => item.id == formModal.value.in_province)
-                    ?.name_th || "",
-            zipCode: formModal.value.in_zipCode.toString(),
-            phone: formModal.value.in_phone.toString(),
+        modalAlert.value = {
+            status: true,
+            title: "กรุณาตรวจสอบ",
+            body: "ข้อมูลเบอร์โทรศัพท์ไม่ถูกต้อง",
         };
-        await _apiSupplier.update(body, rowAction.value.id, async (response) => {
-            if (response.statusCode === 200) {
-                modalAlert.value = {
-                    status: true,
-                    title: "สำเร็จ",
-                    body: "บันทึกข้อมูลสำเร็จ",
-                };
-                onCloseModal();
-                await onLoadData();
-            } else {
-                const mapValidation = response.message.map((item) => {
-                    return `<li>${item}</li>`;
-                });
-                modalAlert.value = {
-                    status: true,
-                    title: "กรุณาตรวจสอบ",
-                    body: mapValidation.join(""),
-                };
-            }
-        });
     }
+    store.commit("setStatusLoading", false);
 };
 
 const onCloseModal = () => {
     document.getElementById("modal-supplier").close();
 };
+
+const validatePhone = () => {
+    if (!isNaN(Number(formModal.value.in_phone))) {
+        return true
+    }
+    return false
+    // if( formModal.value.in_phone.toString().length > 10 ){
+    //     formModal.value.in_phone = formModal.value.in_phone.toString().substring(0, 10)
+    // }
+}
 </script>
 
 <template>
@@ -346,7 +368,7 @@ const onCloseModal = () => {
                     </div>
                     <div class="basis-1/2 px-3 space-y-2 mb-3">
                         <label class="font-semibold">เบอร์โทร</label><br />
-                        <input v-model="formModal.in_phone" type="text"
+                        <input v-model="formModal.in_phone" type="text" maxlength="10"
                             class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3" />
                     </div>
                     <div class="basis-1/2 px-3 space-y-2 mb-3">

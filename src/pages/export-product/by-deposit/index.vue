@@ -360,7 +360,7 @@ const onTranform = (row) => {
     console.log("findRows--> ", findRows)
     formOrder.value = {
         productID: findRows.product.id,
-        quantity: findRows.quantity,
+        quantity: findRows.remain,
         price: "0",
         totalPrice: "0"
     }

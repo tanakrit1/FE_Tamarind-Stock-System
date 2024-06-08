@@ -80,7 +80,6 @@ const onClearAllForm = () => {
 
 const onClearFormCustomer = () => {
     formCustomer.value = {
-        id: "",
         firstName: "",
         lastName: "",
         address: "",
@@ -275,11 +274,12 @@ const onCreateTransection = async (pFormOrder, pFormCustomer) => {
                 title: "สำเร็จ",
                 body: "เพิ่มข้อมูลเรียบร้อย"
             }
+            formCustomerActive.value = false
             onClearFormCustomer()
             onClearFormOrder()
             onLoadTable()
         } else {
-            const mapValidation = response.message.map((item) => {
+            const mapValidation = response.description.map((item) => {
                 return `<li>${item}</li>`;
             });
             formAlert.value = {
@@ -292,17 +292,34 @@ const onCreateTransection = async (pFormOrder, pFormCustomer) => {
     })
 }
 
+const validatePhone = () => {
+    if (!isNaN(Number(formCustomer.value.phone))) {
+        return true
+    }
+    return false
+}
+
 const onSubmitForm = async () => {
     const resultValid = await fnValidate(formOrder.value, formCustomer.value)
-    if (resultValid) {
-        await onCreateTransection(formOrder.value, formCustomer.value)
+    const resultValidatePhone = validatePhone()
+    if (resultValidatePhone) {
+        if (resultValid) {
+            await onCreateTransection(formOrder.value, formCustomer.value)
+        } else {
+            formAlert.value = {
+                status: true,
+                title: "เเจ้งเตือน",
+                body: "กรุณากรอกข้อมูลให้ครบถ้วน"
+            }
+        }
     } else {
         formAlert.value = {
             status: true,
-            title: "เเจ้งเตือน",
-            body: "กรุณากรอกข้อมูลให้ครบถ้วน"
-        }
+            title: "กรุณาตรวจสอบ",
+            body: "ข้อมูลเบอร์โทรศัพท์ไม่ถูกต้อง",
+        };
     }
+
 }
 
 const onLoadTable = async () => {
@@ -521,7 +538,7 @@ onMounted(async () => {
                                 {{ item.label }}
                             </option>
                         </select>
-                        <input v-else class="h-8 focus:outline-red-400 rounded bg-red-100 px-3" type="text"
+                        <input  v-else class="h-8 focus:outline-red-400 rounded bg-red-100 px-3" type="text"
                             v-model="formCustomer.province" />
                     </div>
                     <div class="sm:basis-full md:basis-1/2 lg:basis-2/6 flex flex-col px-3 mb-3">

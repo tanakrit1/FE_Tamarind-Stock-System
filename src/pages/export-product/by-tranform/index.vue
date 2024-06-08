@@ -80,7 +80,6 @@ const onClearAllForm = () => {
 
 const onClearFormCustomer = () => {
     formCustomer.value = {
-        id: "",
         firstName: "",
         lastName: "",
         address: "",
