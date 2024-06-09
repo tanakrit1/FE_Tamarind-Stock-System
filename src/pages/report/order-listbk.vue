@@ -1,0 +1,500 @@
+<script setup>
+import { onMounted, ref } from "vue";
+import tableManage from "../../components/tables/table-manage.vue";
+import paginationPage from "../../components/pagination/pagination-page.vue";
+import _apiProduct from "../../api/master-products.js";
+import _apiExport from "../../api/export-product.js";
+import { useRouter } from "vue-router";
+import ExcelJS from "exceljs";
+import alert from "../../components/alert/alert.vue";
+import store from "../../store";
+const $router = useRouter();
+
+const pagination = ref({
+  page: 1,
+  limit: 5,
+  totalPage: 0,
+});
+
+const formAlert = ref({
+  status: false,
+  title: "",
+  body: "",
+});
+const onCloseAlert = () => {
+  formAlert.value.status = false;
+};
+
+const onChangePagination = (val) => {
+  pagination.page = val;
+  onSubmit();
+};
+
+const columns = [
+  { field: "productName", label: "รหัส", width: "auto" },
+  { field: "productName", label: "ชื่อสินค้า", width: "auto" },
+  { field: "quantity", label: "ปริมาณสินค้า", width: "auto" },
+  { field: "productInPrice", label: "ราคารับซื้อ", width: "auto" },
+  { field: "productOutPrice", label: "ราคาขายออก", width: "auto" },
+  { field: "price", label: "ราคารวม", width: "auto" },
+  { field: "typeAction", label: "ประเภทสินค้านำออก", width: "auto" },
+  { field: "customerFirstName", label: "ชื่อ", width: "auto" },
+  { field: "customerLastName", label: "สกุล", width: "auto" },
+  { field: "customerPhone", label: "เบอร์โทร", width: "auto" },
+  { field: "customerAddress", label: "ที่อยู่", width: "auto" },
+  { field: "customerSubDistrict", label: "ตำบล", width: "auto" },
+  { field: "customerDistrict", label: "อำเภอ", width: "auto" },
+  { field: "customerProvince", label: "จังหวัด", width: "auto" },
+  { field: "customerZipCode", label: "ไปรษณีย์", width: "auto" },
+];
+
+const rows = ref([]);
+
+let flattenedData = null;
+const showTable = ref(false);
+const currentDate = ref({
+  startExportDate: "",
+  endExportDate: "",
+  startDepositDate: "",
+  endDepositDate: "",
+});
+
+const inputSearch = ref({
+  in_productName: "",
+  in_status: "",
+  in_orderID: "",
+});
+const selectSearch = ref({
+  in_exportType: "ขายสินค้า",
+});
+const onShowProduct = async () => {
+  const body = {
+    page: 1,
+    limit: 10000,
+    sortField: "id",
+    sortType: "ASC",
+    filterModel: {
+      logicOperator: "and",
+      items: [],
+    },
+  };
+  await _apiProduct.search(body, (response) => {
+    if (response.statusCode === 200) {
+      console.log("response --> ", response);
+      // setCurrentDate();
+      inputSearch.value = response.data.map((item) => {
+        return {
+          id: item.id,
+          specialID: item.specialID,
+          productName: item.name,
+          productPrice: item.price,
+          quantity: item.quantity,
+        };
+      });
+    }
+  });
+};
+
+const onSubmit = async () => {
+  console.log("***onSubmit***");
+  if (
+    currentDate.value.startExportDate === "" ||
+    currentDate.value.endExportDate === ""
+  ) {
+    store.commit("setStatusLoading", true);
+
+    const body = {
+      page: 1,
+      limit: 10000,
+      sortField: "id",
+      sortType: "ASC",
+      filterModel: {
+        logicOperator: "and",
+        items: [
+          {
+            field: "product_name",
+            operator: "equals",
+            value: inputSearch.value.in_productName,
+          },
+          {
+            field: "typeAction",
+            operator: "equals",
+            value: selectSearch.value.in_exportType,
+          },
+        ],
+      },
+    };
+    console.log("body --> ", body);
+    await _apiExport.search(body, (response) => {
+      if (response.statusCode === 200) {
+        console.log("response --> ", response);
+        if (response.data.length > 0) {
+          store.commit("setStatusLoading", false);
+          console.log("_apiExport--> ", response);
+          showTable.value = true;
+          flattenedData = response.data.map((item) => ({
+            specialID: item.product.specialID,
+            productName: item.product.name,
+            productInPrice: item.product.price,
+            productOutPrice: item.product.priceOut,
+            quantity: item.quantity,
+            price: item.price,
+            exportDate: item.exportDate,
+            priceDeposit: item.priceDeposit,
+            typeAction: item.typeAction,
+            customerPhone: item.customer.phone,
+            customerFirstName: item.customer.firstName,
+            customerLastName: item.customer.lastName,
+            customerAddress: item.customer.address,
+            customerSubDistrict: item.customer.subDistric,
+            customerDistrict: item.customer.distric,
+            customerProvince: item.customer.province,
+            customerZipCode: item.customer.zipCode,
+          }));
+          console.log("showTable --> ", showTable);
+          console.log("flattenedData --> ", flattenedData);
+          rows.value = flattenedData;
+          pagination.value.totalPage = response.metadata.totalPage;
+        } else {
+          showTable.value = false;
+          formAlert.value = {
+            status: true,
+            title: "เกิดข้อผิดพลาด",
+            body: "ไม่พบข้อมูล",
+          };
+
+          store.commit("setStatusLoading", false);
+        }
+      } else {
+        showTable.value = false;
+        formAlert.value = {
+          status: true,
+          title: "เกิดข้อผิดพลาด",
+          body: response.message,
+        };
+
+        store.commit("setStatusLoading", false);
+      }
+    });
+    console.log("ไม่มีวันที่");
+  } else if (
+    currentDate.value.startExportDate !== "" ||
+    currentDate.value.endExportDate !== ""
+  ) {
+    console.log("มีวันที่นำออกข้อมูล");
+    store.commit("setStatusLoading", true);
+
+    const body = {
+      page: 1,
+      limit: 10000,
+      sortField: "id",
+      sortType: "ASC",
+      filterModel: {
+        logicOperator: "and",
+        items: [
+          {
+            field: "product_name",
+            operator: "equals",
+            value: inputSearch.value.in_productName,
+          },
+          {
+            field: "typeAction",
+            operator: "equals",
+            value: selectSearch.value.in_exportType,
+          },
+          {
+            field: "exportDate",
+            operator: "between",
+            value: [
+              currentDate.value.startExportDate,
+              currentDate.value.endExportDate,
+            ],
+          },
+        ],
+      },
+    };
+    console.log("body --> ", body);
+    await _apiExport.search(body, (response) => {
+      if (response.statusCode === 200) {
+        console.log("response --> ", response);
+        if (response.data.length > 0) {
+          console.log("_apiExport--> ", response);
+          showTable.value = true;
+          flattenedData = response.data.map((item) => ({
+            specialID: item.product.specialID,
+            productName: item.product.name,
+            productInPrice: item.product.price,
+            productOutPrice: item.product.priceOut,
+            quantity: item.quantity,
+            price: item.price,
+            exportDate: item.exportDate,
+            priceDeposit: item.priceDeposit,
+            typeAction: item.typeAction,
+            customerPhone: item.customer.phone,
+            customerFirstName: item.customer.firstName,
+            customerLastName: item.customer.lastName,
+            customerAddress: item.customer.address,
+            customerSubDistrict: item.customer.subDistric,
+            customerDistrict: item.customer.distric,
+            customerProvince: item.customer.province,
+            customerZipCode: item.customer.zipCode,
+          }));
+          console.log("showTable --> ", showTable);
+          console.log("flattenedData --> ", flattenedData);
+          rows.value = flattenedData;
+          pagination.value.totalPage = response.metadata.totalPage;
+        } else {
+          store.commit("setStatusLoading", false);
+
+          showTable.value = false;
+          formAlert.value = {
+            status: true,
+            title: "เกิดข้อผิดพลาด",
+            body: "ไม่พบข้อมูล",
+          };
+        }
+      } else {
+        store.commit("setStatusLoading", false);
+        showTable.value = false;
+        formAlert.value = {
+          status: true,
+          title: "เกิดข้อผิดพลาด",
+          body: response.message,
+        };
+      }
+    });
+  }
+};
+
+onMounted(async () => {
+  store.commit("setStatusLoading", true);
+  await onShowProduct();
+  // await onLoadTable();
+  store.commit("setStatusLoading", false);
+});
+const onExportExcel = () => {
+  console.log("***onExportExcel***");
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet("Sheet A");
+  // เพิ่มหัวข้อคอลัมน์ใน Excel spreadsheet
+  worksheet.columns = [
+    { header: "Special ID", key: "specialID", width: 15 },
+    { header: "Product Name", key: "productName", width: 30 },
+    { header: "Type of Action", key: "typeAction", width: 20 },
+    { header: "Product Price", key: "productPrice", width: 15 },
+    { header: "Product Out Price", key: "productOutPrice", width: 15 },
+    { header: "Quantity", key: "quantity", width: 15 },
+    { header: "Price", key: "price", width: 15 },
+    { header: "Price Deposit", key: "priceDeposit", width: 15 },
+    { header: "Export Date", key: "exportDate", width: 15 },
+    { header: "Customer First Name", key: "customerFirstName", width: 20 },
+    { header: "Customer Last Name", key: "customerLastName", width: 20 },
+    { header: "Customer Phone", key: "customerPhone", width: 15 },
+    { header: "Customer Address", key: "customerAddress", width: 30 },
+    { header: "Customer SubDistrict", key: "customerSubDistrict", width: 20 },
+    { header: "Customer District", key: "customerDistrict", width: 20 },
+    { header: "Customer Province", key: "customerProvince", width: 20 },
+    { header: "Customer Zip Code", key: "customerZipCode", width: 15 },
+  ];
+
+  const headerRow = worksheet.getRow(1); // แถวหัวเริ่มที่ index 1
+
+  // กำหนดสีพื้นหลังให้กับแต่ละ cell ในแถวหัว
+  headerRow.eachCell((cell) => {
+    cell.fill = {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: { argb: "FFFF00" }, // สีที่คุณต้องการ
+    };
+  });
+  // เพิ่มข้อมูลลงในแถวของ Excel spreadsheet
+  flattenedData.forEach((item, index) => {
+    worksheet.addRow({
+      specialID: item.specialID,
+      productName: item.productName,
+      typeAction: item.typeAction,
+      productInPrice: item.productInPrice,
+      productOutPrice: item.productOutPrice,
+      quantity: item.quantity,
+      price: item.price,
+      priceDeposit: item.priceDeposit,
+      exportDate: item.exportDate,
+      customerPhone: item.customerPhone,
+      customerFirstName: item.customerFirstName,
+      customerLastName: item.customerLastName,
+      customerAddress: item.customerAddress,
+      customerSubDistrict: item.customerSubDistrict,
+      customerDistrict: item.customerDistrict,
+      customerProvince: item.customerProvince,
+      customerZipCode: item.customerZipCode,
+    });
+  });
+
+  // สร้างไฟล์ Excel
+  workbook.xlsx.writeBuffer().then((data) => {
+    const blob = new Blob([data], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "ExportedData.xlsx";
+    a.click();
+  });
+};
+</script>
+<template>
+  <div class="flex md:justify-center">
+    <div class="sm:w-1/1 md:w-4/5 flex flex-col mb-5 space-y-2">
+      <div class="flex justify-start">
+        <div class="flex">
+          <svg
+            width="33"
+            height="33"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+            <g
+              id="SVGRepo_tracerCarrier"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            ></g>
+            <g id="SVGRepo_iconCarrier">
+              <path
+                fill-rule="evenodd"
+                clip-rule="evenodd"
+                d="M10.9436 1.25H13.0564C14.8942 1.24998 16.3498 1.24997 17.489 1.40314C18.6614 1.56076 19.6104 1.89288 20.3588 2.64124C21.1071 3.38961 21.4392 4.33856 21.5969 5.51098C21.75 6.65019 21.75 8.10583 21.75 9.94359V14.0564C21.75 15.8942 21.75 17.3498 21.5969 18.489C21.4392 19.6614 21.1071 20.6104 20.3588 21.3588C19.6104 22.1071 18.6614 22.4392 17.489 22.5969C16.3498 22.75 14.8942 22.75 13.0564 22.75H10.9436C9.10583 22.75 7.65019 22.75 6.51098 22.5969C5.33856 22.4392 4.38961 22.1071 3.64124 21.3588C2.89288 20.6104 2.56076 19.6614 2.40314 18.489C2.24997 17.3498 2.24998 15.8942 2.25 14.0564V9.94358C2.24998 8.10582 2.24997 6.65019 2.40314 5.51098C2.56076 4.33856 2.89288 3.38961 3.64124 2.64124C4.38961 1.89288 5.33856 1.56076 6.51098 1.40314C7.65019 1.24997 9.10582 1.24998 10.9436 1.25ZM6.71085 2.88976C5.70476 3.02502 5.12511 3.27869 4.7019 3.7019C4.27869 4.12511 4.02502 4.70476 3.88976 5.71085C3.75159 6.73851 3.75 8.09318 3.75 10V14C3.75 15.9068 3.75159 17.2615 3.88976 18.2892C4.02502 19.2952 4.27869 19.8749 4.7019 20.2981C5.12511 20.7213 5.70476 20.975 6.71085 21.1102C7.73851 21.2484 9.09318 21.25 11 21.25H13C14.9068 21.25 16.2615 21.2484 17.2892 21.1102C18.2952 20.975 18.8749 20.7213 19.2981 20.2981C19.7213 19.8749 19.975 19.2952 20.1102 18.2892C20.2484 17.2615 20.25 15.9068 20.25 14V10C20.25 8.09318 20.2484 6.73851 20.1102 5.71085C19.975 4.70476 19.7213 4.12511 19.2981 3.7019C18.8749 3.27869 18.2952 3.02502 17.2892 2.88976C16.2615 2.75159 14.9068 2.75 13 2.75H11C9.09318 2.75 7.73851 2.75159 6.71085 2.88976ZM7.25 8C7.25 7.58579 7.58579 7.25 8 7.25H16C16.4142 7.25 16.75 7.58579 16.75 8C16.75 8.41421 16.4142 8.75 16 8.75H8C7.58579 8.75 7.25 8.41421 7.25 8ZM7.25 12C7.25 11.5858 7.58579 11.25 8 11.25H16C16.4142 11.25 16.75 11.5858 16.75 12C16.75 12.4142 16.4142 12.75 16 12.75H8C7.58579 12.75 7.25 12.4142 7.25 12ZM7.25 16C7.25 15.5858 7.58579 15.25 8 15.25H13C13.4142 15.25 13.75 15.5858 13.75 16C13.75 16.4142 13.4142 16.75 13 16.75H8C7.58579 16.75 7.25 16.4142 7.25 16Z"
+                fill="#A2422C"
+              ></path>
+            </g>
+          </svg>
+
+          <span class="text-2xl font-bold text-red-800">รายการนำออกสินค้า</span>
+        </div>
+      </div>
+      <div class="flex justify-center pb-5">
+        <div class="w-full bg-white rounded-xl py-5">
+          <div class="grid grid-cols-2 gap-4 px-6 mt-3">
+            <div class="flex flex-col">
+              <span class="text-red-800 font-semibold">ชื่อสินค้า</span>
+              <!-- <input
+                class="h-8 w-50 focus:outline-red-400 rounded bg-red-100 px-3"
+                type="text"
+              /> -->
+              <select
+                v-model="inputSearch.in_productName"
+                class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
+              >
+                <option
+                  v-for="(item, index) in inputSearch"
+                  :key="index"
+                  :value="item.productName"
+                >
+                  {{ item.productName }}
+                </option>
+              </select>
+            </div>
+
+            <div class="flex flex-col">
+              <span class="text-red-800 font-semibold">ประเภทนำเข้าสินค้า</span>
+              <select
+                v-model="selectSearch.in_exportType"
+                class="h-8 w-50 focus:outline-red-400 rounded bg-red-100 px-3"
+              >
+                <option selected value="ขายสินค้า">ขายสินค้า</option>
+                <option value="แปรรูป">แปรรูป</option>
+                <option value="ฝาก">ฝาก</option>
+              </select>
+            </div>
+
+            <div class="flex flex-col">
+              <span class="text-red-800 font-semibold">วันที่เริ่มต้น</span>
+              <input
+                class="h-8 w-50 focus:outline-red-400 rounded bg-red-100 px-3"
+                type="date"
+                v-model="currentDate.startExportDate"
+              />
+            </div>
+            <div class="flex flex-col">
+              <span class="text-red-800 font-semibold">วันที่สิ้นสุด</span>
+              <input
+                class="h-8 w-50 focus:outline-red-400 rounded bg-red-100 px-3"
+                type="date"
+                v-model="currentDate.endExportDate"
+              />
+            </div>
+          </div>
+          <div
+            class="grid grid-cols-2 gap-4 px-6 mt-3"
+            v-if="inputSearch.in_productType == 'ฝาก'"
+          >
+            <div class="flex flex-col">
+              <span class="text-red-800 font-semibold"
+                >วันที่เลิกฝากเริ่มต้น</span
+              >
+              <input
+                class="h-8 w-50 focus:outline-red-400 rounded bg-red-100 px-3"
+                type="date"
+                v-model="currentDate.startDepositDate"
+              />
+            </div>
+            <div class="flex flex-col">
+              <span class="text-red-800 font-semibold"
+                >วันที่เลิกฝากสิ้นสุด</span
+              >
+              <input
+                class="h-8 w-50 focus:outline-red-400 rounded bg-red-100 px-3"
+                type="date"
+                v-model="currentDate.endDepositDate"
+              />
+            </div>
+          </div>
+          <div class="flex justify-center py-5 space-x-3">
+            <button
+              label="ค้นหา"
+              @click="onSubmit"
+              class="h-10 rounded-full w-40 btn btn-btn-error btn-wide text-xl text-red-800 font-semibold"
+            >
+              ค้นหา
+            </button>
+            <button
+              @click="clearData"
+              class="h-10 rounded-full w-40 btn btn-btn-error btn-wide text-xl text-red-800 font-semibold"
+            >
+              ยกเลิก
+            </button>
+            <button
+              @click="onExportExcel"
+              class="h-10 rounded-full w-40 btn btn-btn-error btn-wide text-xl text-red-800 font-semibold"
+            >
+              รายงาน
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="rounded-xl mb-10 overflow-auto mx-5" v-if="showTable">
+    <tableManage :columns="columns" :rows="rows" />
+    <div class="flex justify-end py-5">
+      <paginationPage
+        v-model:currentPage="pagination.page"
+        :totalPages="pagination.totalPage"
+        :limit="pagination.limit"
+        @update:currentPage="onChangePagination"
+      />
+    </div>
+  </div>
+
+  <alert
+    :titleMessage="formAlert.title"
+    :bodyMessage="formAlert.body"
+    :status="formAlert.status"
+    @close-alert-modal="onCloseAlert"
+  />
+</template>
+
+
+<style></style>
