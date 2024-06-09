@@ -123,6 +123,7 @@ const onChangeDistrict = async (districtID) => {
     const filterSubDistrict = subDistrict.filter(
         (item) => item.amphure_id == districtID
     );
+    console.log("filterSubDistrict---> ", filterSubDistrict)
     ddl.value.subDistrict = filterSubDistrict;
     formModal.value.in_subDistrict = "";
     formModal.value.in_zipCode = "";
@@ -138,27 +139,27 @@ const onClickEdit = (row) => {
     onOpenModal("edit");
 };
 
-const onClickRemove = async (row) => {
-    await _apiSupplier.delete(row.id, async (response) => {
-        if (response.statusCode === 200) {
-            modalAlert.value = {
-                status: true,
-                title: "สำเร็จ",
-                body: "ลบข้อมูลสำเร็จ",
-            };
-            await onLoadData();
-        } else {
-            const mapValidation = response.message.map((item) => {
-                return `<li>${item}</li>`;
-            });
-            modalAlert.value = {
-                status: true,
-                title: "กรุณาตรวจสอบ",
-                body: mapValidation.join(""),
-            };
-        }
-    });
-};
+// const onClickRemove = async (row) => {
+//     await _apiSupplier.delete(row.id, async (response) => {
+//         if (response.statusCode === 200) {
+//             modalAlert.value = {
+//                 status: true,
+//                 title: "สำเร็จ",
+//                 body: "ลบข้อมูลสำเร็จ",
+//             };
+//             await onLoadData();
+//         } else {
+//             const mapValidation = response.message.map((item) => {
+//                 return `<li>${item}</li>`;
+//             });
+//             modalAlert.value = {
+//                 status: true,
+//                 title: "กรุณาตรวจสอบ",
+//                 body: mapValidation.join(""),
+//             };
+//         }
+//     });
+// };
 
 const onOpenModal = async (mode) => {
     console.log("rowAction--> ", rowAction.value)
@@ -171,12 +172,11 @@ const onOpenModal = async (mode) => {
         )?.id;
 
         const districtValue = district.find(
-            (item) => item.name_th == rowAction.value.distric
+            (item) => item.name_th == rowAction.value.distric && item.province_id == provinceValue
         )?.id;
         const subDistrictValue = subDistrict.find(
-            (item) => item.name_th == rowAction.value.subDistric
+            (item) => item.name_th == rowAction.value.subDistric && item.amphure_id == districtValue
         )?.id;
-        console.log("subDistrictValue--> ", subDistrictValue)
         await onChangeProvince(provinceValue);
         await onChangeDistrict(districtValue);
         await onChangeSubDistrict(subDistrictValue);
@@ -330,8 +330,8 @@ const validatePhone = () => {
                 </div>
 
                 <div class="rounded-xl mb-10 overflow-auto">
-                    <tableManage :columns="columns" :rows="rows" :rowEdit="true" :rowRemove="true"
-                        @onClickEdit="onClickEdit" @onClickRemove="onClickRemove" />
+                    <tableManage :columns="columns" :rows="rows" :rowEdit="true" 
+                        @onClickEdit="onClickEdit"  />
                 </div>
                 <div class="flex justify-end">
                     <paginationPage v-model:currentPage="pagination.page" :totalPages="pagination.totalPage"

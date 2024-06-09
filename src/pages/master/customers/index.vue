@@ -168,10 +168,10 @@ const onOpenModal = async (mode) => {
         )?.id;
 
         const districtValue = district.find(
-            (item) => item.name_th == rowAction.value.distric
+            (item) => item.name_th == rowAction.value.distric && item.province_id == provinceValue
         )?.id;
         const subDistrictValue = subDistrict.find(
-            (item) => item.name_th == rowAction.value.subDistric
+            (item) => item.name_th == rowAction.value.subDistric && item.amphure_id == districtValue
         )?.id;
         await onChangeProvince(provinceValue);
         await onChangeDistrict(districtValue);
