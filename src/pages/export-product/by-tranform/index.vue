@@ -32,6 +32,7 @@ const ddl = ref({
     listProductAll: []
 })
 const formCustomerActive = ref(false)
+const formCustomerDisable = ref(true)
 
 const formAlert = ref({
     status: false,
@@ -59,6 +60,7 @@ const formCustomer = ref({
 
 const onClearAllForm = () => {
     formCustomerActive.value = false
+    formCustomerDisable.value = true
     formCustomer.value = {
         firstName: "",
         lastName: "",
@@ -196,6 +198,7 @@ const onSearchCustomer = async (phone) => {
         if (response.statusCode === 200) {
             if (response.data.length > 0) {
                 formCustomerActive.value = false
+                formCustomerDisable.value = true
                 formCustomer.value.firstName = response.data[0].firstName
                 formCustomer.value.lastName = response.data[0].lastName
                 formCustomer.value.address = response.data[0].address
@@ -211,6 +214,7 @@ const onSearchCustomer = async (phone) => {
                     body: "ไม่พบรายชื่อลูกค้าในระบบ กรณาเพิ่มลูกค้าใหม่"
                 }
                 formCustomerActive.value = true
+                formCustomerDisable.value = false
                 formCustomer.value = {
                     firstName: "",
                     lastName: "",
@@ -495,24 +499,24 @@ onMounted(async () => {
                     </div>
                     <div class="sm:basis-full md:basis-1/2 lg:basis-2/6 flex flex-col px-3 mb-3">
                         <span class="text-red-800 font-semibold">ชื่อ</span>
-                        <input class="h-8 focus:outline-red-400 rounded bg-red-100 px-3" type="text"
+                        <input class="h-8 focus:outline-red-400 rounded bg-red-100 px-3" type="text" :disabled="formCustomerDisable"
                             v-model="formCustomer.firstName" />
                     </div>
                     <div class="sm:basis-full md:basis-1/2 lg:basis-2/6 flex flex-col px-3 mb-3">
-                        <span class="text-red-800 font-semibold">สกุล</span>
-                        <input class="h-8 focus:outline-red-400 rounded bg-red-100 px-3" type="text"
+                        <span class="text-red-800 font-semibold">สกุล</span> 
+                        <input class="h-8 focus:outline-red-400 rounded bg-red-100 px-3" type="text" :disabled="formCustomerDisable"
                             v-model="formCustomer.lastName" />
                     </div>
 
 
                     <div class="sm:basis-full md:basis-1/2 lg:basis-2/6 flex flex-col px-3 mb-3">
                         <span class="text-red-800 font-semibold">ที่อยู่</span>
-                        <input class="h-8 focus:outline-red-400 rounded bg-red-100 px-3" type="text"
+                        <input class="h-8 focus:outline-red-400 rounded bg-red-100 px-3" type="text" :disabled="formCustomerDisable"
                             v-model="formCustomer.address" />
                     </div>
                     <div class="sm:basis-full md:basis-1/2 lg:basis-2/6 flex flex-col px-3 mb-3">
                         <span class="text-red-800 font-semibold">จังหวัด</span>
-                        <select v-if="formCustomerActive" v-model="formCustomer.province"
+                        <select v-if="formCustomerActive" v-model="formCustomer.province" :disabled="formCustomerDisable"
                             @change="(event) => onChangeProvince(event.target.value)"
                             class="h-8 focus:outline-red-400 rounded bg-red-100 px-3">
                             <option value="">------เลือก------</option>
@@ -520,12 +524,12 @@ onMounted(async () => {
                                 {{ item.label }}
                             </option>
                         </select>
-                        <input v-else class="h-8 focus:outline-red-400 rounded bg-red-100 px-3" type="text"
+                        <input v-else class="h-8 focus:outline-red-400 rounded bg-red-100 px-3" type="text" :disabled="formCustomerDisable"
                             v-model="formCustomer.province" />
                     </div>
                     <div class="sm:basis-full md:basis-1/2 lg:basis-2/6 flex flex-col px-3 mb-3">
                         <span class="text-red-800 font-semibold">อำเภอ</span>
-                        <select v-if="formCustomerActive" v-model="formCustomer.district"
+                        <select v-if="formCustomerActive" v-model="formCustomer.district" :disabled="formCustomerDisable"
                             @change="(event) => onChangeDistrict(event.target.value)"
                             class="h-8 focus:outline-red-400 rounded bg-red-100 px-3">
                             <option value="">------เลือก------</option>
@@ -534,12 +538,12 @@ onMounted(async () => {
                             </option>
                         </select>
 
-                        <input v-else class="h-8 focus:outline-red-400 rounded bg-red-100 px-3" type="text"
+                        <input v-else class="h-8 focus:outline-red-400 rounded bg-red-100 px-3" type="text" :disabled="formCustomerDisable"
                             v-model="formCustomer.district" />
                     </div>
                     <div class="sm:basis-full md:basis-1/2 lg:basis-2/6 flex flex-col px-3">
                         <span class="text-red-800 font-semibold">ตำบล</span>
-                        <select v-if="formCustomerActive" v-model="formCustomer.subDistrict"
+                        <select v-if="formCustomerActive" v-model="formCustomer.subDistrict" :disabled="formCustomerDisable"
                             @change="(event) => onChangeSubDistrict(event.target.value)"
                             class="h-8 focus:outline-red-400 rounded bg-red-100 px-3">
                             <option value="">------เลือก------</option>
@@ -547,12 +551,12 @@ onMounted(async () => {
                                 {{ item.label }}
                             </option>
                         </select>
-                        <input v-else class="h-8 focus:outline-red-400 rounded bg-red-100 px-3" type="text"
+                        <input v-else class="h-8 focus:outline-red-400 rounded bg-red-100 px-3" type="text" :disabled="formCustomerDisable"
                             v-model="formCustomer.subDistrict" />
                     </div>
                     <div class="sm:basis-full md:basis-1/2 lg:basis-2/6 flex flex-col px-3">
                         <span class="text-red-800 font-semibold">ไปรษณีย์</span>
-                        <input class="h-8 focus:outline-red-400 rounded bg-red-100 px-3" type="text"
+                        <input class="h-8 focus:outline-red-400 rounded bg-red-100 px-3" type="text" :disabled="formCustomerDisable"
                             v-model="formCustomer.zipCode" />
                     </div>
 

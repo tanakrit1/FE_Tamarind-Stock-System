@@ -3,7 +3,7 @@ const { status } = defineProps(['status'])
 </script>
 
 <template>
-    <div v-show="status"
+    <div v-show="status" style="z-index: 999;"
         class="z-50 absolute  bg-cover  bg-center backdrop-blur-3xl backdrop-filter backdrop-grayscale backdrop-saturate-150 backdrop-opacity-50 h-screen w-screen flex items-center justify-center">
         <div class="flex flex-col items-center space-y-3">
             <div class="loader"></div>
