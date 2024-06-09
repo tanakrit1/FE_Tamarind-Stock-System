@@ -554,7 +554,7 @@ onMounted(async () => {
               <span class="w-1/4 text-red-800 font-semibold">ปริมาณ</span>
               <input
                 class="h-8 w-3/4 focus:outline-red-400 rounded bg-red-100 px-3"
-                type="text"
+                type="number"
                 @change="(event) => onChangeQuantity(event.target.value)"
                 v-model="formProduct.quantity"
               />
@@ -586,7 +586,7 @@ onMounted(async () => {
           >
             <label class="w-1/4 text-red-800 font-semibold">เบอร์โทร</label>
             <input
-              type="text"
+              type="number"
               placeholder="กรอกเบอร์โทรศัพท์ (10 หลัก)"
               pattern="[0-9]*"
               maxlength="10"

@@ -104,10 +104,6 @@ const onLoadTable = async () => {
   const body = {
     page: pagination.value.page,
     limit: pagination.value.limit,
-    filterModel: {
-      logicOperator: "and",
-      items: [],
-    },
   };
 
   await _apiStockReport.searchStockReport(body, (response) => {
@@ -116,7 +112,7 @@ const onLoadTable = async () => {
       showTable.value = true;
       flattenedData = response.data;
       rows.value = flattenedData;
-      pagination.value.totalPage = response.totalPage;
+      pagination.value.totalPage = response.metadata.totalPage;
     } else {
       showTable.value = false;
       formAlert.value = {

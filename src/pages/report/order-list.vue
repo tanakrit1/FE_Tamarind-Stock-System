@@ -32,14 +32,10 @@ const onCloseAlert = () => {
   formAlert.value.status = false;
 };
 
-const columnsSupplier = [
-{ field: "productName", label: "รหัส", width: "auto" },
+const columns = [
+  { field: "productName", label: "รหัส", width: "auto" },
   { field: "productName", label: "ชื่อสินค้า", width: "auto" },
-  { field: "quantity", label: "ปริมาณสินค้า", width: "auto" },
-  { field: "productInPrice", label: "ราคารับซื้อ", width: "auto" },
-  { field: "productOutPrice", label: "ราคาขายออก", width: "auto" },
-  { field: "price", label: "ราคารวม", width: "auto" },
-  { field: "typeAction", label: "ประเภทสินค้านำออก", width: "auto" },
+  
   { field: "customerFirstName", label: "ชื่อ", width: "auto" },
   { field: "customerLastName", label: "สกุล", width: "auto" },
   { field: "customerPhone", label: "เบอร์โทร", width: "auto" },
@@ -50,24 +46,25 @@ const columnsSupplier = [
   { field: "customerZipCode", label: "ไปรษณีย์", width: "auto" },
 ];
 
-// const columnsDeposit = [
-//   { field: "specialID", label: "รหัส", width: "auto" },
-//   { field: "productName", label: "ชื่อสินค้า", width: "auto" },
-//   //   { field: "typeAction", label: "ประเภทสินค้า", width: "auto" },
-//   { field: "productPrice", label: "ราคาสินค้า", width: "auto" },
-//   { field: "quantity", label: "ปริมาณสินค้า", width: "auto" },
-//   { field: "remain", label: "จํานวนคงเหลือ", width: "auto" },
-//   { field: "price", label: "ราคารวม", width: "auto" },
-//   { field: "periodDate", label: "วันที่สิ้นสุดการฝาก", width: "auto" },
-//   { field: "supplierFirstName", label: "ชื่อ", width: "auto" },
-//   { field: "supplierLastName", label: "สกุล", width: "auto" },
-//   { field: "supplierPhone", label: "เบอร์โทร", width: "auto" },
-//   { field: "supplierAddress", label: "ที่อยู่", width: "auto" },
-//   { field: "supplierSubDistrict", label: "ตำบล", width: "auto" },
-//   { field: "supplierDistrict", label: "อำเภอ", width: "auto" },
-//   { field: "supplierProvince", label: "จังหวัด", width: "auto" },
-//   { field: "supplierZipCode", label: "ไปรษณีย์", width: "auto" },
-// ];
+const columnsDeposit = [
+  { field: "specialID", label: "รหัส", width: "auto" },
+  { field: "productName", label: "ชื่อสินค้า", width: "auto" },
+  //   { field: "typeAction", label: "ประเภทสินค้า", width: "auto" },
+  { field: "productPrice", label: "ราคาสินค้า", width: "auto" },
+  { field: "quantity_import", label: "ปริมาณสินค้าฝากเข้า", width: "auto" },
+  { field: "quantity", label: "ปริมาณการเบิก", width: "auto" },
+  { field: "remain", label: "จํานวนคงเหลือ", width: "auto" },
+  { field: "price", label: "ราคารวม", width: "auto" },
+  { field: "periodDate", label: "วันที่สิ้นสุดการฝาก", width: "auto" },
+  { field: "supplierFirstName", label: "ชื่อ", width: "auto" },
+  { field: "supplierLastName", label: "สกุล", width: "auto" },
+  { field: "supplierPhone", label: "เบอร์โทร", width: "auto" },
+  { field: "supplierAddress", label: "ที่อยู่", width: "auto" },
+  { field: "supplierSubDistrict", label: "ตำบล", width: "auto" },
+  { field: "supplierDistrict", label: "อำเภอ", width: "auto" },
+  { field: "supplierProvince", label: "จังหวัด", width: "auto" },
+  { field: "supplierZipCode", label: "ไปรษณีย์", width: "auto" },
+];
 
 const rows = ref([]);
 let flattenedData = null;
@@ -170,10 +167,10 @@ const onLoadTable = async () => {
                 specialID: item.product.specialID,
                 productName: item.product.name,
                 productPrice: item.product.price,
+                quantity_import: item.Import_Deposit.quantity,
+                remain: item.Import_Deposit.remain,
                 quantity: item.quantity,
-                remain: item.remain,
-                price: item.price,
-                periodDate: item.periodDate,
+                periodDate: item.Import_Deposit.periodDate,
                 supplierFirstName: item.supplier.firstName,
                 supplierLastName: item.supplier.lastName,
                 supplierPhone: item.supplier.phone,
@@ -184,7 +181,7 @@ const onLoadTable = async () => {
                 supplierZipCode: item.supplier.zipCode,
               }));
               rows.value = flattenedData;
-              pagination.value.totalPage = response.metadata.totalPage;
+              pagination.value.totalPage = response.metadata.totalPage;              ;
             } else {
               store.commit("setStatusLoading", false);
               showTable.value = false;
@@ -259,8 +256,9 @@ const onLoadTable = async () => {
                 specialID: item.product.specialID,
                 productName: item.product.name,
                 productPrice: item.product.price,
+                quantity_import: item.Import_Deposit.quantity,
                 quantity: item.quantity,
-                remain: item.remain,
+                remain: item.Import_Deposit.remain,
                 price: item.price,
                 periodDate: item.periodDate,
                 supplierFirstName: item.supplier.firstName,
@@ -347,8 +345,9 @@ const onLoadTable = async () => {
                 specialID: item.product.specialID,
                 productName: item.product.name,
                 productPrice: item.product.price,
+                quantity_import: item.Import_Deposit.quantity,
                 quantity: item.quantity,
-                remain: item.remain,
+                remain: item.Import_Deposit.remain,
                 price: item.price,
                 periodDate: item.periodDate,
                 supplierFirstName: item.supplier.firstName,
@@ -428,8 +427,9 @@ const onLoadTable = async () => {
                 specialID: item.product.specialID,
                 productName: item.product.name,
                 productPrice: item.product.price,
+                quantity_import: item.Import_Deposit.quantity,
                 quantity: item.quantity,
-                remain: item.remain,
+                remain: item.Import_Deposit.remain,
                 price: item.price,
                 periodDate: item.periodDate,
                 supplierFirstName: item.supplier.firstName,
@@ -458,6 +458,7 @@ const onLoadTable = async () => {
                 productInPrice: item.product.price,
                 productOutPrice: item.product.priceOut,
                 quantity: item.quantity,
+                remain: item.Import_Deposit.remain,
                 price: item.price,
                 exportDate: item.exportDate,
                 priceDeposit: item.priceDeposit,
@@ -839,7 +840,7 @@ const onExportExcel = () => {
         productName: item.productName,
         productPrice: item.productPrice,
         quantity: item.quantity,
-        remain: item.remain,
+        remain: item.Import_Deposit.remain,
         price: item.price,
         periodDate: item.periodDate,
         supplierFirstName: item.supplierFirstName,
@@ -1108,12 +1109,12 @@ const onExportExcel = () => {
     </div>
   </div>
   <div v-if="showTable" class="rounded-xl mb-10 overflow-auto mx-20">
-    <!-- <tableManage
+    <tableManage
       v-if="fromDepositActive"
       :columns="columnsDeposit"
       :rows="rows"
-    /> -->
-    <tableManage :columns="columnsSupplier" :rows="rows" />
+    />
+    <tableManage v-else :columns="columns" :rows="rows" />
     <div class="flex justify-end py-5">
       <paginationPage
         v-model:currentPage="pagination.page"
