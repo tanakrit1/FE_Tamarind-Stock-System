@@ -70,6 +70,7 @@ const showTable = ref(false);
 const exportToExcelActive = ref(false);
 let formattedMessages;
 
+
 const onLoadTable = async () => {
   store.commit("setStatusLoading", true);
   const body = {
@@ -80,10 +81,15 @@ const onLoadTable = async () => {
   await _apiStockReport.searchStockReport(body, (response) => {
     if (response.statusCode === 200) {
       console.log("response2 --> ", response.data);
-      exportToExcelActive.value == false;
+    //   exportToExcelActive.value == false;
+      if( exportToExcelActive.value){
+        flattenedData = response.data;
+      }else{
+        rows.value = response.data;
+      }
       showTable.value = true;
-      flattenedData = response.data;
-      rows.value = flattenedData;
+
+    //   rows.value = response.data;
       pagination.value.totalPage = response.metadata.totalPage;
     } else {
       showTable.value = false;

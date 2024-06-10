@@ -613,7 +613,6 @@ onMounted(async () => {
             <input
               type="number"
               placeholder="กรอกเบอร์โทรศัพท์ (10 หลัก)"
-              pattern="[0-9]*"
               class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
               v-model="formSupplier.phone"
               @input="limitLength($event)"
