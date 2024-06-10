@@ -3,8 +3,7 @@ import { onMounted, ref, watch } from "vue";
 import tableManage from "../../components/tables/table-manage.vue";
 import { useRouter } from "vue-router";
 import paginationPage from "../../components/pagination/pagination-page.vue";
-import _apiSupplierImport from "../../api/supplier-import.js";
-import _apiDepositImport from "../../api/deposit-import.js";
+import _apiDepositExport from "../../api/deposit-export.js";
 import _apiExport from "../../api/export-product.js";
 import _apiProduct from "../../api/master-products.js";
 import ExcelJS from "exceljs";
@@ -33,9 +32,14 @@ const onCloseAlert = () => {
 };
 
 const columns = [
-  { field: "productName", label: "รหัส", width: "auto" },
+  { field: "specialID", label: "รหัส", width: "auto" },
   { field: "productName", label: "ชื่อสินค้า", width: "auto" },
-  
+  { field: "typeAction", label: "ประเภทสินค้านำออก", width: "auto" },
+  { field: "productInPrice", label: "ราคารับซื้อ", width: "auto" },
+  { field: "productOutPrice", label: "ราคาขายออก", width: "auto" },
+  { field: "quantity", label: "ปริมาณการขาย", width: "auto" },
+  { field: "priceTotal", label: "ราคารวม", width: "auto" },
+  { field: "exportDate", label: "วันที่นำออก", width: "auto" },
   { field: "customerFirstName", label: "ชื่อ", width: "auto" },
   { field: "customerLastName", label: "สกุล", width: "auto" },
   { field: "customerPhone", label: "เบอร์โทร", width: "auto" },
@@ -49,12 +53,14 @@ const columns = [
 const columnsDeposit = [
   { field: "specialID", label: "รหัส", width: "auto" },
   { field: "productName", label: "ชื่อสินค้า", width: "auto" },
-  //   { field: "typeAction", label: "ประเภทสินค้า", width: "auto" },
-  { field: "productPrice", label: "ราคาสินค้า", width: "auto" },
-  { field: "quantity_import", label: "ปริมาณสินค้าฝากเข้า", width: "auto" },
-  { field: "quantity", label: "ปริมาณการเบิก", width: "auto" },
-  { field: "remain", label: "จํานวนคงเหลือ", width: "auto" },
-  { field: "price", label: "ราคารวม", width: "auto" },
+  { field: "typeAction", label: "ประเภทสินค้านำออก", width: "auto" },
+  { field: "quantity_import", label: "ปริมาณฝากเข้า", width: "auto" },
+  { field: "productInPrice", label: "ราคารับซื้อ", width: "auto" },
+  { field: "productOutPrice", label: "ราคาขายออก", width: "auto" },
+  { field: "priceDeposit", label: "ค่าฝาก", width: "auto" },
+  { field: "quantity", label: "ปริมาณการขาย", width: "auto" },
+  { field: "remain", label: "ประมาณคงเหลือ", width: "auto" },
+  { field: "priceDeposit", label: "ราคารวม", width: "auto" },
   { field: "periodDate", label: "วันที่สิ้นสุดการฝาก", width: "auto" },
   { field: "supplierFirstName", label: "ชื่อ", width: "auto" },
   { field: "supplierLastName", label: "สกุล", width: "auto" },
@@ -68,9 +74,10 @@ const columnsDeposit = [
 
 const rows = ref([]);
 let flattenedData = null;
+const exportToExcelActive = ref(false);
 const showTable = ref(false);
 const fromDepositActive = ref(false);
-
+let formattedMessages;
 const currentDate = ref({
   startDate: "",
   endDate: "",
@@ -136,7 +143,8 @@ const onLoadTable = async () => {
         store.commit("setStatusLoading", true);
         const body = {
           page: pagination.value.page,
-          limit: pagination.value.limit,
+          limit:
+            exportToExcelActive.value == true ? 10000 : pagination.value.limit,
           sortField: "id",
           sortType: "ASC",
           filterModel: {
@@ -148,27 +156,30 @@ const onLoadTable = async () => {
                 value: inputSearch.value.in_productName,
               },
               {
-                field: "importDate",
+                field: "exportDate",
                 operator: "between",
                 value: [currentDate.value.startDate, currentDate.value.endDate],
               },
             ],
           },
         };
-        console.log("bodyimportDate --> ", body);
-        await _apiDepositImport.searchDepositImport(body, (response) => {
+        console.log("body --> ", body);
+        await _apiDepositExport.exportSearch(body, (response) => {
           if (response.statusCode === 200) {
             if (response.data.length > 0) {
               showTable.value = true;
               fromDepositActive.value = true;
               store.commit("setStatusLoading", false);
-              console.log("response5555--> ", response);
+              console.log("_apiDepositExport--> ", response);
               flattenedData = response.data.map((item) => ({
                 specialID: item.product.specialID,
                 productName: item.product.name,
-                productPrice: item.product.price,
+                productInPrice: item.product.price,
+                productOutPrice: item.product.priceOut,
+                priceDeposit: item.Import_Deposit.price, //ค่าฝาก
+                priceTotalDeposit: item.Import_Deposit.price, //ค่าฝาก
+                remain: item.Import_Deposit.remain, //คงเหลือ
                 quantity_import: item.Import_Deposit.quantity,
-                remain: item.Import_Deposit.remain,
                 quantity: item.quantity,
                 periodDate: item.Import_Deposit.periodDate,
                 supplierFirstName: item.supplier.firstName,
@@ -179,9 +190,16 @@ const onLoadTable = async () => {
                 supplierDistrict: item.supplier.distric,
                 supplierProvince: item.supplier.province,
                 supplierZipCode: item.supplier.zipCode,
+                typeAction: (item.typeAction = "ฝาก"),
               }));
-              rows.value = flattenedData;
-              pagination.value.totalPage = response.metadata.totalPage;              ;
+
+              if (exportToExcelActive.value == true) {
+                showTable.value = false;
+              } else {
+                rows.value = flattenedData;
+                console.log("rows --> ", rows.value);
+                pagination.value.totalPage = response.metadata.totalPage;
+              }
             } else {
               store.commit("setStatusLoading", false);
               showTable.value = false;
@@ -193,14 +211,21 @@ const onLoadTable = async () => {
               rows.value = [];
             }
           } else {
-            store.commit("setStatusLoading", false);
             showTable.value = false;
+            if (typeof response.message === "string") {
+              const messages = response.message;
+              formattedMessages = messages
+                .map((message) => `<li>${message}</li>`)
+                .join("");
+            } else {
+              formattedMessages = response.message.toString();
+            }
             formAlert.value = {
               status: true,
               title: "เกิดข้อผิดพลาด",
-              body: response.message,
+              body: formattedMessages,
             };
-            rows.value = [];
+            store.commit("setStatusLoading", false);
           }
         });
       }
@@ -222,7 +247,8 @@ const onLoadTable = async () => {
         store.commit("setStatusLoading", true);
         const body = {
           page: pagination.value.page,
-          limit: pagination.value.limit,
+          limit:
+            exportToExcelActive.value == true ? 10000 : pagination.value.limit,
           sortField: "id",
           sortType: "ASC",
           filterModel: {
@@ -234,7 +260,7 @@ const onLoadTable = async () => {
                 value: inputSearch.value.in_productName,
               },
               {
-                field: "periodDate",
+                field: "Import_Deposit_periodDate",
                 operator: "between",
                 value: [
                   currentDate.value.startPeriodDate,
@@ -244,23 +270,25 @@ const onLoadTable = async () => {
             ],
           },
         };
-        console.log("bodyperiodDate --> ", body);
-        await _apiDepositImport.searchDepositImport(body, (response) => {
+        console.log("body --> ", body);
+        await _apiDepositExport.exportSearch(body, (response) => {
           if (response.statusCode === 200) {
             if (response.data.length > 0) {
               showTable.value = true;
               fromDepositActive.value = true;
               store.commit("setStatusLoading", false);
-              console.log("response5555--> ", response);
+              console.log("_apiDepositExport--> ", response);
               flattenedData = response.data.map((item) => ({
                 specialID: item.product.specialID,
                 productName: item.product.name,
-                productPrice: item.product.price,
+                productInPrice: item.product.price,
+                productOutPrice: item.product.priceOut,
+                priceDeposit: item.Import_Deposit.price, //ค่าฝาก
+                priceTotalDeposit: item.Import_Deposit.price, //ค่าฝาก
+                remain: item.Import_Deposit.remain, //คงเหลือ
                 quantity_import: item.Import_Deposit.quantity,
                 quantity: item.quantity,
-                remain: item.Import_Deposit.remain,
-                price: item.price,
-                periodDate: item.periodDate,
+                periodDate: item.Import_Deposit.periodDate,
                 supplierFirstName: item.supplier.firstName,
                 supplierLastName: item.supplier.lastName,
                 supplierPhone: item.supplier.phone,
@@ -269,9 +297,16 @@ const onLoadTable = async () => {
                 supplierDistrict: item.supplier.distric,
                 supplierProvince: item.supplier.province,
                 supplierZipCode: item.supplier.zipCode,
+                typeAction: (item.typeAction = "ฝาก"),
               }));
-              rows.value = flattenedData;
-              pagination.value.totalPage = response.metadata.totalPage;
+
+              if (exportToExcelActive.value == true) {
+                showTable.value = false;
+              } else {
+                rows.value = flattenedData;
+                console.log("rows --> ", rows.value);
+                pagination.value.totalPage = response.metadata.totalPage;
+              }
             } else {
               store.commit("setStatusLoading", false);
               showTable.value = false;
@@ -283,14 +318,21 @@ const onLoadTable = async () => {
               rows.value = [];
             }
           } else {
-            store.commit("setStatusLoading", false);
             showTable.value = false;
+            if (typeof response.message === "string") {
+              const messages = response.message;
+              formattedMessages = messages
+                .map((message) => `<li>${message}</li>`)
+                .join("");
+            } else {
+              formattedMessages = response.message.toString();
+            }
             formAlert.value = {
               status: true,
               title: "เกิดข้อผิดพลาด",
-              body: response.message,
+              body: formattedMessages,
             };
-            rows.value = [];
+            store.commit("setStatusLoading", false);
           }
         });
       }
@@ -306,7 +348,8 @@ const onLoadTable = async () => {
         store.commit("setStatusLoading", true);
         const body = {
           page: pagination.value.page,
-          limit: pagination.value.limit,
+          limit:
+            exportToExcelActive.value == true ? 10000 : pagination.value.limit,
           sortField: "id",
           sortType: "ASC",
           filterModel: {
@@ -318,12 +361,12 @@ const onLoadTable = async () => {
                 value: inputSearch.value.in_productName,
               },
               {
-                field: "importDate",
+                field: "exportDate",
                 operator: "between",
                 value: [currentDate.value.startDate, currentDate.value.endDate],
               },
               {
-                field: "periodDate",
+                field: "Import_Deposit_periodDate",
                 operator: "between",
                 value: [
                   currentDate.value.startPeriodDate,
@@ -333,23 +376,25 @@ const onLoadTable = async () => {
             ],
           },
         };
-        console.log("bodyperiodDate --> ", body);
-        await _apiDepositImport.searchDepositImport(body, (response) => {
+        console.log("body --> ", body);
+        await _apiDepositExport.exportSearch(body, (response) => {
           if (response.statusCode === 200) {
             if (response.data.length > 0) {
               showTable.value = true;
               fromDepositActive.value = true;
               store.commit("setStatusLoading", false);
-              console.log("response5555--> ", response);
+              console.log("_apiDepositExport--> ", response);
               flattenedData = response.data.map((item) => ({
                 specialID: item.product.specialID,
                 productName: item.product.name,
-                productPrice: item.product.price,
+                productInPrice: item.product.price,
+                productOutPrice: item.product.priceOut,
+                priceDeposit: item.Import_Deposit.price, //ค่าฝาก
+                priceTotalDeposit: item.Import_Deposit.price, //ค่าฝาก
+                remain: item.Import_Deposit.remain, //คงเหลือ
                 quantity_import: item.Import_Deposit.quantity,
                 quantity: item.quantity,
-                remain: item.Import_Deposit.remain,
-                price: item.price,
-                periodDate: item.periodDate,
+                periodDate: item.Import_Deposit.periodDate,
                 supplierFirstName: item.supplier.firstName,
                 supplierLastName: item.supplier.lastName,
                 supplierPhone: item.supplier.phone,
@@ -358,9 +403,16 @@ const onLoadTable = async () => {
                 supplierDistrict: item.supplier.distric,
                 supplierProvince: item.supplier.province,
                 supplierZipCode: item.supplier.zipCode,
+                typeAction: (item.typeAction = "ฝาก"),
               }));
-              rows.value = flattenedData;
-              pagination.value.totalPage = response.metadata.totalPage;
+
+              if (exportToExcelActive.value == true) {
+                showTable.value = false;
+              } else {
+                rows.value = flattenedData;
+                console.log("rows --> ", rows.value);
+                pagination.value.totalPage = response.metadata.totalPage;
+              }
             } else {
               store.commit("setStatusLoading", false);
               showTable.value = false;
@@ -372,14 +424,21 @@ const onLoadTable = async () => {
               rows.value = [];
             }
           } else {
-            store.commit("setStatusLoading", false);
             showTable.value = false;
+            if (typeof response.message === "string") {
+              const messages = response.message;
+              formattedMessages = messages
+                .map((message) => `<li>${message}</li>`)
+                .join("");
+            } else {
+              formattedMessages = response.message.toString();
+            }
             formAlert.value = {
               status: true,
               title: "เกิดข้อผิดพลาด",
-              body: response.message,
+              body: formattedMessages,
             };
-            rows.value = [];
+            store.commit("setStatusLoading", false);
           }
         });
       }
@@ -394,9 +453,11 @@ const onLoadTable = async () => {
 
       if (isValidDate) {
         store.commit("setStatusLoading", true);
+
         const body = {
           page: pagination.value.page,
-          limit: pagination.value.limit,
+          limit:
+            exportToExcelActive.value == true ? 10000 : pagination.value.limit,
           sortField: "id",
           sortType: "ASC",
           filterModel: {
@@ -407,31 +468,28 @@ const onLoadTable = async () => {
                 operator: "equals",
                 value: inputSearch.value.in_productName,
               },
-              {
-                field: "typeAction",
-                operator: "equals",
-                value: selectSearch.value.in_exportType,
-              },
             ],
           },
         };
         console.log("body --> ", body);
-        await _apiDepositImport.searchDepositImport(body, (response) => {
+        await _apiDepositExport.exportSearch(body, (response) => {
           if (response.statusCode === 200) {
             if (response.data.length > 0) {
               showTable.value = true;
               fromDepositActive.value = true;
               store.commit("setStatusLoading", false);
-              console.log("response5555--> ", response);
+              console.log("_apiDepositExport--> ", response);
               flattenedData = response.data.map((item) => ({
                 specialID: item.product.specialID,
                 productName: item.product.name,
-                productPrice: item.product.price,
+                productInPrice: item.product.price,
+                productOutPrice: item.product.priceOut,
+                priceDeposit: item.Import_Deposit.price, //ค่าฝาก
+                priceTotalDeposit: item.Import_Deposit.price, //ค่าฝาก
+                remain: item.Import_Deposit.remain, //คงเหลือ
                 quantity_import: item.Import_Deposit.quantity,
                 quantity: item.quantity,
-                remain: item.Import_Deposit.remain,
-                price: item.price,
-                periodDate: item.periodDate,
+                periodDate: item.Import_Deposit.periodDate,
                 supplierFirstName: item.supplier.firstName,
                 supplierLastName: item.supplier.lastName,
                 supplierPhone: item.supplier.phone,
@@ -440,42 +498,17 @@ const onLoadTable = async () => {
                 supplierDistrict: item.supplier.distric,
                 supplierProvince: item.supplier.province,
                 supplierZipCode: item.supplier.zipCode,
+                typeAction: (item.typeAction = "ฝาก"),
               }));
-              rows.value = flattenedData;
-              pagination.value.totalPage = response.metadata.totalPage;
-            }
-          }
-        });await _apiExport.search(body, (response) => {
-          if (response.statusCode === 200) {
-            if (response.data.length > 0) {
-              showTable.value = true;
-              fromDepositActive.value = false;
-              store.commit("setStatusLoading", false);
-              console.log("responseimportDate--> ", response);
-              flattenedData = response.data.map((item) => ({
-                specialID: item.product.specialID,
-                productName: item.product.name,
-                productInPrice: item.product.price,
-                productOutPrice: item.product.priceOut,
-                quantity: item.quantity,
-                remain: item.Import_Deposit.remain,
-                price: item.price,
-                exportDate: item.exportDate,
-                priceDeposit: item.priceDeposit,
-                typeAction: item.typeAction,
-                customerPhone: item.customer.phone,
-                customerFirstName: item.customer.firstName,
-                customerLastName: item.customer.lastName,
-                customerAddress: item.customer.address,
-                customerSubDistrict: item.customer.subDistric,
-                customerDistrict: item.customer.distric,
-                customerProvince: item.customer.province,
-                customerZipCode: item.customer.zipCode,
-              }));
-              rows.value = flattenedData;
-              console.log("rows --> ", rows.value);
-              pagination.value.totalPage = response.metadata.totalPage;
-            }else {
+
+              if (exportToExcelActive.value == true) {
+                showTable.value = false;
+              } else {
+                rows.value = flattenedData;
+                console.log("rows --> ", rows.value);
+                pagination.value.totalPage = response.metadata.totalPage;
+              }
+            } else {
               store.commit("setStatusLoading", false);
               showTable.value = false;
               formAlert.value = {
@@ -485,28 +518,131 @@ const onLoadTable = async () => {
               };
               rows.value = [];
             }
-          }else{
-            store.commit("setStatusLoading", false);
-
+          } else {
+            showTable.value = false;
+            if (typeof response.message === "string") {
+              const messages = response.message;
+              formattedMessages = messages
+                .map((message) => `<li>${message}</li>`)
+                .join("");
+            } else {
+              formattedMessages = response.message.toString();
+            }
             formAlert.value = {
               status: true,
               title: "เกิดข้อผิดพลาด",
-              body: response.message,
+              body: formattedMessages,
             };
-            rows.value = [];
+            store.commit("setStatusLoading", false);
+          }
+        });
+      }
+    } else if (
+      currentDate.value.startDate == "" &&
+      currentDate.value.endDate == "" &&
+      currentDate.value.startPeriodDate == "" &&
+      currentDate.value.endPeriodDate == "" &&
+      inputSearch.value.in_productName == ""
+    ) {
+      console.log("ไม่มีค่าวันที่");
+      const isValidDate = CheckCurrentDate();
+
+      if (isValidDate) {
+        store.commit("setStatusLoading", true);
+
+        const body = {
+          page: pagination.value.page,
+          limit:
+            exportToExcelActive.value == true ? 10000 : pagination.value.limit,
+          sortField: "id",
+          sortType: "ASC",
+          filterModel: {
+            logicOperator: "and",
+            items: [],
+          },
+        };
+        console.log("body --> ", body);
+        await _apiDepositExport.exportSearch(body, (response) => {
+          if (response.statusCode === 200) {
+            if (response.data.length > 0) {
+              showTable.value = true;
+              fromDepositActive.value = true;
+              store.commit("setStatusLoading", false);
+              console.log("_apiDepositExport--> ", response);
+              flattenedData = response.data.map((item) => ({
+                specialID: item.product.specialID,
+                productName: item.product.name,
+                productInPrice: item.product.price,
+                productOutPrice: item.product.priceOut,
+                priceDeposit: item.Import_Deposit.price, //ค่าฝาก
+                priceTotalDeposit: item.Import_Deposit.price, //ค่าฝาก
+                remain: item.Import_Deposit.remain, //คงเหลือ
+                quantity_import: item.Import_Deposit.quantity,
+                quantity: item.quantity,
+                periodDate: item.Import_Deposit.periodDate,
+                supplierFirstName: item.supplier.firstName,
+                supplierLastName: item.supplier.lastName,
+                supplierPhone: item.supplier.phone,
+                supplierAddress: item.supplier.address,
+                supplierSubDistrict: item.supplier.subDistric,
+                supplierDistrict: item.supplier.distric,
+                supplierProvince: item.supplier.province,
+                supplierZipCode: item.supplier.zipCode,
+                typeAction: (item.typeAction = "ฝาก"),
+              }));
+
+              if (exportToExcelActive.value == true) {
+                showTable.value = false;
+              } else {
+                rows.value = flattenedData;
+                console.log("rows --> ", rows.value);
+                pagination.value.totalPage = response.metadata.totalPage;
+              }
+            } else {
+              store.commit("setStatusLoading", false);
+              showTable.value = false;
+              formAlert.value = {
+                status: true,
+                title: "แจ้งเตือน",
+                body: "ไม่พบข้อมูล",
+              };
+              rows.value = [];
+            }
+          } else {
+            showTable.value = false;
+            if (typeof response.message === "string") {
+              const messages = response.message;
+              formattedMessages = messages
+                .map((message) => `<li>${message}</li>`)
+                .join("");
+            } else {
+              formattedMessages = response.message.toString();
+            }
+            formAlert.value = {
+              status: true,
+              title: "เกิดข้อผิดพลาด",
+              body: formattedMessages,
+            };
+            store.commit("setStatusLoading", false);
           }
         });
       }
     }
-  } else {
-    console.log("fromDepositActive --> false");
+  } else if (fromDepositActive.value == false) {
     if (currentDate.value.startDate != "" && currentDate.value.endDate != "") {
+      console.log(
+        "currentDate.value.startDate --> ",
+        currentDate.value.startDate
+      );
+      console.log("currentDate.value.endDate --> ", currentDate.value.endDate);
       const isValidDate = CheckCurrentDate();
+
       if (isValidDate) {
         store.commit("setStatusLoading", true);
         const body = {
           page: pagination.value.page,
-          limit: pagination.value.limit,
+          limit:
+            exportToExcelActive.value == true ? 10000 : pagination.value.limit,
           sortField: "id",
           sortType: "ASC",
           filterModel: {
@@ -530,55 +666,66 @@ const onLoadTable = async () => {
             ],
           },
         };
-        console.log("bodyimportDate --> ", body);
+        console.log("body --> ", body);
         await _apiExport.search(body, (response) => {
           if (response.statusCode === 200) {
             if (response.data.length > 0) {
               showTable.value = true;
               fromDepositActive.value = false;
               store.commit("setStatusLoading", false);
-              console.log("responseimportDate--> ", response);
+              console.log("_apiExport--> ", response);
               flattenedData = response.data.map((item) => ({
                 specialID: item.product.specialID,
                 productName: item.product.name,
                 productInPrice: item.product.price,
                 productOutPrice: item.product.priceOut,
-                quantity: item.quantity,
-                price: item.price,
-                exportDate: item.exportDate,
-                priceDeposit: item.priceDeposit,
                 typeAction: item.typeAction,
-                customerPhone: item.customer.phone,
+                exportDate: item.exportDate,
+                quantity: item.quantity,
+                priceTotal: item.price,
                 customerFirstName: item.customer.firstName,
                 customerLastName: item.customer.lastName,
+                customerPhone: item.customer.phone,
                 customerAddress: item.customer.address,
                 customerSubDistrict: item.customer.subDistric,
                 customerDistrict: item.customer.distric,
                 customerProvince: item.customer.province,
                 customerZipCode: item.customer.zipCode,
               }));
-              rows.value = flattenedData;
-              console.log("rows --> ", rows.value);
-              pagination.value.totalPage = response.metadata.totalPage;
-            }else{
-              store.commit("setStatusLoading", false);
 
+              if (exportToExcelActive.value == true) {
+                showTable.value = false;
+              } else {
+                rows.value = flattenedData;
+                console.log("rows --> ", rows.value);
+                pagination.value.totalPage = response.metadata.totalPage;
+              }
+            } else {
+              store.commit("setStatusLoading", false);
+              showTable.value = false;
               formAlert.value = {
                 status: true,
-                title: "เกิดข้อผิดพลาด",
+                title: "แจ้งเตือน",
                 body: "ไม่พบข้อมูล",
               };
               rows.value = [];
             }
-          }else{
-            store.commit("setStatusLoading", false);
-
+          } else {
+            showTable.value = false;
+            if (typeof response.message === "string") {
+              const messages = response.message;
+              formattedMessages = messages
+                .map((message) => `<li>${message}</li>`)
+                .join("");
+            } else {
+              formattedMessages = response.message.toString();
+            }
             formAlert.value = {
               status: true,
               title: "เกิดข้อผิดพลาด",
-              body: response.message,
+              body: formattedMessages,
             };
-            rows.value = [];
+            store.commit("setStatusLoading", false);
           }
         });
       }
@@ -586,13 +733,14 @@ const onLoadTable = async () => {
       currentDate.value.startDate == "" &&
       currentDate.value.endDate == ""
     ) {
-      console.log("ไม่มีค่าวันที่");
       const isValidDate = CheckCurrentDate();
+
       if (isValidDate) {
         store.commit("setStatusLoading", true);
         const body = {
           page: pagination.value.page,
-          limit: pagination.value.limit,
+          limit:
+            exportToExcelActive.value == true ? 10000 : pagination.value.limit,
           sortField: "id",
           sortType: "ASC",
           filterModel: {
@@ -618,29 +766,148 @@ const onLoadTable = async () => {
               showTable.value = true;
               fromDepositActive.value = false;
               store.commit("setStatusLoading", false);
+              console.log("_apiExport--> ", response);
               flattenedData = response.data.map((item) => ({
                 specialID: item.product.specialID,
                 productName: item.product.name,
                 productInPrice: item.product.price,
                 productOutPrice: item.product.priceOut,
-                quantity: item.quantity,
-                price: item.price,
-                exportDate: item.exportDate,
-                priceDeposit: item.priceDeposit,
                 typeAction: item.typeAction,
-                customerPhone: item.customer.phone,
+                exportDate: item.exportDate,
+                quantity: item.quantity,
+                priceTotal: item.price,
                 customerFirstName: item.customer.firstName,
                 customerLastName: item.customer.lastName,
+                customerPhone: item.customer.phone,
                 customerAddress: item.customer.address,
                 customerSubDistrict: item.customer.subDistric,
                 customerDistrict: item.customer.distric,
                 customerProvince: item.customer.province,
                 customerZipCode: item.customer.zipCode,
               }));
-              console.log("flattenedData--> ", flattenedData);
-              rows.value = flattenedData;
-              pagination.value.totalPage = response.metadata.totalPage;
+
+              if (exportToExcelActive.value == true) {
+                showTable.value = false;
+              } else {
+                rows.value = flattenedData;
+                console.log("rows --> ", rows.value);
+                pagination.value.totalPage = response.metadata.totalPage;
+              }
+            } else {
+              store.commit("setStatusLoading", false);
+              showTable.value = false;
+              formAlert.value = {
+                status: true,
+                title: "แจ้งเตือน",
+                body: "ไม่พบข้อมูล",
+              };
+              rows.value = [];
             }
+          } else {
+            showTable.value = false;
+            if (typeof response.message === "string") {
+              const messages = response.message;
+              formattedMessages = messages
+                .map((message) => `<li>${message}</li>`)
+                .join("");
+            } else {
+              formattedMessages = response.message.toString();
+            }
+            formAlert.value = {
+              status: true,
+              title: "เกิดข้อผิดพลาด",
+              body: formattedMessages,
+            };
+            store.commit("setStatusLoading", false);
+          }
+        });
+      }
+    } else if (
+      currentDate.value.startDate == "" &&
+      currentDate.value.endDate == "" &&
+      inputSearch.value.in_productName == ""
+    ) {
+      const isValidDate = CheckCurrentDate();
+
+      if (isValidDate) {
+        store.commit("setStatusLoading", true);
+        const body = {
+          page: pagination.value.page,
+          limit:
+            exportToExcelActive.value == true ? 10000 : pagination.value.limit,
+          sortField: "id",
+          sortType: "ASC",
+          filterModel: {
+            logicOperator: "and",
+            items: [
+              {
+                field: "typeAction",
+                operator: "equals",
+                value: selectSearch.value.in_exportType,
+              },
+            ],
+          },
+        };
+        console.log("body --> ", body);
+        await _apiExport.search(body, (response) => {
+          if (response.statusCode === 200) {
+            if (response.data.length > 0) {
+              showTable.value = true;
+              fromDepositActive.value = false;
+              store.commit("setStatusLoading", false);
+              console.log("_apiExport--> ", response);
+              flattenedData = response.data.map((item) => ({
+                specialID: item.product.specialID,
+                productName: item.product.name,
+                productInPrice: item.product.price,
+                productOutPrice: item.product.priceOut,
+                typeAction: item.typeAction,
+                exportDate: item.exportDate,
+                quantity: item.quantity,
+                priceTotal: item.price,
+                customerFirstName: item.customer.firstName,
+                customerLastName: item.customer.lastName,
+                customerPhone: item.customer.phone,
+                customerAddress: item.customer.address,
+                customerSubDistrict: item.customer.subDistric,
+                customerDistrict: item.customer.distric,
+                customerProvince: item.customer.province,
+                customerZipCode: item.customer.zipCode,
+              }));
+
+              if (exportToExcelActive.value == true) {
+                showTable.value = false;
+              } else {
+                rows.value = flattenedData;
+                console.log("rows --> ", rows.value);
+                pagination.value.totalPage = response.metadata.totalPage;
+              }
+            } else {
+              store.commit("setStatusLoading", false);
+              showTable.value = false;
+              formAlert.value = {
+                status: true,
+                title: "แจ้งเตือน",
+                body: "ไม่พบข้อมูล",
+              };
+              rows.value = [];
+            }
+          } else {
+            showTable.value = false;
+            if (typeof response.message === "string") {
+              const messages = response.message;
+              formattedMessages = messages
+                .map((message) => `<li>${message}</li>`)
+                .join("");
+            } else {
+              formattedMessages = response.message.toString();
+            }
+            formAlert.value = {
+              status: true,
+              title: "เกิดข้อผิดพลาด",
+              body: formattedMessages,
+            };
+            store.commit("setStatusLoading", false);
           }
         });
       }
@@ -799,28 +1066,34 @@ onMounted(async () => {
   store.commit("setStatusLoading", false);
 });
 
-const onExportExcel = () => {
+const onExportExcel = async () => {
   console.log("***onExportExcel***");
   const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet("Sheet A");
+  exportToExcelActive.value = true;
+  await onLoadTable();
 
   if (fromDepositActive.value == true) {
     worksheet.columns = [
-      { header: "Special ID", key: "specialID", width: 15 },
-      { header: "Product Name", key: "productName", width: 30 },
-      { header: "Product Price", key: "productPrice", width: 15 },
-      { header: "Quantity", key: "quantity", width: 15 },
-      { header: "Remain", key: "remain", width: 15 },
-      { header: "Price", key: "price", width: 15 },
-      { header: "Period Date", key: "periodDate", width: 15 },
-      { header: "Supplier First Name", key: "supplierFirstName", width: 20 },
-      { header: "Supplier Last Name", key: "supplierLastName", width: 20 },
-      { header: "Supplier Phone", key: "supplierPhone", width: 20 },
-      { header: "Supplier Address", key: "supplierAddress", width: 30 },
-      { header: "Supplier SubDistrict", key: "supplierSubDistrict", width: 20 },
-      { header: "Supplier District", key: "supplierDistrict", width: 20 },
-      { header: "Supplier Province", key: "supplierProvince", width: 20 },
-      { header: "Supplier Zip Code", key: "supplierZipCode", width: 15 },
+      { header: "รหัสสินค้า", key: "specialID", width: 15 },
+      { header: "ชื่อสินค้า", key: "productName", width: 30 },
+      { header: "ประเภทสินค้า", key: "typeAction", width: 20 },
+      { header: "ปริมาณฝากเข้า", key: "quantity_import", width: 15 },
+      { header: "ราคารับซื้อ", key: "productInPrice", width: 15 },
+      { header: "ราคาขายออก", key: "productOutPrice", width: 15 },
+      { header: "ค่าฝาก", key: "priceDeposit", width: 15 },
+      { header: "ปริมาณการขาย", key: "quantity", width: 15 },
+      { header: "ประมาณคงเหลือ", key: "remain", width: 15 },
+      { header: "รวมทั้งสิ้น", key: "priceTotalDeposit", width: 15 },
+      { header: "วันที่สิ้นสุดการฝาก", key: "periodDate", width: 15 },
+      { header: "ชื่อ", key: "supplierFirstName", width: 15 },
+      { header: "สกุล", key: "supplierLastName", width: 15 },
+      { header: "เบอร์โทร", key: "supplierPhone", width: 15 },
+      { header: "ที่อยู่", key: "supplierAddress", width: 30 },
+      { header: "ตำบล", key: "supplierSubDistrict", width: 15 },
+      { header: "อำเภอ", key: "supplierDistrict", width: 15 },
+      { header: "จังหวัด", key: "supplierProvince", width: 15 },
+      { header: "ไปรษณีย์", key: "supplierZipCode", width: 15 },
     ];
     // เข้าถึงแถวหัวของ Excel spreadsheet
     const headerRow = worksheet.getRow(1); // แถวหัวเริ่มที่ index 1
@@ -838,10 +1111,13 @@ const onExportExcel = () => {
       worksheet.addRow({
         specialID: item.specialID,
         productName: item.productName,
-        productPrice: item.productPrice,
+        productInPrice: item.productInPrice,
+        productOutPrice: item.productOutPrice,
+        priceDeposit: item.priceDeposit, //ค่าฝาก
+        priceTotalDeposit: item.priceTotalDeposit, //ค่าฝาก
+        remain: item.remain, //คงเหลือ
+        quantity_import: item.quantity_import,
         quantity: item.quantity,
-        remain: item.Import_Deposit.remain,
-        price: item.price,
         periodDate: item.periodDate,
         supplierFirstName: item.supplierFirstName,
         supplierLastName: item.supplierLastName,
@@ -851,8 +1127,10 @@ const onExportExcel = () => {
         supplierDistrict: item.supplierDistrict,
         supplierProvince: item.supplierProvince,
         supplierZipCode: item.supplierZipCode,
+        typeAction: item.typeAction,
       });
     });
+
     workbook.xlsx.writeBuffer().then((data) => {
       const blob = new Blob([data], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -860,25 +1138,27 @@ const onExportExcel = () => {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = "ExportedData.xlsx";
+      a.download = "ExportedDataDeposit.xlsx";
       a.click();
     });
   } else {
     worksheet.columns = [
-      { header: "Special ID", key: "specialID", width: 15 },
-      { header: "Product Name", key: "productName", width: 30 },
-      { header: "Type of Action", key: "typeAction", width: 20 },
-      { header: "Product Price", key: "productPrice", width: 15 },
-      { header: "Quantity", key: "quantity", width: 15 },
-      { header: "Price", key: "price", width: 15 },
-      { header: "Supplier First Name", key: "supplierFirstName", width: 20 },
-      { header: "Supplier Last Name", key: "supplierLastName", width: 20 },
-      { header: "Supplier Phone", key: "supplierPhone", width: 20 },
-      { header: "Supplier Address", key: "supplierAddress", width: 30 },
-      { header: "Supplier SubDistrict", key: "supplierSubDistrict", width: 20 },
-      { header: "Supplier District", key: "supplierDistrict", width: 20 },
-      { header: "Supplier Province", key: "supplierProvince", width: 20 },
-      { header: "Supplier Zip Code", key: "supplierZipCode", width: 15 },
+      { header: "รหัสสินค้า", key: "specialID", width: 15 },
+      { header: "ชื่อสินค้า", key: "productName", width: 30 },
+      { header: "ประเภทสินค้า", key: "typeAction", width: 20 },
+      { header: "ราคารับซื้อ", key: "productInPrice", width: 15 },
+      { header: "ราคาขายออก", key: "productOutPrice", width: 15 },
+      { header: "ปริมาณการขาย", key: "quantity", width: 15 },
+      { header: "รวมทั้งสิ้น", key: "priceTotal", width: 15 },
+      { header: "วันที่นำออก", key: "exportDate", width: 15 },
+      { header: "ชื่อ", key: "customerFirstName", width: 15 },
+      { header: "สกุล", key: "customerLastName", width: 15 },
+      { header: "เบอร์โทร", key: "customerPhone", width: 15 },
+      { header: "ที่อยู่", key: "customerAddress", width: 30 },
+      { header: "ตำบล", key: "customerSubDistrict", width: 15 },
+      { header: "อำเภอ", key: "customerDistrict", width: 15 },
+      { header: "จังหวัด", key: "customerProvince", width: 15 },
+      { header: "ไปรษณีย์", key: "customerZipCode", width: 15 },
     ];
 
     // เข้าถึงแถวหัวของ Excel spreadsheet
@@ -892,24 +1172,25 @@ const onExportExcel = () => {
         fgColor: { argb: "A8CD9F" }, // สีที่คุณต้องการ
       };
     });
-
     // เพิ่มข้อมูลลงในแถวของ Excel spreadsheet
     flattenedData.forEach((item, index) => {
       worksheet.addRow({
         specialID: item.specialID,
         productName: item.productName,
+        productInPrice: item.productInPrice,
+        productOutPrice: item.productOutPrice,
         typeAction: item.typeAction,
-        productPrice: item.productPrice,
+        exportDate: item.exportDate,
         quantity: item.quantity,
-        price: item.price,
-        supplierFirstName: item.supplierFirstName,
-        supplierLastName: item.supplierLastName,
-        supplierPhone: item.supplierPhone,
-        supplierAddress: item.supplierAddress,
-        supplierSubDistrict: item.supplierSubDistrict,
-        supplierDistrict: item.supplierDistrict,
-        supplierProvince: item.supplierProvince,
-        supplierZipCode: item.supplierZipCode,
+        priceTotal: item.priceTotal,
+        customerFirstName: item.customerFirstName,
+        customerLastName: item.customerLastName,
+        customerPhone: item.customerPhone,
+        customerAddress: item.customerAddress,
+        customerSubDistrict: item.customerSubDistrict,
+        customerDistrict: item.customerDistrict,
+        customerProvince: item.customerProvince,
+        customerZipCode: item.customerZipCode,
       });
     });
     workbook.xlsx.writeBuffer().then((data) => {
@@ -954,9 +1235,7 @@ const onExportExcel = () => {
             </g>
           </svg>
 
-          <span class="text-2xl font-bold text-red-800"
-            >รายการสินค้านำออก</span
-          >
+          <span class="text-2xl font-bold text-red-800">รายการสินค้านำออก</span>
         </div>
       </div>
       <div class="flex justify-center pb-5">
@@ -985,6 +1264,7 @@ const onExportExcel = () => {
             <div class="flex flex-col">
               <span class="text-red-800 font-semibold">ประเภทนำเข้าสินค้า</span>
               <select
+                @change="onChangeType"
                 v-model="selectSearch.in_exportType"
                 class="h-8 w-50 focus:outline-red-400 rounded bg-red-100 px-3"
               >
@@ -1108,13 +1388,15 @@ const onExportExcel = () => {
       </div>
     </div>
   </div>
-  <div v-if="showTable" class="rounded-xl mb-10 overflow-auto mx-20">
-    <tableManage
-      v-if="fromDepositActive"
-      :columns="columnsDeposit"
-      :rows="rows"
-    />
-    <tableManage v-else :columns="columns" :rows="rows" />
+  <div v-if="showTable" class="mx-20">
+    <div class="overflow-auto rounded-xl">
+      <tableManage
+        v-if="fromDepositActive"
+        :columns="columnsDeposit"
+        :rows="rows"
+      />
+      <tableManage v-else :columns="columns" :rows="rows" />
+    </div>
     <div class="flex justify-end py-5">
       <paginationPage
         v-model:currentPage="pagination.page"

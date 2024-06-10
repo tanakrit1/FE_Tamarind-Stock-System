@@ -37,7 +37,7 @@ const columnsSupplier = [
   { field: "typeAction", label: "ประเภทสินค้า", width: "auto" },
   { field: "productPrice", label: "ราคาสินค้า", width: "auto" },
   { field: "quantity", label: "ปริมาณสินค้า", width: "auto" },
-  { field: "price", label: "ราคารวม", width: "auto" },
+  { field: "price", label: "รวมทั้งสิ้น", width: "auto" },
   { field: "supplierFirstName", label: "ชื่อ", width: "auto" },
   { field: "supplierLastName", label: "สกุล", width: "auto" },
   { field: "supplierPhone", label: "เบอร์โทร", width: "auto" },
@@ -55,7 +55,7 @@ const columnsDeposit = [
   { field: "productPrice", label: "ราคาสินค้า", width: "auto" },
   { field: "quantity", label: "ปริมาณสินค้า", width: "auto" },
   { field: "remain", label: "จํานวนคงเหลือ", width: "auto" },
-  { field: "price", label: "ราคารวม", width: "auto" },
+  { field: "price", label: "รวมทั้งสิ้น", width: "auto" },
   { field: "periodDate", label: "วันที่สิ้นสุดการฝาก", width: "auto" },
   { field: "supplierFirstName", label: "ชื่อ", width: "auto" },
   { field: "supplierLastName", label: "สกุล", width: "auto" },
@@ -71,6 +71,8 @@ const rows = ref([]);
 let flattenedData = null;
 const showTable = ref(false);
 const fromDepositActive = ref(false);
+const exportToExcelActive = ref(false);
+let formattedMessages;
 
 const currentDate = ref({
   startDate: "",
@@ -137,7 +139,7 @@ const onLoadTable = async () => {
         store.commit("setStatusLoading", true);
         const body = {
           page: pagination.value.page,
-          limit: pagination.value.limit,
+          limit: exportToExcelActive.value == true ? 10000 : pagination.value.limit,
           sortField: "id",
           sortType: "ASC",
           filterModel: {
@@ -181,8 +183,13 @@ const onLoadTable = async () => {
                 supplierProvince: item.supplier.province,
                 supplierZipCode: item.supplier.zipCode,
               }));
-              rows.value = flattenedData;
-              pagination.value.totalPage = response.metadata.totalPage;
+              if (exportToExcelActive.value == true) {
+                showTable.value = false;
+              } else {
+                rows.value = flattenedData;
+                console.log("rows --> ", rows.value);
+                pagination.value.totalPage = response.metadata.totalPage;
+              }
             } else {
               store.commit("setStatusLoading", false);
               showTable.value = false;
@@ -194,14 +201,21 @@ const onLoadTable = async () => {
               rows.value = [];
             }
           } else {
-            store.commit("setStatusLoading", false);
             showTable.value = false;
+            if (typeof response.message === "string") {
+              const messages = response.message;
+              formattedMessages = messages
+                .map((message) => `<li>${message}</li>`)
+                .join("");
+            } else {
+              formattedMessages = response.message.toString();
+            }
             formAlert.value = {
               status: true,
               title: "เกิดข้อผิดพลาด",
-              body: response.message,
+              body: formattedMessages,
             };
-            rows.value = [];
+            store.commit("setStatusLoading", false);
           }
         });
       }
@@ -223,7 +237,7 @@ const onLoadTable = async () => {
         store.commit("setStatusLoading", true);
         const body = {
           page: pagination.value.page,
-          limit: pagination.value.limit,
+          limit: exportToExcelActive.value == true ? 10000 : pagination.value.limit,
           sortField: "id",
           sortType: "ASC",
           filterModel: {
@@ -270,8 +284,13 @@ const onLoadTable = async () => {
                 supplierProvince: item.supplier.province,
                 supplierZipCode: item.supplier.zipCode,
               }));
-              rows.value = flattenedData;
-              pagination.value.totalPage = response.metadata.totalPage;
+              if (exportToExcelActive.value == true) {
+                showTable.value = false;
+              } else {
+                rows.value = flattenedData;
+                console.log("rows --> ", rows.value);
+                pagination.value.totalPage = response.metadata.totalPage;
+              }
             } else {
               store.commit("setStatusLoading", false);
               showTable.value = false;
@@ -283,14 +302,21 @@ const onLoadTable = async () => {
               rows.value = [];
             }
           } else {
-            store.commit("setStatusLoading", false);
             showTable.value = false;
+            if (typeof response.message === "string") {
+              const messages = response.message;
+              formattedMessages = messages
+                .map((message) => `<li>${message}</li>`)
+                .join("");
+            } else {
+              formattedMessages = response.message.toString();
+            }
             formAlert.value = {
               status: true,
               title: "เกิดข้อผิดพลาด",
-              body: response.message,
+              body: formattedMessages,
             };
-            rows.value = [];
+            store.commit("setStatusLoading", false);
           }
         });
       }
@@ -306,7 +332,7 @@ const onLoadTable = async () => {
         store.commit("setStatusLoading", true);
         const body = {
           page: pagination.value.page,
-          limit: pagination.value.limit,
+          limit: exportToExcelActive.value == true ? 10000 : pagination.value.limit,
           sortField: "id",
           sortType: "ASC",
           filterModel: {
@@ -358,8 +384,13 @@ const onLoadTable = async () => {
                 supplierProvince: item.supplier.province,
                 supplierZipCode: item.supplier.zipCode,
               }));
-              rows.value = flattenedData;
-              pagination.value.totalPage = response.metadata.totalPage;
+              if (exportToExcelActive.value == true) {
+                showTable.value = false;
+              } else {
+                rows.value = flattenedData;
+                console.log("rows --> ", rows.value);
+                pagination.value.totalPage = response.metadata.totalPage;
+              }
             } else {
               store.commit("setStatusLoading", false);
               showTable.value = false;
@@ -371,14 +402,21 @@ const onLoadTable = async () => {
               rows.value = [];
             }
           } else {
-            store.commit("setStatusLoading", false);
             showTable.value = false;
+            if (typeof response.message === "string") {
+              const messages = response.message;
+              formattedMessages = messages
+                .map((message) => `<li>${message}</li>`)
+                .join("");
+            } else {
+              formattedMessages = response.message.toString();
+            }
             formAlert.value = {
               status: true,
               title: "เกิดข้อผิดพลาด",
-              body: response.message,
+              body: formattedMessages,
             };
-            rows.value = [];
+            store.commit("setStatusLoading", false);
           }
         });
       }
@@ -395,7 +433,7 @@ const onLoadTable = async () => {
         store.commit("setStatusLoading", true);
         const body = {
           page: pagination.value.page,
-          limit: pagination.value.limit,
+          limit: exportToExcelActive.value == true ? 10000 : pagination.value.limit,
           sortField: "id",
           sortType: "ASC",
           filterModel: {
@@ -434,9 +472,121 @@ const onLoadTable = async () => {
                 supplierProvince: item.supplier.province,
                 supplierZipCode: item.supplier.zipCode,
               }));
-              rows.value = flattenedData;
-              pagination.value.totalPage = response.metadata.totalPage;
+              if (exportToExcelActive.value == true) {
+                showTable.value = false;
+              } else {
+                rows.value = flattenedData;
+                console.log("rows --> ", rows.value);
+                pagination.value.totalPage = response.metadata.totalPage;
+              }
+            } else {
+              store.commit("setStatusLoading", false);
+              showTable.value = false;
+              formAlert.value = {
+                status: true,
+                title: "แจ้งเตือน",
+                body: "ไม่พบข้อมูล",
+              };
+              rows.value = [];
             }
+          } else {
+            showTable.value = false;
+            if (typeof response.message === "string") {
+              const messages = response.message;
+              formattedMessages = messages
+                .map((message) => `<li>${message}</li>`)
+                .join("");
+            } else {
+              formattedMessages = response.message.toString();
+            }
+            formAlert.value = {
+              status: true,
+              title: "เกิดข้อผิดพลาด",
+              body: formattedMessages,
+            };
+            store.commit("setStatusLoading", false);
+          }
+        });
+      }
+    }else if (
+      currentDate.value.startDate == "" &&
+      currentDate.value.endDate == "" &&
+      currentDate.value.startPeriodDate == "" &&
+      currentDate.value.endPeriodDate == "" && inputSearch.value.in_productName == ""
+    ) {
+      console.log("ไม่มีค่าวันที่");
+      const isValidDate = CheckCurrentDate();
+
+      if (isValidDate) {
+        store.commit("setStatusLoading", true);
+        const body = {
+          page: pagination.value.page,
+          limit: exportToExcelActive.value == true ? 10000 : pagination.value.limit,
+          sortField: "id",
+          sortType: "ASC",
+          filterModel: {
+            logicOperator: "and",
+            items: [],
+          },
+        };
+        console.log("body --> ", body);
+        await _apiDepositImport.searchDepositImport(body, (response) => {
+          if (response.statusCode === 200) {
+            if (response.data.length > 0) {
+              showTable.value = true;
+              fromDepositActive.value = true;
+              store.commit("setStatusLoading", false);
+              console.log("response5555--> ", response);
+              flattenedData = response.data.map((item) => ({
+                specialID: item.product.specialID,
+                productName: item.product.name,
+                productPrice: item.product.price,
+                quantity: item.quantity,
+                remain: item.remain,
+                price: item.price,
+                periodDate: item.periodDate,
+                supplierFirstName: item.supplier.firstName,
+                supplierLastName: item.supplier.lastName,
+                supplierPhone: item.supplier.phone,
+                supplierAddress: item.supplier.address,
+                supplierSubDistrict: item.supplier.subDistric,
+                supplierDistrict: item.supplier.distric,
+                supplierProvince: item.supplier.province,
+                supplierZipCode: item.supplier.zipCode,
+              }));
+              if (exportToExcelActive.value == true) {
+                showTable.value = false;
+              } else {
+                rows.value = flattenedData;
+                console.log("rows --> ", rows.value);
+                pagination.value.totalPage = response.metadata.totalPage;
+              }
+            } else {
+              store.commit("setStatusLoading", false);
+              showTable.value = false;
+              formAlert.value = {
+                status: true,
+                title: "แจ้งเตือน",
+                body: "ไม่พบข้อมูล",
+              };
+              rows.value = [];
+            }
+          } else {
+            showTable.value = false;
+            if (typeof response.message === "string") {
+              const messages = response.message;
+              formattedMessages = messages
+                .map((message) => `<li>${message}</li>`)
+                .join("");
+            } else {
+              formattedMessages = response.message.toString();
+            }
+            formAlert.value = {
+              status: true,
+              title: "เกิดข้อผิดพลาด",
+              body: formattedMessages,
+            };
+            store.commit("setStatusLoading", false);
           }
         });
       }
@@ -449,7 +599,7 @@ const onLoadTable = async () => {
         store.commit("setStatusLoading", true);
         const body = {
           page: pagination.value.page,
-          limit: pagination.value.limit,
+          limit: exportToExcelActive.value == true ? 10000 : pagination.value.limit,
           sortField: "id",
           sortType: "ASC",
           filterModel: {
@@ -498,10 +648,39 @@ const onLoadTable = async () => {
                 supplierProvince: item.supplier.province,
                 supplierZipCode: item.supplier.zipCode,
               }));
-              rows.value = flattenedData;
-              console.log("rows --> ", rows.value);
-              pagination.value.totalPage = response.metadata.totalPage;
+              if (exportToExcelActive.value == true) {
+                showTable.value = false;
+              } else {
+                rows.value = flattenedData;
+                console.log("rows --> ", rows.value);
+                pagination.value.totalPage = response.metadata.totalPage;
+              }
+            } else {
+              store.commit("setStatusLoading", false);
+              showTable.value = false;
+              formAlert.value = {
+                status: true,
+                title: "แจ้งเตือน",
+                body: "ไม่พบข้อมูล",
+              };
+              rows.value = [];
             }
+          } else {
+            showTable.value = false;
+            if (typeof response.message === "string") {
+              const messages = response.message;
+              formattedMessages = messages
+                .map((message) => `<li>${message}</li>`)
+                .join("");
+            } else {
+              formattedMessages = response.message.toString();
+            }
+            formAlert.value = {
+              status: true,
+              title: "เกิดข้อผิดพลาด",
+              body: formattedMessages,
+            };
+            store.commit("setStatusLoading", false);
           }
         });
       }
@@ -517,7 +696,7 @@ const onLoadTable = async () => {
         store.commit("setStatusLoading", true);
         const body = {
           page: pagination.value.page,
-          limit: pagination.value.limit,
+          limit: exportToExcelActive.value == true ? 10000 : pagination.value.limit,
           sortField: "id",
           sortType: "ASC",
           filterModel: {
@@ -560,10 +739,125 @@ const onLoadTable = async () => {
                 supplierProvince: item.supplier.province,
                 supplierZipCode: item.supplier.zipCode,
               }));
-              console.log("flattenedData--> ", flattenedData);
-              rows.value = flattenedData;
-              pagination.value.totalPage = response.metadata.totalPage;
+              if (exportToExcelActive.value == true) {
+                showTable.value = false;
+              } else {
+                rows.value = flattenedData;
+                console.log("rows --> ", rows.value);
+                pagination.value.totalPage = response.metadata.totalPage;
+              }
+            } else {
+              store.commit("setStatusLoading", false);
+              showTable.value = false;
+              formAlert.value = {
+                status: true,
+                title: "แจ้งเตือน",
+                body: "ไม่พบข้อมูล",
+              };
+              rows.value = [];
             }
+          } else {
+            showTable.value = false;
+            if (typeof response.message === "string") {
+              const messages = response.message;
+              formattedMessages = messages
+                .map((message) => `<li>${message}</li>`)
+                .join("");
+            } else {
+              formattedMessages = response.message.toString();
+            }
+            formAlert.value = {
+              status: true,
+              title: "เกิดข้อผิดพลาด",
+              body: formattedMessages,
+            };
+            store.commit("setStatusLoading", false);
+          }
+        });
+      }
+    }else if (
+      currentDate.value.startDate == "" &&
+      currentDate.value.endDate == "" &&
+      currentDate.value.startPeriodDate == "" &&
+      currentDate.value.endPeriodDate == "" && inputSearch.value.in_productName == ""
+    ) {
+      console.log("ไม่มีค่าวันที่");
+      const isValidDate = CheckCurrentDate();
+      if (isValidDate) {
+        store.commit("setStatusLoading", true);
+        const body = {
+          page: pagination.value.page,
+          limit: exportToExcelActive.value == true ? 10000 : pagination.value.limit,
+          sortField: "id",
+          sortType: "ASC",
+          filterModel: {
+            logicOperator: "and",
+            items: [
+              {
+                field: "typeAction",
+                operator: "equals",
+                value: selectSearch.value.in_productType,
+              },
+            ],
+          },
+        };
+        console.log("body --> ", body);
+        await _apiSupplierImport.searchSupplierImport(body, (response) => {
+          if (response.statusCode === 200) {
+            if (response.data.length > 0) {
+              showTable.value = true;
+              fromDepositActive.value = false;
+              store.commit("setStatusLoading", false);
+              flattenedData = response.data.map((item) => ({
+                specialID: item.product.specialID,
+                productName: item.product.name,
+                productPrice: item.product.price,
+                typeAction: item.typeAction,
+                quantity: item.quantity,
+                price: item.price,
+                periodDate: item.periodDate,
+                supplierFirstName: item.supplier.firstName,
+                supplierLastName: item.supplier.lastName,
+                supplierPhone: item.supplier.phone,
+                supplierAddress: item.supplier.address,
+                supplierSubDistrict: item.supplier.subDistric,
+                supplierDistrict: item.supplier.distric,
+                supplierProvince: item.supplier.province,
+                supplierZipCode: item.supplier.zipCode,
+              }));
+              if (exportToExcelActive.value == true) {
+                showTable.value = false;
+              } else {
+                rows.value = flattenedData;
+                console.log("rows --> ", rows.value);
+                pagination.value.totalPage = response.metadata.totalPage;
+              }
+            } else {
+              store.commit("setStatusLoading", false);
+              showTable.value = false;
+              formAlert.value = {
+                status: true,
+                title: "แจ้งเตือน",
+                body: "ไม่พบข้อมูล",
+              };
+              rows.value = [];
+            }
+          } else {
+            showTable.value = false;
+            if (typeof response.message === "string") {
+              const messages = response.message;
+              formattedMessages = messages
+                .map((message) => `<li>${message}</li>`)
+                .join("");
+            } else {
+              formattedMessages = response.message.toString();
+            }
+            formAlert.value = {
+              status: true,
+              title: "เกิดข้อผิดพลาด",
+              body: formattedMessages,
+            };
+            store.commit("setStatusLoading", false);
           }
         });
       }
@@ -722,11 +1016,12 @@ onMounted(async () => {
   store.commit("setStatusLoading", false);
 });
 
-const onExportExcel = () => {
+const onExportExcel =  async () => {
   console.log("***onExportExcel***");
   const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet("Sheet A");
-
+  exportToExcelActive.value = true;
+  await onLoadTable();
   if (fromDepositActive.value == true) {
     worksheet.columns = [
       { header: "Special ID", key: "specialID", width: 15 },
@@ -1019,7 +1314,7 @@ const onExportExcel = () => {
       </div>
     </div>
   </div>
-  <div v-if="showTable" class="rounded-xl mb-10 overflow-auto mx-20">
+  <div v-if="showTable" class="rounded-xl mb-10 overflow-auto">
     <tableManage
       v-if="fromDepositActive"
       :columns="columnsDeposit"

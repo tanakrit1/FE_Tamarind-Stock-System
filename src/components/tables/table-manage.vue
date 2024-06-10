@@ -52,7 +52,7 @@ watch(() => props.trickerClear, () => {
 </script>
 
 <template>
-    <table class="table ">
+    <table class="table overflow-auto">
         <thead>
             <tr style="background-color: #A2422C;">
                 <th v-for="(column, index) in props.columns" :key="index" class="text-white text-lg"

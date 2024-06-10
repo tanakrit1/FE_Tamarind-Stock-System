@@ -46,6 +46,11 @@ const pagination = ref({
   totalPage: 0,
 });
 
+const onChangePagination = (val) => {
+  pagination.page = val;
+  onLoadTable();
+};
+
 const formAlert = ref({
   status: false,
   title: "",
@@ -63,6 +68,8 @@ const onCloseAlert = () => {
 const rows = ref([]);
 let flattenedData = null;
 const showTable = ref(false);
+const exportToExcelActive = ref(false);
+let formattedMessages;
 
 const onShowProduct = async () => {
   const body = {
@@ -103,32 +110,38 @@ const onLoadTable = async () => {
   store.commit("setStatusLoading", true);
   const body = {
     page: pagination.value.page,
-    limit: pagination.value.limit,
+    limit: exportToExcelActive.value == true ? 10000 : pagination.value.limit,
   };
 
   await _apiStockReport.searchStockReport(body, (response) => {
     if (response.statusCode === 200) {
       console.log("response2 --> ", response);
+      exportToExcelActive.value == false;
       showTable.value = true;
       flattenedData = response.data;
       rows.value = flattenedData;
       pagination.value.totalPage = response.metadata.totalPage;
     } else {
       showTable.value = false;
+      if (typeof response.message === "string") {
+        const messages = response.message;
+        formattedMessages = messages
+          .map((message) => `<li>${message}</li>`)
+          .join("");
+      } else {
+        formattedMessages = response.message.toString();
+      }
       formAlert.value = {
         status: true,
         title: "เกิดข้อผิดพลาด",
-        body: response.message,
+        body: formattedMessages,
       };
+      store.commit("setStatusLoading", false);
     }
   });
   store.commit("setStatusLoading", false);
 };
 
-const onChangePagination = (val) => {
-  pagination.page = val;
-  onLoadTable();
-};
 onMounted(async () => {
   store.commit("setStatusLoading", true);
   await onShowProduct();
@@ -136,11 +149,12 @@ onMounted(async () => {
   store.commit("setStatusLoading", false);
 });
 
-const onExportExcel = () => {
+const onExportExcel = async () => {
   console.log("***onExportExcel***");
   const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet("Sheet A");
-
+  exportToExcelActive.value = true;
+  await onLoadTable();
   worksheet.columns = [
     { header: "รหัส", key: "specialID", width: 20 },
     { header: "ชื่อสินค้า", key: "productName", width: 20 },

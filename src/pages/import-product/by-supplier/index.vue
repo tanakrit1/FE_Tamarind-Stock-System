@@ -91,6 +91,8 @@ let formattedMessages;
 
 const onLoadData = async () => {
   showTable.value = false;
+  store.commit("setStatusLoading", true);
+
   const body = {
     page: pagination.value.page,
     limit: pagination.value.limit,
@@ -129,6 +131,8 @@ const onLoadData = async () => {
         showTable.value = false;
       }
       console.log("response", rows.value);
+      store.commit("setStatusLoading", false);
+
     } else {
       showTable.value = false;
       if (typeof response.message === "string") {
