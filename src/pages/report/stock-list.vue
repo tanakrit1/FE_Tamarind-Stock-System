@@ -3,7 +3,6 @@ import { onMounted, ref, watch } from "vue";
 import tableManage from "../../components/tables/table-manage.vue";
 import { useRouter } from "vue-router";
 import paginationPage from "../../components/pagination/pagination-page.vue";
-import _apiProduct from "../../api/master-products.js";
 import _apiStockReport from "../../api/stock-report.js";
 import ExcelJS from "exceljs";
 import alert from "../../components/alert/alert.vue";
@@ -71,51 +70,16 @@ const showTable = ref(false);
 const exportToExcelActive = ref(false);
 let formattedMessages;
 
-const onShowProduct = async () => {
-  const body = {
-    page: 1,
-    limit: 10000,
-    sortField: "id",
-    sortType: "ASC",
-    filterModel: {
-      logicOperator: "and",
-      items: [],
-    },
-  };
-  await _apiProduct.search(body, (response) => {
-    if (response.statusCode === 200) {
-      console.log("response --> ", response);
-      // setCurrentDate();
-
-      inputSearch.value = response.data.map((item) => {
-        return {
-          id: item.id,
-          specialID: item.specialID,
-          productName: item.name,
-          typeAction: item.type,
-          productPrice: item.price,
-          quantity: item.quantity,
-        };
-      });
-    } else {
-      formAlert.value = {
-        status: true,
-        title: "เกิดข้อผิดพลาด",
-        body: response.message,
-      };
-    }
-  });
-};
 const onLoadTable = async () => {
   store.commit("setStatusLoading", true);
   const body = {
     page: pagination.value.page,
-    limit: exportToExcelActive.value == true ? 10000 : pagination.value.limit,
+    limit: exportToExcelActive.value ? 10000 : pagination.value.limit,
   };
 
   await _apiStockReport.searchStockReport(body, (response) => {
     if (response.statusCode === 200) {
-      console.log("response2 --> ", response);
+      console.log("response2 --> ", response.data);
       exportToExcelActive.value == false;
       showTable.value = true;
       flattenedData = response.data;
@@ -144,8 +108,7 @@ const onLoadTable = async () => {
 
 onMounted(async () => {
   store.commit("setStatusLoading", true);
-  await onShowProduct();
-  onLoadTable();
+  await onLoadTable();
   store.commit("setStatusLoading", false);
 });
 
