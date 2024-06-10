@@ -1,7 +1,7 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import confirm from '../alert/confirm.vue';
-const props = defineProps(['columns', 'rows', 'rowEdit', 'rowRemove', 'rowTranform'])
+const props = defineProps(['columns', 'rows', 'rowEdit', 'rowRemove', 'rowTranform', 'trickerClear'])
 const emit = defineEmits()
 const rowClick = ref({})
 const formModalConfirm = ref({
@@ -30,6 +30,24 @@ const onClickRemove = (rowData) => {
     }
 }
 
+const onClickTranform = (row) => {
+    rowClick.value = row
+    console.log("---> ", document.body.scrollHeight)
+    // document.getElementById('btn-save').scrollIntoView({
+    //     behavior: 'smooth'
+    // });
+
+    window.scrollTo({
+        bottom: document.body.scrollHeight,
+        behavior: 'smooth'
+    });
+    emit('onClickTranform', row)
+}
+
+watch(() => props.trickerClear, () => {
+    rowClick.value = {}
+})
+
 
 </script>
 
@@ -43,7 +61,8 @@ const onClickRemove = (rowData) => {
             </tr>
         </thead>
         <tbody class="bg-white">
-            <tr v-for="(row, index) in props.rows" :key="index">
+            <tr v-for="(row, index) in props.rows" :key="index"
+                :class="{ 'hover:bg-red-100': true, 'bg-red-100': rowClick.id === row.id }">
                 <td v-for="(column, index) in props.columns" :key="index" class="font-semibold">{{ row[column.field] }}
                 </td>
                 <td v-if="props.rowEdit || props.rowRemove || props.rowTranform">
@@ -76,7 +95,7 @@ const onClickRemove = (rowData) => {
                         </button>
 
                         <button type="button" class="rounded-full hover:bg-red-100 px-2 py-2" v-if="props.rowTranform"
-                            @click="emit('onClickTranform', row)">
+                            @click="onClickTranform(row)">
                             <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 48 48">
                                 <path fill="#E69329" d="m11.7 21.6l5.1 9.9l9.5-3.9l4.4-12.7l-14.8.8z" />
                                 <circle cx="15" cy="36" r="7.8" fill="#C2796A" />

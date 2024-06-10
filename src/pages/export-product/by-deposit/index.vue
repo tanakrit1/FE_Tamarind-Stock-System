@@ -30,6 +30,7 @@ const columns = [
 const rows = ref([]);
 const rowsOriginal = ref([])
 const rowAction = ref(null)
+const effectClearTable = ref(false)
 const ddl = ref({
     province: [],
     district: [],
@@ -70,6 +71,7 @@ const formSupplier = ref({
 })
 
 const onClearAllForm = () => {
+    effectClearTable.value = !effectClearTable.value
     formSupplierActive.value = false
     formSupplier.value = {
         firstName: "",
@@ -411,7 +413,7 @@ onMounted(async () => {
             </div>
 
             <div class="mt-2 mb-8 rounded-xl">
-                <tableManage :columns="columns" :rows="rows" :rowTranform="true" @onClickTranform="onTranform" />
+                <tableManage :columns="columns" :rows="rows" :rowTranform="true" @onClickTranform="onTranform" :trickerClear="effectClearTable" />
                 <div class="flex justify-end mt-3">
                     <paginationPage v-model:currentPage="pagination.page" :totalPages="pagination.totalPage"
                         :limit="pagination.limit" @update:currentPage="onChangePagination" />
@@ -574,7 +576,7 @@ onMounted(async () => {
 
                 </div>
             </div>
-            <div class="flex justify-center py-10" v-if="rowAction !== null">
+            <div id="btn-save" class="flex justify-center py-10" v-if="rowAction !== null">
                 <buttonPrimaryOutline @click="onSubmitForm" label="บันทึกข้อมูล" />
             </div>
         </div>
