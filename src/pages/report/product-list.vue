@@ -69,6 +69,7 @@ const columnsDeposit = [
 
 const rows = ref([]);
 let flattenedData = null;
+let dataExport = null;
 const showTable = ref(false);
 const fromDepositActive = ref(false);
 const exportToExcelActive = ref(false);
@@ -138,8 +139,8 @@ const onLoadTable = async () => {
       if (isValidDate) {
         store.commit("setStatusLoading", true);
         const body = {
-          page: pagination.value.page,
-          limit: exportToExcelActive.value == true ? 10000 : pagination.value.limit,
+          page: exportToExcelActive.value ? 1 : pagination.value.page,
+          limit: exportToExcelActive.value ? 10000 : pagination.value.limit,
           sortField: "id",
           sortType: "ASC",
           filterModel: {
@@ -184,11 +185,12 @@ const onLoadTable = async () => {
                 supplierZipCode: item.supplier.zipCode,
               }));
               if (exportToExcelActive.value == true) {
-                showTable.value = false;
+                dataExport = flattenedData;
+                exportToExcelActive.value = false;
               } else {
                 rows.value = flattenedData;
-                console.log("rows --> ", rows.value);
                 pagination.value.totalPage = response.metadata.totalPage;
+                showTable.value = true;
               }
             } else {
               store.commit("setStatusLoading", false);
@@ -236,8 +238,8 @@ const onLoadTable = async () => {
       if (isValidDate) {
         store.commit("setStatusLoading", true);
         const body = {
-          page: pagination.value.page,
-          limit: exportToExcelActive.value == true ? 10000 : pagination.value.limit,
+          page: exportToExcelActive.value ? 1 : pagination.value.page,
+          limit: exportToExcelActive.value ? 10000 : pagination.value.limit,
           sortField: "id",
           sortType: "ASC",
           filterModel: {
@@ -285,11 +287,12 @@ const onLoadTable = async () => {
                 supplierZipCode: item.supplier.zipCode,
               }));
               if (exportToExcelActive.value == true) {
-                showTable.value = false;
+                dataExport = flattenedData;
+                exportToExcelActive.value = false;
               } else {
                 rows.value = flattenedData;
-                console.log("rows --> ", rows.value);
                 pagination.value.totalPage = response.metadata.totalPage;
+                showTable.value = true;
               }
             } else {
               store.commit("setStatusLoading", false);
@@ -331,8 +334,8 @@ const onLoadTable = async () => {
       if (isValidDate) {
         store.commit("setStatusLoading", true);
         const body = {
-          page: pagination.value.page,
-          limit: exportToExcelActive.value == true ? 10000 : pagination.value.limit,
+          page: exportToExcelActive.value ? 1 : pagination.value.page,
+          limit: exportToExcelActive.value ? 10000 : pagination.value.limit,
           sortField: "id",
           sortType: "ASC",
           filterModel: {
@@ -385,11 +388,12 @@ const onLoadTable = async () => {
                 supplierZipCode: item.supplier.zipCode,
               }));
               if (exportToExcelActive.value == true) {
-                showTable.value = false;
+                dataExport = flattenedData;
+                exportToExcelActive.value = false;
               } else {
                 rows.value = flattenedData;
-                console.log("rows --> ", rows.value);
                 pagination.value.totalPage = response.metadata.totalPage;
+                showTable.value = true;
               }
             } else {
               store.commit("setStatusLoading", false);
@@ -432,8 +436,8 @@ const onLoadTable = async () => {
       if (isValidDate) {
         store.commit("setStatusLoading", true);
         const body = {
-          page: pagination.value.page,
-          limit: exportToExcelActive.value == true ? 10000 : pagination.value.limit,
+          page: exportToExcelActive.value ? 1 : pagination.value.page,
+          limit: exportToExcelActive.value ? 10000 : pagination.value.limit,
           sortField: "id",
           sortType: "ASC",
           filterModel: {
@@ -473,11 +477,12 @@ const onLoadTable = async () => {
                 supplierZipCode: item.supplier.zipCode,
               }));
               if (exportToExcelActive.value == true) {
-                showTable.value = false;
+                dataExport = flattenedData;
+                exportToExcelActive.value = false;
               } else {
                 rows.value = flattenedData;
-                console.log("rows --> ", rows.value);
                 pagination.value.totalPage = response.metadata.totalPage;
+                showTable.value = true;
               }
             } else {
               store.commit("setStatusLoading", false);
@@ -508,11 +513,12 @@ const onLoadTable = async () => {
           }
         });
       }
-    }else if (
+    } else if (
       currentDate.value.startDate == "" &&
       currentDate.value.endDate == "" &&
       currentDate.value.startPeriodDate == "" &&
-      currentDate.value.endPeriodDate == "" && inputSearch.value.in_productName == ""
+      currentDate.value.endPeriodDate == "" &&
+      inputSearch.value.in_productName == ""
     ) {
       console.log("ไม่มีค่าวันที่");
       const isValidDate = CheckCurrentDate();
@@ -520,8 +526,8 @@ const onLoadTable = async () => {
       if (isValidDate) {
         store.commit("setStatusLoading", true);
         const body = {
-          page: pagination.value.page,
-          limit: exportToExcelActive.value == true ? 10000 : pagination.value.limit,
+          page: exportToExcelActive.value ? 1 : pagination.value.page,
+          limit: exportToExcelActive.value ? 10000 : pagination.value.limit,
           sortField: "id",
           sortType: "ASC",
           filterModel: {
@@ -555,11 +561,12 @@ const onLoadTable = async () => {
                 supplierZipCode: item.supplier.zipCode,
               }));
               if (exportToExcelActive.value == true) {
-                showTable.value = false;
+                dataExport = flattenedData;
+                exportToExcelActive.value = false;
               } else {
                 rows.value = flattenedData;
-                console.log("rows --> ", rows.value);
                 pagination.value.totalPage = response.metadata.totalPage;
+                showTable.value = true;
               }
             } else {
               store.commit("setStatusLoading", false);
@@ -598,8 +605,9 @@ const onLoadTable = async () => {
       if (isValidDate) {
         store.commit("setStatusLoading", true);
         const body = {
-          page: pagination.value.page,
-          limit: exportToExcelActive.value == true ? 10000 : pagination.value.limit,
+          page: exportToExcelActive.value ? 1 : pagination.value.page,
+          limit: exportToExcelActive.value ? 10000 : pagination.value.limit,
+
           sortField: "id",
           sortType: "ASC",
           filterModel: {
@@ -649,11 +657,12 @@ const onLoadTable = async () => {
                 supplierZipCode: item.supplier.zipCode,
               }));
               if (exportToExcelActive.value == true) {
-                showTable.value = false;
+                dataExport = flattenedData;
+                exportToExcelActive.value = false;
               } else {
                 rows.value = flattenedData;
-                console.log("rows --> ", rows.value);
                 pagination.value.totalPage = response.metadata.totalPage;
+                showTable.value = true;
               }
             } else {
               store.commit("setStatusLoading", false);
@@ -695,9 +704,9 @@ const onLoadTable = async () => {
       if (isValidDate) {
         store.commit("setStatusLoading", true);
         const body = {
-          page: pagination.value.page,
-          limit: exportToExcelActive.value == true ? 10000 : pagination.value.limit,
-          sortField: "id",
+          page: exportToExcelActive.value ? 1 : pagination.value.page,
+          limit: exportToExcelActive.value ? 10000 : pagination.value.limit,
+          sortField: "product_specialID",
           sortType: "ASC",
           filterModel: {
             logicOperator: "and",
@@ -715,7 +724,7 @@ const onLoadTable = async () => {
             ],
           },
         };
-        console.log("body --> ", body);
+        console.log("bodyproduct_name --> ", body);
         await _apiSupplierImport.searchSupplierImport(body, (response) => {
           if (response.statusCode === 200) {
             if (response.data.length > 0) {
@@ -739,98 +748,20 @@ const onLoadTable = async () => {
                 supplierProvince: item.supplier.province,
                 supplierZipCode: item.supplier.zipCode,
               }));
+              // if (exportToExcelActive.value == true) {
+              //   showTable.value = false;
+              // } else {
+              //   rows.value = flattenedData;
+              //   console.log("rows --> ", rows.value);
+              //   pagination.value.totalPage = response.metadata.totalPage;
+              // }
               if (exportToExcelActive.value == true) {
-                showTable.value = false;
+                dataExport = flattenedData;
+                exportToExcelActive.value = false;
               } else {
                 rows.value = flattenedData;
-                console.log("rows --> ", rows.value);
                 pagination.value.totalPage = response.metadata.totalPage;
-              }
-            } else {
-              store.commit("setStatusLoading", false);
-              showTable.value = false;
-              formAlert.value = {
-                status: true,
-                title: "แจ้งเตือน",
-                body: "ไม่พบข้อมูล",
-              };
-              rows.value = [];
-            }
-          } else {
-            showTable.value = false;
-            if (typeof response.message === "string") {
-              const messages = response.message;
-              formattedMessages = messages
-                .map((message) => `<li>${message}</li>`)
-                .join("");
-            } else {
-              formattedMessages = response.message.toString();
-            }
-            formAlert.value = {
-              status: true,
-              title: "เกิดข้อผิดพลาด",
-              body: formattedMessages,
-            };
-            store.commit("setStatusLoading", false);
-          }
-        });
-      }
-    }else if (
-      currentDate.value.startDate == "" &&
-      currentDate.value.endDate == "" &&
-      currentDate.value.startPeriodDate == "" &&
-      currentDate.value.endPeriodDate == "" && inputSearch.value.in_productName == ""
-    ) {
-      console.log("ไม่มีค่าวันที่");
-      const isValidDate = CheckCurrentDate();
-      if (isValidDate) {
-        store.commit("setStatusLoading", true);
-        const body = {
-          page: pagination.value.page,
-          limit: exportToExcelActive.value == true ? 10000 : pagination.value.limit,
-          sortField: "id",
-          sortType: "ASC",
-          filterModel: {
-            logicOperator: "and",
-            items: [
-              {
-                field: "typeAction",
-                operator: "equals",
-                value: selectSearch.value.in_productType,
-              },
-            ],
-          },
-        };
-        console.log("body --> ", body);
-        await _apiSupplierImport.searchSupplierImport(body, (response) => {
-          if (response.statusCode === 200) {
-            if (response.data.length > 0) {
-              showTable.value = true;
-              fromDepositActive.value = false;
-              store.commit("setStatusLoading", false);
-              flattenedData = response.data.map((item) => ({
-                specialID: item.product.specialID,
-                productName: item.product.name,
-                productPrice: item.product.price,
-                typeAction: item.typeAction,
-                quantity: item.quantity,
-                price: item.price,
-                periodDate: item.periodDate,
-                supplierFirstName: item.supplier.firstName,
-                supplierLastName: item.supplier.lastName,
-                supplierPhone: item.supplier.phone,
-                supplierAddress: item.supplier.address,
-                supplierSubDistrict: item.supplier.subDistric,
-                supplierDistrict: item.supplier.distric,
-                supplierProvince: item.supplier.province,
-                supplierZipCode: item.supplier.zipCode,
-              }));
-              if (exportToExcelActive.value == true) {
-                showTable.value = false;
-              } else {
-                rows.value = flattenedData;
-                console.log("rows --> ", rows.value);
-                pagination.value.totalPage = response.metadata.totalPage;
+                showTable.value = true;
               }
             } else {
               store.commit("setStatusLoading", false);
@@ -1016,7 +947,7 @@ onMounted(async () => {
   store.commit("setStatusLoading", false);
 });
 
-const onExportExcel =  async () => {
+const onExportExcel = async () => {
   console.log("***onExportExcel***");
   const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet("Sheet A");
@@ -1052,7 +983,7 @@ const onExportExcel =  async () => {
       };
     });
     // เพิ่มข้อมูลลงในแถวของ Excel spreadsheet
-    flattenedData.forEach((item, index) => {
+    dataExport.forEach((item, index) => {
       worksheet.addRow({
         specialID: item.specialID,
         productName: item.productName,
@@ -1112,7 +1043,7 @@ const onExportExcel =  async () => {
     });
 
     // เพิ่มข้อมูลลงในแถวของ Excel spreadsheet
-    flattenedData.forEach((item, index) => {
+    dataExport.forEach((item, index) => {
       worksheet.addRow({
         specialID: item.specialID,
         productName: item.productName,
@@ -1260,14 +1191,26 @@ const onExportExcel =  async () => {
               @click="onSubmit"
               class="h-10 rounded-full w-40 btn btn-btn-error btn-wide text-xl text-red-800 font-semibold"
             >
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M11.5 2.75a8.75 8.75 0 1 0 0 17.5a8.75 8.75 0 0 0 0-17.5M1.25 11.5c0-5.66 4.59-10.25 10.25-10.25S21.75 5.84 21.75 11.5c0 2.56-.939 4.902-2.491 6.698l3.271 3.272a.75.75 0 1 1-1.06 1.06l-3.272-3.271A10.21 10.21 0 0 1 11.5 21.75c-5.66 0-10.25-4.59-10.25-10.25" clip-rule="evenodd"/></svg>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  fill="currentColor"
+                  fill-rule="evenodd"
+                  d="M11.5 2.75a8.75 8.75 0 1 0 0 17.5a8.75 8.75 0 0 0 0-17.5M1.25 11.5c0-5.66 4.59-10.25 10.25-10.25S21.75 5.84 21.75 11.5c0 2.56-.939 4.902-2.491 6.698l3.271 3.272a.75.75 0 1 1-1.06 1.06l-3.272-3.271A10.21 10.21 0 0 1 11.5 21.75c-5.66 0-10.25-4.59-10.25-10.25"
+                  clip-rule="evenodd"
+                />
+              </svg>
               ค้นหา
             </button>
             <button
               @click="clearData"
               class="h-10 rounded-full w-40 btn btn-btn-error btn-wide text-xl text-red-800 font-semibold"
             >
-            <svg
+              <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="32"
                 height="32"
@@ -1285,28 +1228,28 @@ const onExportExcel =  async () => {
               @click="onExportExcel"
               class="h-10 rounded-full w-40 btn btn-btn-error btn-wide text-xl text-red-800 font-semibold"
             >
-            <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="32"
-            height="32"
-            viewBox="0 0 24 24"
-          >
-            <path
-              fill="currentColor"
-              d="M3 10c0-3.771 0-5.657 1.172-6.828C5.343 2 7.229 2 11 2h2c3.771 0 5.657 0 6.828 1.172C21 4.343 21 6.229 21 10v4c0 3.771 0 5.657-1.172 6.828C18.657 22 16.771 22 13 22h-2c-3.771 0-5.657 0-6.828-1.172C3 19.657 3 17.771 3 14z"
-              opacity=".5"
-            />
-            <path
-              fill="currentColor"
-              d="M16.519 16.501c.175-.136.334-.295.651-.612l3.957-3.958c.096-.095.052-.26-.075-.305a4.332 4.332 0 0 1-1.644-1.034a4.332 4.332 0 0 1-1.034-1.644c-.045-.127-.21-.171-.305-.075L14.11 12.83c-.317.317-.476.476-.612.651c-.161.207-.3.43-.412.666c-.095.2-.166.414-.308.84l-.184.55l-.292.875l-.273.82a.584.584 0 0 0 .738.738l.82-.273l.875-.292l.55-.184c.426-.142.64-.212.84-.308c.236-.113.46-.25.666-.412m5.849-5.809a2.163 2.163 0 1 0-3.06-3.059l-.126.128a.524.524 0 0 0-.148.465c.02.107.055.265.12.452c.13.375.376.867.839 1.33a3.5 3.5 0 0 0 1.33.839c.188.065.345.1.452.12a.525.525 0 0 0 .465-.148z"
-            />
-            <path
-              fill="currentColor"
-              fill-rule="evenodd"
-              d="M7.25 9A.75.75 0 0 1 8 8.25h6.5a.75.75 0 0 1 0 1.5H8A.75.75 0 0 1 7.25 9m0 4a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 0 1.5H8a.75.75 0 0 1-.75-.75m0 4a.75.75 0 0 1 .75-.75h1.5a.75.75 0 0 1 0 1.5H8a.75.75 0 0 1-.75-.75"
-              clip-rule="evenodd"
-            />
-          </svg>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="32"
+                height="32"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  fill="currentColor"
+                  d="M3 10c0-3.771 0-5.657 1.172-6.828C5.343 2 7.229 2 11 2h2c3.771 0 5.657 0 6.828 1.172C21 4.343 21 6.229 21 10v4c0 3.771 0 5.657-1.172 6.828C18.657 22 16.771 22 13 22h-2c-3.771 0-5.657 0-6.828-1.172C3 19.657 3 17.771 3 14z"
+                  opacity=".5"
+                />
+                <path
+                  fill="currentColor"
+                  d="M16.519 16.501c.175-.136.334-.295.651-.612l3.957-3.958c.096-.095.052-.26-.075-.305a4.332 4.332 0 0 1-1.644-1.034a4.332 4.332 0 0 1-1.034-1.644c-.045-.127-.21-.171-.305-.075L14.11 12.83c-.317.317-.476.476-.612.651c-.161.207-.3.43-.412.666c-.095.2-.166.414-.308.84l-.184.55l-.292.875l-.273.82a.584.584 0 0 0 .738.738l.82-.273l.875-.292l.55-.184c.426-.142.64-.212.84-.308c.236-.113.46-.25.666-.412m5.849-5.809a2.163 2.163 0 1 0-3.06-3.059l-.126.128a.524.524 0 0 0-.148.465c.02.107.055.265.12.452c.13.375.376.867.839 1.33a3.5 3.5 0 0 0 1.33.839c.188.065.345.1.452.12a.525.525 0 0 0 .465-.148z"
+                />
+                <path
+                  fill="currentColor"
+                  fill-rule="evenodd"
+                  d="M7.25 9A.75.75 0 0 1 8 8.25h6.5a.75.75 0 0 1 0 1.5H8A.75.75 0 0 1 7.25 9m0 4a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 0 1.5H8a.75.75 0 0 1-.75-.75m0 4a.75.75 0 0 1 .75-.75h1.5a.75.75 0 0 1 0 1.5H8a.75.75 0 0 1-.75-.75"
+                  clip-rule="evenodd"
+                />
+              </svg>
               รายงาน
             </button>
           </div>

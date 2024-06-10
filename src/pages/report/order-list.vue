@@ -142,10 +142,9 @@ const onLoadTable = async () => {
       if (isValidDate) {
         store.commit("setStatusLoading", true);
         const body = {
-          page: pagination.value.page,
-          limit:
-            exportToExcelActive.value == true ? 10000 : pagination.value.limit,
-          sortField: "id",
+          page: exportToExcelActive.value ? 1 : pagination.value.page,
+          limit: exportToExcelActive.value ? 10000 : pagination.value.limit,
+          sortField: "product_specialID",
           sortType: "ASC",
           filterModel: {
             logicOperator: "and",
@@ -194,11 +193,12 @@ const onLoadTable = async () => {
               }));
 
               if (exportToExcelActive.value == true) {
-                showTable.value = false;
+                dataExport = flattenedData;
+                exportToExcelActive.value = false;
               } else {
                 rows.value = flattenedData;
-                console.log("rows --> ", rows.value);
                 pagination.value.totalPage = response.metadata.totalPage;
+                showTable.value = true;
               }
             } else {
               store.commit("setStatusLoading", false);
@@ -246,10 +246,9 @@ const onLoadTable = async () => {
       if (isValidDate) {
         store.commit("setStatusLoading", true);
         const body = {
-          page: pagination.value.page,
-          limit:
-            exportToExcelActive.value == true ? 10000 : pagination.value.limit,
-          sortField: "id",
+          page: exportToExcelActive.value ? 1 : pagination.value.page,
+          limit: exportToExcelActive.value ? 10000 : pagination.value.limit,
+          sortField: "product_specialID",
           sortType: "ASC",
           filterModel: {
             logicOperator: "and",
@@ -301,11 +300,12 @@ const onLoadTable = async () => {
               }));
 
               if (exportToExcelActive.value == true) {
-                showTable.value = false;
+                dataExport = flattenedData;
+                exportToExcelActive.value = false;
               } else {
                 rows.value = flattenedData;
-                console.log("rows --> ", rows.value);
                 pagination.value.totalPage = response.metadata.totalPage;
+                showTable.value = true;
               }
             } else {
               store.commit("setStatusLoading", false);
@@ -347,10 +347,9 @@ const onLoadTable = async () => {
       if (isValidDate) {
         store.commit("setStatusLoading", true);
         const body = {
-          page: pagination.value.page,
-          limit:
-            exportToExcelActive.value == true ? 10000 : pagination.value.limit,
-          sortField: "id",
+          page: exportToExcelActive.value ? 1 : pagination.value.page,
+          limit: exportToExcelActive.value ? 10000 : pagination.value.limit,
+          sortField: "product_specialID",
           sortType: "ASC",
           filterModel: {
             logicOperator: "and",
@@ -407,11 +406,12 @@ const onLoadTable = async () => {
               }));
 
               if (exportToExcelActive.value == true) {
-                showTable.value = false;
+                dataExport = flattenedData;
+                exportToExcelActive.value = false;
               } else {
                 rows.value = flattenedData;
-                console.log("rows --> ", rows.value);
                 pagination.value.totalPage = response.metadata.totalPage;
+                showTable.value = true;
               }
             } else {
               store.commit("setStatusLoading", false);
@@ -455,10 +455,9 @@ const onLoadTable = async () => {
         store.commit("setStatusLoading", true);
 
         const body = {
-          page: pagination.value.page,
-          limit:
-            exportToExcelActive.value == true ? 10000 : pagination.value.limit,
-          sortField: "id",
+          page: exportToExcelActive.value ? 1 : pagination.value.page,
+          limit: exportToExcelActive.value ? 10000 : pagination.value.limit,
+          sortField: "product_specialID",
           sortType: "ASC",
           filterModel: {
             logicOperator: "and",
@@ -502,11 +501,12 @@ const onLoadTable = async () => {
               }));
 
               if (exportToExcelActive.value == true) {
-                showTable.value = false;
+                dataExport = flattenedData;
+                exportToExcelActive.value = false;
               } else {
                 rows.value = flattenedData;
-                console.log("rows --> ", rows.value);
                 pagination.value.totalPage = response.metadata.totalPage;
+                showTable.value = true;
               }
             } else {
               store.commit("setStatusLoading", false);
@@ -551,10 +551,9 @@ const onLoadTable = async () => {
         store.commit("setStatusLoading", true);
 
         const body = {
-          page: pagination.value.page,
-          limit:
-            exportToExcelActive.value == true ? 10000 : pagination.value.limit,
-          sortField: "id",
+          page: exportToExcelActive.value ? 1 : pagination.value.page,
+          limit: exportToExcelActive.value ? 10000 : pagination.value.limit,
+          sortField: "product_specialID",
           sortType: "ASC",
           filterModel: {
             logicOperator: "and",
@@ -592,11 +591,12 @@ const onLoadTable = async () => {
               }));
 
               if (exportToExcelActive.value == true) {
-                showTable.value = false;
+                dataExport = flattenedData;
+                exportToExcelActive.value = false;
               } else {
                 rows.value = flattenedData;
-                console.log("rows --> ", rows.value);
                 pagination.value.totalPage = response.metadata.totalPage;
+                showTable.value = true;
               }
             } else {
               store.commit("setStatusLoading", false);
@@ -640,10 +640,9 @@ const onLoadTable = async () => {
       if (isValidDate) {
         store.commit("setStatusLoading", true);
         const body = {
-          page: pagination.value.page,
-          limit:
-            exportToExcelActive.value == true ? 10000 : pagination.value.limit,
-          sortField: "id",
+          page: exportToExcelActive.value ? 1 : pagination.value.page,
+          limit: exportToExcelActive.value ? 10000 : pagination.value.limit,
+          sortField: "product_specialID",
           sortType: "ASC",
           filterModel: {
             logicOperator: "and",
@@ -694,11 +693,12 @@ const onLoadTable = async () => {
               }));
 
               if (exportToExcelActive.value == true) {
-                showTable.value = false;
+                dataExport = flattenedData;
+                exportToExcelActive.value = false;
               } else {
                 rows.value = flattenedData;
-                console.log("rows --> ", rows.value);
                 pagination.value.totalPage = response.metadata.totalPage;
+                showTable.value = true;
               }
             } else {
               store.commit("setStatusLoading", false);
@@ -738,10 +738,9 @@ const onLoadTable = async () => {
       if (isValidDate) {
         store.commit("setStatusLoading", true);
         const body = {
-          page: pagination.value.page,
-          limit:
-            exportToExcelActive.value == true ? 10000 : pagination.value.limit,
-          sortField: "id",
+          page: exportToExcelActive.value ? 1 : pagination.value.page,
+          limit: exportToExcelActive.value ? 10000 : pagination.value.limit,
+          sortField: "product_specialID",
           sortType: "ASC",
           filterModel: {
             logicOperator: "and",
@@ -787,11 +786,12 @@ const onLoadTable = async () => {
               }));
 
               if (exportToExcelActive.value == true) {
-                showTable.value = false;
+                dataExport = flattenedData;
+                exportToExcelActive.value = false;
               } else {
                 rows.value = flattenedData;
-                console.log("rows --> ", rows.value);
                 pagination.value.totalPage = response.metadata.totalPage;
+                showTable.value = true;
               }
             } else {
               store.commit("setStatusLoading", false);
@@ -832,10 +832,9 @@ const onLoadTable = async () => {
       if (isValidDate) {
         store.commit("setStatusLoading", true);
         const body = {
-          page: pagination.value.page,
-          limit:
-            exportToExcelActive.value == true ? 10000 : pagination.value.limit,
-          sortField: "id",
+          page: exportToExcelActive.value ? 1 : pagination.value.page,
+          limit: exportToExcelActive.value ? 10000 : pagination.value.limit,
+          sortField: "product_specialID",
           sortType: "ASC",
           filterModel: {
             logicOperator: "and",
@@ -876,11 +875,12 @@ const onLoadTable = async () => {
               }));
 
               if (exportToExcelActive.value == true) {
-                showTable.value = false;
+                dataExport = flattenedData;
+                exportToExcelActive.value = false;
               } else {
                 rows.value = flattenedData;
-                console.log("rows --> ", rows.value);
                 pagination.value.totalPage = response.metadata.totalPage;
+                showTable.value = true;
               }
             } else {
               store.commit("setStatusLoading", false);
@@ -1107,7 +1107,7 @@ const onExportExcel = async () => {
       };
     });
     // เพิ่มข้อมูลลงในแถวของ Excel spreadsheet
-    flattenedData.forEach((item, index) => {
+    dataExport.forEach((item, index) => {
       worksheet.addRow({
         specialID: item.specialID,
         productName: item.productName,
@@ -1173,7 +1173,7 @@ const onExportExcel = async () => {
       };
     });
     // เพิ่มข้อมูลลงในแถวของ Excel spreadsheet
-    flattenedData.forEach((item, index) => {
+    dataExport.forEach((item, index) => {
       worksheet.addRow({
         specialID: item.specialID,
         productName: item.productName,
