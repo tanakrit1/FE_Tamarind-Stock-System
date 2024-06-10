@@ -259,7 +259,6 @@ const onChangeSupplier = async (phone) => {
 
         console.log("formSupplier", formSupplier.value);
       } else {
-
         formAlert.value = {
           status: true,
           title: "เเจ้งเตือน",
@@ -279,7 +278,6 @@ const onChangeSupplier = async (phone) => {
         };
       }
       store.commit("setStatusLoading", false);
-
     } else {
       const messages = response.message;
       const formattedMessages = messages
@@ -334,11 +332,10 @@ function validateFormProduct(product) {
   return (
     !isEmpty(product.quantity) &&
     !isEmpty(product.price) &&
-    !isEmpty(product.typeAction) &&
     !isEmpty(product.productID) &&
     !isEmpty(product.periodDate) &&
     !isEmpty(product.remain) &&
-    !isEmpty(product.productName)
+    !isEmpty(product.productID)
   );
 }
 
@@ -369,86 +366,101 @@ const onSubmit = async () => {
   store.commit("setStatusLoading", true);
   if (
     !validateFormProduct(formProduct.value) ||
-    !validateFormSupplier(formSupplier.value) || formProduct.value.quantity === "0"
+    !validateFormSupplier(formSupplier.value)
   ) {
-    if (formProduct.value.quantity === "0") {
-      formAlert.value = {
-        status: true,
-        title: "เกิดข้อผิดพลาด",
-        body: "จํานวนสินค้าต้องไม่เป็น 0",
-      };
-      store.commit("setStatusLoading", false);
-      return;
-    } else {
-      formAlert.value = {
-        status: true,
-        title: "เกิดข้อผิดพลาด",
-        body: "กรุณากรอกข้อมูลให้ครบถ้วน",
-      };
-      store.commit("setStatusLoading", false);
-      return;
-    }
-  }else{
-    
-  const body = {
-    //------transaction_import------//
-    quantity: formProduct.value.quantity.toString(),
-    price: Number(formProduct.value.price),
-    remain: Number(formProduct.value.remain),
-    periodDate: formProduct.value.periodDate,
-    // priceDeposit:1152.05,
-    typeAction: formProduct.value.typeAction,
-    //--------product----------------//
-    product_id: Number(formProduct.value.productID),
-    //--------supplier---------------//
-    firstName: formSupplier.value.firstName,
-    lastName: formSupplier.value.lastName,
-    address: formSupplier.value.address,
-    distric:
-      formDepositActive.value === false
-        ? formSupplier.value.district
-        : district.find((item) => item.id === formSupplier.value.district)
-            .name_th,
-    province:
-      formDepositActive.value === false
-        ? formSupplier.value.province
-        : province.find((item) => item.id === formSupplier.value.province)
-            .name_th,
-    subDistric:
-      formDepositActive.value === false
-        ? formSupplier.value.subDistrict
-        : subDistrict.find((item) => item.id === formSupplier.value.subDistrict)
-            .name_th,
-    zipCode: formSupplier.value.zipCode.toString(),
-    phone: formSupplier.value.phone,
-  };
+    console.log("validateFormProduct", validateFormProduct(formProduct.value));
+    console.log("validateFormSupplier", validateFormSupplier(formSupplier.value));
+    formAlert.value = {
+      status: true,
+      title: "เกิดข้อผิดพลาด",
+      body: "กรุณากรอกข้อมูลให้ครบถ้วน",
+    };
+    store.commit("setStatusLoading", false);
+    return;
+  } else if (formProduct.value.quantity === "0") {
+    formAlert.value = {
+      status: true,
+      title: "เกิดข้อผิดพลาด",
+      body: "จํานวนสินค้าต้องไม่เป็น 0",
+    };
+    store.commit("setStatusLoading", false);
+    return;
+  } else {
+    const body = {
+      //------transaction_import------//
+      quantity: formProduct.value.quantity.toString(),
+      price: Number(formProduct.value.price),
+      remain: Number(formProduct.value.remain),
+      periodDate: formProduct.value.periodDate,
+      // priceDeposit:1152.05,
+      typeAction: formProduct.value.typeAction,
+      //--------product----------------//
+      product_id: Number(formProduct.value.productID),
+      //--------supplier---------------//
+      firstName: formSupplier.value.firstName,
+      lastName: formSupplier.value.lastName,
+      address: formSupplier.value.address,
+      distric:
+        formDepositActive.value === false
+          ? formSupplier.value.district
+          : district.find((item) => item.id === formSupplier.value.district)
+              .name_th,
+      province:
+        formDepositActive.value === false
+          ? formSupplier.value.province
+          : province.find((item) => item.id === formSupplier.value.province)
+              .name_th,
+      subDistric:
+        formDepositActive.value === false
+          ? formSupplier.value.subDistrict
+          : subDistrict.find(
+              (item) => item.id === formSupplier.value.subDistrict
+            ).name_th,
+      zipCode: formSupplier.value.zipCode.toString(),
+      phone: formSupplier.value.phone,
+    };
 
-  await _apiDepositImport.createDepositImport(body, (response) => {
-    if (response.statusCode === 200) {
-      formAlert.value = {
-        status: true,
-        title: "เเจ้งเตือน",
-        body: "บันทึกข้อมูลเรียบร้อย",
-      };
-      clearData();
-      onLoadData();
-      onShowProduct();
-    } else {
-      const messages = response.message;
-      const formattedMessages = messages
-        .map((message) => `<li>${message}</li>`)
-        .join("");
-      formAlert.value = {
-        status: true,
-        title: "เกิดข้อผิดพลาด",
-        body: formattedMessages,
-      };
-    }
-  });
-  console.log(body);
-  store.commit("setStatusLoading", false);
+    await _apiDepositImport.createDepositImport(body, (response) => {
+      if (response.statusCode === 200) {
+        formAlert.value = {
+          status: true,
+          title: "เเจ้งเตือน",
+          body: "บันทึกข้อมูลเรียบร้อย",
+        };
+        formDepositActive.value = false;
+        clearData();
+        onLoadData();
+        onShowProduct();
+      } else {
+        const messages = response.message;
+        const formattedMessages = messages
+          .map((message) => `<li>${message}</li>`)
+          .join("");
+        formAlert.value = {
+          status: true,
+          title: "เกิดข้อผิดพลาด",
+          body: formattedMessages,
+        };
+      }
+    });
+    console.log(body);
+    store.commit("setStatusLoading", false);
   }
+};
 
+const limitLength = (event) => {
+  const value = event.target.value;
+  if (value.length > 10) {
+    event.target.value = value.slice(0, 10);
+    formSupplier.value.phone = event.target.value;
+  }
+};
+
+const filterNumericInput = (event) => {
+  const value = event.target.value;
+  const numericValue = value.replace(/\D/g, ""); // กรองตัวอักษรที่ไม่ใช่ตัวเลขออก
+  event.target.value = numericValue;
+  formProduct.value.quantity = numericValue;
 };
 
 onMounted(async () => {
@@ -524,7 +536,7 @@ onMounted(async () => {
                 </option>
               </select>
             </div>
-            
+
             <div
               class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6"
             >
@@ -567,6 +579,7 @@ onMounted(async () => {
                 class="h-8 w-3/4 focus:outline-red-400 rounded bg-red-100 px-3"
                 type="number"
                 v-model="formProduct.quantity"
+                 @input="filterNumericInput($event)"
               />
               <span class="w-1/4 text-red-800 font-semibold">กิโลกรัม</span>
             </div>
@@ -578,6 +591,7 @@ onMounted(async () => {
                 class="h-8 w-3/4 focus:outline-red-400 rounded bg-red-100 px-3"
                 type="number"
                 v-model="formProduct.remain"
+                disabled
               />
               <span class="w-1/4 text-red-800 font-semibold">กิโลกรัม</span>
             </div>
@@ -600,9 +614,9 @@ onMounted(async () => {
               type="text"
               placeholder="กรอกเบอร์โทรศัพท์ (10 หลัก)"
               pattern="[0-9]*"
-              maxlength="10"
               class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
               v-model="formSupplier.phone"
+              @input="limitLength($event)"
               @blur="(event) => onChangeSupplier(event.target.value)"
             />
           </div>

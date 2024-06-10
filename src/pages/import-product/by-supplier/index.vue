@@ -417,6 +417,7 @@ const onSubmit = async () => {
           title: "เเจ้งเตือน",
           body: "บันทึกข้อมูลเรียบร้อย",
         };
+        formSupplierActive.value = false;
         clearData();
         onLoadData();
         onShowProduct();
@@ -435,6 +436,21 @@ const onSubmit = async () => {
     });
     console.log(body);
   }
+};
+
+const limitLength = (event) => {
+  const value = event.target.value;
+  if (value.length > 10) {
+    event.target.value = value.slice(0, 10);
+    formSupplier.value.phone = event.target.value;
+  }
+};
+
+const filterNumericInput = (event) => {
+  const value = event.target.value;
+  const numericValue = value.replace(/\D/g, ''); // กรองตัวอักษรที่ไม่ใช่ตัวเลขออก
+  event.target.value = numericValue;
+  formProduct.value.quantity = numericValue;
 };
 
 onMounted(async () => {
@@ -546,6 +562,7 @@ onMounted(async () => {
                 class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
                 v-model="formProduct.price"
               />
+              <span class="w-1/4 text-red-800 font-semibold">บาท</span>
             </div>
 
             <div
@@ -554,10 +571,13 @@ onMounted(async () => {
               <span class="w-1/4 text-red-800 font-semibold">ปริมาณ</span>
               <input
                 class="h-8 w-3/4 focus:outline-red-400 rounded bg-red-100 px-3"
-                type="number"
+                type="text"
+                @input="filterNumericInput"
                 @change="(event) => onChangeQuantity(event.target.value)"
                 v-model="formProduct.quantity"
               />
+              <span class="w-1/4 text-red-800 font-semibold">กิโลกรัม</span>
+
             </div>
             <div
               class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6"
@@ -569,6 +589,7 @@ onMounted(async () => {
                 class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
                 v-model="formProduct.totalPrice"
               />
+              <span class="w-1/4 text-red-800 font-semibold">บาท</span>
             </div>
           </div>
         </div>
@@ -589,9 +610,9 @@ onMounted(async () => {
               type="number"
               placeholder="กรอกเบอร์โทรศัพท์ (10 หลัก)"
               pattern="[0-9]*"
-              maxlength="10"
               class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
               v-model="formSupplier.phone"
+              @input="limitLength($event)"
               @blur="(event) => onChangeSupplier(event.target.value)"
             />
           </div>
