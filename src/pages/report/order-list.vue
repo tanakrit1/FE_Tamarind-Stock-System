@@ -1067,11 +1067,41 @@ const onExportExcel = async () => {
         pattern: "solid",
         fgColor: { argb: "DD5746" }, // สีที่คุณต้องการ
       };
+      cell.border = {
+        top: { style: "thin" },
+        left: { style: "thin" },
+        bottom: { style: "thin" },
+        right: { style: "thin" },
+      };
     });
     // เพิ่มข้อมูลลงในแถวของ Excel spreadsheet
 
+    // Loop through dataExport to add rows
     dataExport.forEach((item, index) => {
-      const row = worksheet.getRow(index + 2); // Index + 2 because header row is at index 1
+      // Add row to the worksheet
+      const row = worksheet.addRow({
+        specialID: item.specialID,
+        productName: item.productName,
+        productInPrice: item.productInPrice,
+        productOutPrice: item.productOutPrice,
+        priceDeposit: item.priceDeposit, //ค่าฝาก
+        priceTotalDeposit: item.priceTotalDeposit, //ค่าฝาก
+        remain: item.remain, //คงเหลือ
+        quantity_import: item.quantity_import,
+        quantity: item.quantity,
+        periodDate: item.periodDate,
+        supplierFirstName: item.supplierFirstName,
+        supplierLastName: item.supplierLastName,
+        supplierPhone: item.supplierPhone,
+        supplierAddress: item.supplierAddress,
+        supplierSubDistrict: item.supplierSubDistrict,
+        supplierDistrict: item.supplierDistrict,
+        supplierProvince: item.supplierProvince,
+        supplierZipCode: item.supplierZipCode,
+        typeAction: item.typeAction,
+      });
+
+      // Set borders for each cell in the row
       row.eachCell((cell) => {
         cell.border = {
           top: { style: "thin" },
@@ -1079,28 +1109,6 @@ const onExportExcel = async () => {
           bottom: { style: "thin" },
           right: { style: "thin" },
         };
-
-        worksheet.addRow({
-          specialID: item.specialID,
-          productName: item.productName,
-          productInPrice: item.productInPrice,
-          productOutPrice: item.productOutPrice,
-          priceDeposit: item.priceDeposit, //ค่าฝาก
-          priceTotalDeposit: item.priceTotalDeposit, //ค่าฝาก
-          remain: item.remain, //คงเหลือ
-          quantity_import: item.quantity_import,
-          quantity: item.quantity,
-          periodDate: item.periodDate,
-          supplierFirstName: item.supplierFirstName,
-          supplierLastName: item.supplierLastName,
-          supplierPhone: item.supplierPhone,
-          supplierAddress: item.supplierAddress,
-          supplierSubDistrict: item.supplierSubDistrict,
-          supplierDistrict: item.supplierDistrict,
-          supplierProvince: item.supplierProvince,
-          supplierZipCode: item.supplierZipCode,
-          typeAction: item.typeAction,
-        });
       });
     });
 
@@ -1144,10 +1152,17 @@ const onExportExcel = async () => {
         pattern: "solid",
         fgColor: { argb: "A8CD9F" }, // สีที่คุณต้องการ
       };
+      cell.border = {
+        top: { style: "thin" },
+        left: { style: "thin" },
+        bottom: { style: "thin" },
+        right: { style: "thin" },
+      };
     });
     // เพิ่มข้อมูลลงในแถวของ Excel spreadsheet
     dataExport.forEach((item, index) => {
-      worksheet.addRow({
+      // Add row to the worksheet
+      const row = worksheet.addRow({
         specialID: item.specialID,
         productName: item.productName,
         productInPrice: item.productInPrice,
@@ -1165,7 +1180,16 @@ const onExportExcel = async () => {
         customerProvince: item.customerProvince,
         customerZipCode: item.customerZipCode,
       });
+      row.eachCell((cell) => {
+        cell.border = {
+          top: { style: "thin" },
+          left: { style: "thin" },
+          bottom: { style: "thin" },
+          right: { style: "thin" },
+        };
+      });
     });
+
     workbook.xlsx.writeBuffer().then((data) => {
       const blob = new Blob([data], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",

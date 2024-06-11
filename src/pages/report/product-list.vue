@@ -1032,10 +1032,17 @@ const onExportExcel = async () => {
         pattern: "solid",
         fgColor: { argb: "DD5746" }, // สีที่คุณต้องการ
       };
+      cell.border = {
+        top: { style: "thin" },
+        left: { style: "thin" },
+        bottom: { style: "thin" },
+        right: { style: "thin" },
+      };
     });
     // เพิ่มข้อมูลลงในแถวของ Excel spreadsheet
     dataExport.forEach((item, index) => {
-      worksheet.addRow({
+      // Add row to the worksheet
+      const row = worksheet.addRow({
         specialID: item.specialID,
         productName: item.productName,
         productPrice: item.productPrice,
@@ -1051,6 +1058,15 @@ const onExportExcel = async () => {
         supplierDistrict: item.supplierDistrict,
         supplierProvince: item.supplierProvince,
         supplierZipCode: item.supplierZipCode,
+      });
+
+      row.eachCell((cell) => {
+        cell.border = {
+          top: { style: "thin" },
+          left: { style: "thin" },
+          bottom: { style: "thin" },
+          right: { style: "thin" },
+        };
       });
     });
     workbook.xlsx.writeBuffer().then((data) => {
@@ -1091,11 +1107,17 @@ const onExportExcel = async () => {
         pattern: "solid",
         fgColor: { argb: "A8CD9F" }, // สีที่คุณต้องการ
       };
+      cell.border = {
+        top: { style: "thin" },
+        left: { style: "thin" },
+        bottom: { style: "thin" },
+        right: { style: "thin" },
+      };
     });
 
-    // เพิ่มข้อมูลลงในแถวของ Excel spreadsheet
     dataExport.forEach((item, index) => {
-      worksheet.addRow({
+      // Add row to the worksheet
+      const row = worksheet.addRow({
         specialID: item.specialID,
         productName: item.productName,
         typeAction: item.typeAction,
@@ -1110,6 +1132,15 @@ const onExportExcel = async () => {
         supplierDistrict: item.supplierDistrict,
         supplierProvince: item.supplierProvince,
         supplierZipCode: item.supplierZipCode,
+      });
+
+      row.eachCell((cell) => {
+        cell.border = {
+          top: { style: "thin" },
+          left: { style: "thin" },
+          bottom: { style: "thin" },
+          right: { style: "thin" },
+        };
       });
     });
     workbook.xlsx.writeBuffer().then((data) => {
