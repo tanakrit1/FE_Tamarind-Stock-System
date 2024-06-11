@@ -606,6 +606,14 @@ const onLoadTable = async () => {
           }
         });
       }
+    }else if(selectSearch.value.in_exportType == ""){
+      store.commit("setStatusLoading", false);
+              showTable.value = false;
+              formAlert.value = {
+                status: true,
+                title: "แจ้งเตือน",
+                body: "ไม่พบข้อมูล",
+              };
     }
   } else if (fromDepositActive.value == false) {
     if (currentDate.value.startDate != "" && currentDate.value.endDate != "") {
@@ -874,6 +882,14 @@ const onLoadTable = async () => {
           }
         });
       }
+    }else if(selectSearch.value.in_exportType == ""){
+      store.commit("setStatusLoading", false);
+              showTable.value = false;
+              formAlert.value = {
+                status: true,
+                title: "แจ้งเตือน",
+                body: "ไม่พบข้อมูล",
+              };
     }
   }
 };
@@ -1007,7 +1023,7 @@ const clearData = () => {
   showTable.value = false;
   fromDepositActive.value = false;
   inputSearch.value.in_productName = "";
-  selectSearch.value.in_exportType = "ซื้อ-ขาย";
+  selectSearch.value.in_exportType = "";
   currentDate.value.startDate = "";
   currentDate.value.endDate = "";
   currentDate.value.startPeriodDate = "";

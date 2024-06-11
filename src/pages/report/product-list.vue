@@ -495,10 +495,6 @@ const onLoadTable = async () => {
         });
       }
     } else if (
-      currentDate.value.startDate == "" &&
-      currentDate.value.endDate == "" &&
-      currentDate.value.startPeriodDate == "" &&
-      currentDate.value.endPeriodDate == "" &&
       inputSearch.value.in_productName == "" &&
       selectSearch.value.in_productType == "ฝาก"
     ) {
@@ -574,6 +570,14 @@ const onLoadTable = async () => {
           }
         });
       }
+    }else if(selectSearch.value.in_exportType == ""){
+      store.commit("setStatusLoading", false);
+              showTable.value = false;
+              formAlert.value = {
+                status: true,
+                title: "แจ้งเตือน",
+                body: "ไม่พบข้อมูล",
+              };
     }
   } else {
     console.log("fromDepositActive --> false");
@@ -760,11 +764,7 @@ const onLoadTable = async () => {
         });
       }
     } else if (
-      currentDate.value.startDate == "" &&
-      currentDate.value.endDate == "" &&
-      currentDate.value.startPeriodDate == "" &&
-      currentDate.value.endPeriodDate == "" &&
-      inputSearch.value.in_productName == ""
+      selectSearch.value.in_productType != ""
     ) {
       console.log("ไม่มีค่าวันที่");
       const isValidDate = CheckCurrentDate();
@@ -827,7 +827,6 @@ const onLoadTable = async () => {
                 title: "แจ้งเตือน",
                 body: "ไม่พบข้อมูล",
               };
-              rows.value = [];
             }
           } else {
             showTable.value = false;
@@ -843,6 +842,14 @@ const onLoadTable = async () => {
           }
         });
       }
+    }else if(selectSearch.value.in_exportType == ""){
+      store.commit("setStatusLoading", false);
+              showTable.value = false;
+              formAlert.value = {
+                status: true,
+                title: "แจ้งเตือน",
+                body: "ไม่พบข้อมูล",
+              };
     }
   }
 };
@@ -976,7 +983,7 @@ const clearData = () => {
   showTable.value = false;
   fromDepositActive.value = false;
   inputSearch.value.in_productName = "";
-  selectSearch.value.in_productType = "ซื้อ-ขาย";
+  selectSearch.value.in_productType = "";
   currentDate.value.startDate = "";
   currentDate.value.endDate = "";
   currentDate.value.startPeriodDate = "";
