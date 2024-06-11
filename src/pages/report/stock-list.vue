@@ -130,19 +130,19 @@ const onExportExcel = async () => {
     {
       header: "ปริมาณการรับเข้าสินค้า",
       key: "import_ซื้อขาย_quantity",
-      width: 20,
+      width: 25,
     },
-    { header: "ปริมาณการขายสินค้า", key: "export_ซื้อขาย_quantity", width: 20 },
-    { header: "ปริมาณสินค้าแปรรูป", key: "export_แปรรูป_quantity", width: 20 },
+    { header: "ปริมาณการขายสินค้า", key: "export_ซื้อขาย_quantity", width: 25 },
+    { header: "ปริมาณสินค้าแปรรูป", key: "export_แปรรูป_quantity", width: 25 },
     {
       header: "ปริมาณสินค้าคงเหลือ",
       key: "remaining_ซื้อขาย_แปรรูป",
-      width: 20,
+      width: 25,
     },
     {
       header: "ปริมาณสินค้าฝากเก็บคงเหลือ",
       key: "remaining_ฝากเก็บ",
-      width: 20,
+      width: 25,
     },
   ];
   const headerRow = worksheet.getRow(1); // แถวหัวเริ่มที่ index 1
