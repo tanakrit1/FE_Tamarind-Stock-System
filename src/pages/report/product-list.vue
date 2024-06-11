@@ -204,18 +204,13 @@ const onLoadTable = async () => {
             }
           } else {
             showTable.value = false;
-            if (typeof response.message === "string") {
-              const messages = response.message;
-              formattedMessages = messages
-                .map((message) => `<li>${message}</li>`)
-                .join("");
-            } else {
-              formattedMessages = response.message.toString();
-            }
-            formAlert.value = {
+            const mapValidation = response.message.map((item) => {
+              return `<li>${item}</li>`;
+            });
+            modalAlert.value = {
               status: true,
-              title: "เกิดข้อผิดพลาด",
-              body: formattedMessages,
+              title: "กรุณาตรวจสอบ",
+              body: mapValidation.join(""),
             };
             store.commit("setStatusLoading", false);
           }
@@ -223,7 +218,8 @@ const onLoadTable = async () => {
       }
     } else if (
       currentDate.value.startPeriodDate != "" &&
-      currentDate.value.endPeriodDate != ""
+      currentDate.value.endPeriodDate != "" &&
+      inputSearch.value.in_productName != ""
     ) {
       console.log(
         "currentDate.value.startPeriodDate --> ",
@@ -306,18 +302,13 @@ const onLoadTable = async () => {
             }
           } else {
             showTable.value = false;
-            if (typeof response.message === "string") {
-              const messages = response.message;
-              formattedMessages = messages
-                .map((message) => `<li>${message}</li>`)
-                .join("");
-            } else {
-              formattedMessages = response.message.toString();
-            }
-            formAlert.value = {
+            const mapValidation = response.message.map((item) => {
+              return `<li>${item}</li>`;
+            });
+            modalAlert.value = {
               status: true,
-              title: "เกิดข้อผิดพลาด",
-              body: formattedMessages,
+              title: "กรุณาตรวจสอบ",
+              body: mapValidation.join(""),
             };
             store.commit("setStatusLoading", false);
           }
@@ -407,18 +398,13 @@ const onLoadTable = async () => {
             }
           } else {
             showTable.value = false;
-            if (typeof response.message === "string") {
-              const messages = response.message;
-              formattedMessages = messages
-                .map((message) => `<li>${message}</li>`)
-                .join("");
-            } else {
-              formattedMessages = response.message.toString();
-            }
-            formAlert.value = {
+            const mapValidation = response.message.map((item) => {
+              return `<li>${item}</li>`;
+            });
+            modalAlert.value = {
               status: true,
-              title: "เกิดข้อผิดพลาด",
-              body: formattedMessages,
+              title: "กรุณาตรวจสอบ",
+              body: mapValidation.join(""),
             };
             store.commit("setStatusLoading", false);
           }
@@ -496,18 +482,13 @@ const onLoadTable = async () => {
             }
           } else {
             showTable.value = false;
-            if (typeof response.message === "string") {
-              const messages = response.message;
-              formattedMessages = messages
-                .map((message) => `<li>${message}</li>`)
-                .join("");
-            } else {
-              formattedMessages = response.message.toString();
-            }
-            formAlert.value = {
+            const mapValidation = response.message.map((item) => {
+              return `<li>${item}</li>`;
+            });
+            modalAlert.value = {
               status: true,
-              title: "เกิดข้อผิดพลาด",
-              body: formattedMessages,
+              title: "กรุณาตรวจสอบ",
+              body: mapValidation.join(""),
             };
             store.commit("setStatusLoading", false);
           }
@@ -518,7 +499,8 @@ const onLoadTable = async () => {
       currentDate.value.endDate == "" &&
       currentDate.value.startPeriodDate == "" &&
       currentDate.value.endPeriodDate == "" &&
-      inputSearch.value.in_productName == ""
+      inputSearch.value.in_productName == "" &&
+      selectSearch.value.in_productType == "ฝาก"
     ) {
       console.log("ไม่มีค่าวันที่");
       const isValidDate = CheckCurrentDate();
@@ -580,18 +562,13 @@ const onLoadTable = async () => {
             }
           } else {
             showTable.value = false;
-            if (typeof response.message === "string") {
-              const messages = response.message;
-              formattedMessages = messages
-                .map((message) => `<li>${message}</li>`)
-                .join("");
-            } else {
-              formattedMessages = response.message.toString();
-            }
-            formAlert.value = {
+            const mapValidation = response.message.map((item) => {
+              return `<li>${item}</li>`;
+            });
+            modalAlert.value = {
               status: true,
-              title: "เกิดข้อผิดพลาด",
-              body: formattedMessages,
+              title: "กรุณาตรวจสอบ",
+              body: mapValidation.join(""),
             };
             store.commit("setStatusLoading", false);
           }
@@ -676,18 +653,13 @@ const onLoadTable = async () => {
             }
           } else {
             showTable.value = false;
-            if (typeof response.message === "string") {
-              const messages = response.message;
-              formattedMessages = messages
-                .map((message) => `<li>${message}</li>`)
-                .join("");
-            } else {
-              formattedMessages = response.message.toString();
-            }
-            formAlert.value = {
+            const mapValidation = response.message.map((item) => {
+              return `<li>${item}</li>`;
+            });
+            modalAlert.value = {
               status: true,
-              title: "เกิดข้อผิดพลาด",
-              body: formattedMessages,
+              title: "กรุณาตรวจสอบ",
+              body: mapValidation.join(""),
             };
             store.commit("setStatusLoading", false);
           }
@@ -775,18 +747,97 @@ const onLoadTable = async () => {
             }
           } else {
             showTable.value = false;
-            if (typeof response.message === "string") {
-              const messages = response.message;
-              formattedMessages = messages
-                .map((message) => `<li>${message}</li>`)
-                .join("");
-            } else {
-              formattedMessages = response.message.toString();
-            }
-            formAlert.value = {
+            const mapValidation = response.message.map((item) => {
+              return `<li>${item}</li>`;
+            });
+            modalAlert.value = {
               status: true,
-              title: "เกิดข้อผิดพลาด",
-              body: formattedMessages,
+              title: "กรุณาตรวจสอบ",
+              body: mapValidation.join(""),
+            };
+            store.commit("setStatusLoading", false);
+          }
+        });
+      }
+    } else if (
+      currentDate.value.startDate == "" &&
+      currentDate.value.endDate == "" &&
+      currentDate.value.startPeriodDate == "" &&
+      currentDate.value.endPeriodDate == "" &&
+      inputSearch.value.in_productName == ""
+    ) {
+      console.log("ไม่มีค่าวันที่");
+      const isValidDate = CheckCurrentDate();
+      if (isValidDate) {
+        store.commit("setStatusLoading", true);
+        const body = {
+          page: exportToExcelActive.value ? 1 : pagination.value.page,
+          limit: exportToExcelActive.value ? 10000 : pagination.value.limit,
+          sortField: "product_specialID",
+          sortType: "ASC",
+          filterModel: {
+            logicOperator: "and",
+            items: [
+              {
+                field: "typeAction",
+                operator: "equals",
+                value: selectSearch.value.in_productType,
+              },
+            ],
+          },
+        };
+        console.log("bodyproduct_name --> ", body);
+        await _apiSupplierImport.searchSupplierImport(body, (response) => {
+          if (response.statusCode === 200) {
+            if (response.data.length > 0) {
+              showTable.value = true;
+              fromDepositActive.value = false;
+              store.commit("setStatusLoading", false);
+              flattenedData = response.data.map((item) => ({
+                specialID: item.product.specialID,
+                productName: item.product.name,
+                productPrice: item.product.price,
+                typeAction: item.typeAction,
+                quantity: item.quantity,
+                price: item.price,
+                periodDate: item.periodDate,
+                supplierFirstName: item.supplier.firstName,
+                supplierLastName: item.supplier.lastName,
+                supplierPhone: item.supplier.phone,
+                supplierAddress: item.supplier.address,
+                supplierSubDistrict: item.supplier.subDistric,
+                supplierDistrict: item.supplier.distric,
+                supplierProvince: item.supplier.province,
+                supplierZipCode: item.supplier.zipCode,
+              }));
+
+              if (exportToExcelActive.value == true) {
+                dataExport = flattenedData;
+                exportToExcelActive.value = false;
+              } else {
+                rows.value = flattenedData;
+                pagination.value.totalPage = response.metadata.totalPage;
+                showTable.value = true;
+              }
+            } else {
+              store.commit("setStatusLoading", false);
+              showTable.value = false;
+              formAlert.value = {
+                status: true,
+                title: "แจ้งเตือน",
+                body: "ไม่พบข้อมูล",
+              };
+              rows.value = [];
+            }
+          } else {
+            showTable.value = false;
+            const mapValidation = response.message.map((item) => {
+              return `<li>${item}</li>`;
+            });
+            modalAlert.value = {
+              status: true,
+              title: "กรุณาตรวจสอบ",
+              body: mapValidation.join(""),
             };
             store.commit("setStatusLoading", false);
           }

@@ -74,6 +74,7 @@ const columnsDeposit = [
 
 const rows = ref([]);
 let flattenedData = null;
+let dataExport = null;
 const exportToExcelActive = ref(false);
 const showTable = ref(false);
 const fromDepositActive = ref(false);
@@ -120,10 +121,13 @@ const onShowProduct = async () => {
         };
       });
     } else {
-      formAlert.value = {
+      const mapValidation = response.message.map((item) => {
+        return `<li>${item}</li>`;
+      });
+      modalAlert.value = {
         status: true,
-        title: "เกิดข้อผิดพลาด",
-        body: response.message,
+        title: "กรุณาตรวจสอบ",
+        body: mapValidation.join(""),
       };
     }
   });
@@ -212,18 +216,13 @@ const onLoadTable = async () => {
             }
           } else {
             showTable.value = false;
-            if (typeof response.message === "string") {
-              const messages = response.message;
-              formattedMessages = messages
-                .map((message) => `<li>${message}</li>`)
-                .join("");
-            } else {
-              formattedMessages = response.message.toString();
-            }
-            formAlert.value = {
+            const mapValidation = response.message.map((item) => {
+              return `<li>${item}</li>`;
+            });
+            modalAlert.value = {
               status: true,
-              title: "เกิดข้อผิดพลาด",
-              body: formattedMessages,
+              title: "กรุณาตรวจสอบ",
+              body: mapValidation.join(""),
             };
             store.commit("setStatusLoading", false);
           }
@@ -259,7 +258,7 @@ const onLoadTable = async () => {
                 value: inputSearch.value.in_productName,
               },
               {
-                field: "Import_Deposit_periodDate",
+                field: "importDeposit_periodDate",
                 operator: "between",
                 value: [
                   currentDate.value.startPeriodDate,
@@ -319,18 +318,13 @@ const onLoadTable = async () => {
             }
           } else {
             showTable.value = false;
-            if (typeof response.message === "string") {
-              const messages = response.message;
-              formattedMessages = messages
-                .map((message) => `<li>${message}</li>`)
-                .join("");
-            } else {
-              formattedMessages = response.message.toString();
-            }
-            formAlert.value = {
+            const mapValidation = response.message.map((item) => {
+              return `<li>${item}</li>`;
+            });
+            modalAlert.value = {
               status: true,
-              title: "เกิดข้อผิดพลาด",
-              body: formattedMessages,
+              title: "กรุณาตรวจสอบ",
+              body: mapValidation.join(""),
             };
             store.commit("setStatusLoading", false);
           }
@@ -365,7 +359,7 @@ const onLoadTable = async () => {
                 value: [currentDate.value.startDate, currentDate.value.endDate],
               },
               {
-                field: "Import_Deposit_periodDate",
+                field: "importDeposit_periodDate",
                 operator: "between",
                 value: [
                   currentDate.value.startPeriodDate,
@@ -425,18 +419,13 @@ const onLoadTable = async () => {
             }
           } else {
             showTable.value = false;
-            if (typeof response.message === "string") {
-              const messages = response.message;
-              formattedMessages = messages
-                .map((message) => `<li>${message}</li>`)
-                .join("");
-            } else {
-              formattedMessages = response.message.toString();
-            }
-            formAlert.value = {
+            const mapValidation = response.message.map((item) => {
+              return `<li>${item}</li>`;
+            });
+            modalAlert.value = {
               status: true,
-              title: "เกิดข้อผิดพลาด",
-              body: formattedMessages,
+              title: "กรุณาตรวจสอบ",
+              body: mapValidation.join(""),
             };
             store.commit("setStatusLoading", false);
           }
@@ -520,18 +509,13 @@ const onLoadTable = async () => {
             }
           } else {
             showTable.value = false;
-            if (typeof response.message === "string") {
-              const messages = response.message;
-              formattedMessages = messages
-                .map((message) => `<li>${message}</li>`)
-                .join("");
-            } else {
-              formattedMessages = response.message.toString();
-            }
-            formAlert.value = {
+            const mapValidation = response.message.map((item) => {
+              return `<li>${item}</li>`;
+            });
+            modalAlert.value = {
               status: true,
-              title: "เกิดข้อผิดพลาด",
-              body: formattedMessages,
+              title: "กรุณาตรวจสอบ",
+              body: mapValidation.join(""),
             };
             store.commit("setStatusLoading", false);
           }
@@ -610,18 +594,13 @@ const onLoadTable = async () => {
             }
           } else {
             showTable.value = false;
-            if (typeof response.message === "string") {
-              const messages = response.message;
-              formattedMessages = messages
-                .map((message) => `<li>${message}</li>`)
-                .join("");
-            } else {
-              formattedMessages = response.message.toString();
-            }
-            formAlert.value = {
+            const mapValidation = response.message.map((item) => {
+              return `<li>${item}</li>`;
+            });
+            modalAlert.value = {
               status: true,
-              title: "เกิดข้อผิดพลาด",
-              body: formattedMessages,
+              title: "กรุณาตรวจสอบ",
+              body: mapValidation.join(""),
             };
             store.commit("setStatusLoading", false);
           }
@@ -712,18 +691,13 @@ const onLoadTable = async () => {
             }
           } else {
             showTable.value = false;
-            if (typeof response.message === "string") {
-              const messages = response.message;
-              formattedMessages = messages
-                .map((message) => `<li>${message}</li>`)
-                .join("");
-            } else {
-              formattedMessages = response.message.toString();
-            }
-            formAlert.value = {
+            const mapValidation = response.message.map((item) => {
+              return `<li>${item}</li>`;
+            });
+            modalAlert.value = {
               status: true,
-              title: "เกิดข้อผิดพลาด",
-              body: formattedMessages,
+              title: "กรุณาตรวจสอบ",
+              body: mapValidation.join(""),
             };
             store.commit("setStatusLoading", false);
           }
@@ -758,14 +732,14 @@ const onLoadTable = async () => {
             ],
           },
         };
-        console.log("body --> ", body);
+        console.log("body--> ", body);
         await _apiExport.search(body, (response) => {
           if (response.statusCode === 200) {
             if (response.data.length > 0) {
               showTable.value = true;
               fromDepositActive.value = false;
               store.commit("setStatusLoading", false);
-              console.log("_apiExport--> ", response);
+              console.log("name&typeAction--> ", response);
               flattenedData = response.data.map((item) => ({
                 specialID: item.product.specialID,
                 productName: item.product.name,
@@ -805,18 +779,13 @@ const onLoadTable = async () => {
             }
           } else {
             showTable.value = false;
-            if (typeof response.message === "string") {
-              const messages = response.message;
-              formattedMessages = messages
-                .map((message) => `<li>${message}</li>`)
-                .join("");
-            } else {
-              formattedMessages = response.message.toString();
-            }
-            formAlert.value = {
+            const mapValidation = response.message.map((item) => {
+              return `<li>${item}</li>`;
+            });
+            modalAlert.value = {
               status: true,
-              title: "เกิดข้อผิดพลาด",
-              body: formattedMessages,
+              title: "กรุณาตรวจสอบ",
+              body: mapValidation.join(""),
             };
             store.commit("setStatusLoading", false);
           }
@@ -847,14 +816,14 @@ const onLoadTable = async () => {
             ],
           },
         };
-        console.log("body --> ", body);
+        console.log("body--> ", body);
         await _apiExport.search(body, (response) => {
           if (response.statusCode === 200) {
             if (response.data.length > 0) {
               showTable.value = true;
               fromDepositActive.value = false;
               store.commit("setStatusLoading", false);
-              console.log("_apiExport--> ", response);
+              console.log("_apiExporttttttt--> ", response);
               flattenedData = response.data.map((item) => ({
                 specialID: item.product.specialID,
                 productName: item.product.name,
@@ -890,22 +859,16 @@ const onLoadTable = async () => {
                 title: "แจ้งเตือน",
                 body: "ไม่พบข้อมูล",
               };
-              rows.value = [];
             }
           } else {
             showTable.value = false;
-            if (typeof response.message === "string") {
-              const messages = response.message;
-              formattedMessages = messages
-                .map((message) => `<li>${message}</li>`)
-                .join("");
-            } else {
-              formattedMessages = response.message.toString();
-            }
-            formAlert.value = {
+            const mapValidation = response.message.map((item) => {
+              return `<li>${item}</li>`;
+            });
+            modalAlert.value = {
               status: true,
-              title: "เกิดข้อผิดพลาด",
-              body: formattedMessages,
+              title: "กรุณาตรวจสอบ",
+              body: mapValidation.join(""),
             };
             store.commit("setStatusLoading", false);
           }
@@ -1072,7 +1035,6 @@ const onExportExcel = async () => {
   const worksheet = workbook.addWorksheet("Sheet A");
   exportToExcelActive.value = true;
   await onLoadTable();
-
   if (fromDepositActive.value == true) {
     worksheet.columns = [
       { header: "รหัสสินค้า", key: "specialID", width: 15 },
@@ -1107,27 +1069,38 @@ const onExportExcel = async () => {
       };
     });
     // เพิ่มข้อมูลลงในแถวของ Excel spreadsheet
+
     dataExport.forEach((item, index) => {
-      worksheet.addRow({
-        specialID: item.specialID,
-        productName: item.productName,
-        productInPrice: item.productInPrice,
-        productOutPrice: item.productOutPrice,
-        priceDeposit: item.priceDeposit, //ค่าฝาก
-        priceTotalDeposit: item.priceTotalDeposit, //ค่าฝาก
-        remain: item.remain, //คงเหลือ
-        quantity_import: item.quantity_import,
-        quantity: item.quantity,
-        periodDate: item.periodDate,
-        supplierFirstName: item.supplierFirstName,
-        supplierLastName: item.supplierLastName,
-        supplierPhone: item.supplierPhone,
-        supplierAddress: item.supplierAddress,
-        supplierSubDistrict: item.supplierSubDistrict,
-        supplierDistrict: item.supplierDistrict,
-        supplierProvince: item.supplierProvince,
-        supplierZipCode: item.supplierZipCode,
-        typeAction: item.typeAction,
+      const row = worksheet.getRow(index + 2); // Index + 2 because header row is at index 1
+      row.eachCell((cell) => {
+        cell.border = {
+          top: { style: "thin" },
+          left: { style: "thin" },
+          bottom: { style: "thin" },
+          right: { style: "thin" },
+        };
+
+        worksheet.addRow({
+          specialID: item.specialID,
+          productName: item.productName,
+          productInPrice: item.productInPrice,
+          productOutPrice: item.productOutPrice,
+          priceDeposit: item.priceDeposit, //ค่าฝาก
+          priceTotalDeposit: item.priceTotalDeposit, //ค่าฝาก
+          remain: item.remain, //คงเหลือ
+          quantity_import: item.quantity_import,
+          quantity: item.quantity,
+          periodDate: item.periodDate,
+          supplierFirstName: item.supplierFirstName,
+          supplierLastName: item.supplierLastName,
+          supplierPhone: item.supplierPhone,
+          supplierAddress: item.supplierAddress,
+          supplierSubDistrict: item.supplierSubDistrict,
+          supplierDistrict: item.supplierDistrict,
+          supplierProvince: item.supplierProvince,
+          supplierZipCode: item.supplierZipCode,
+          typeAction: item.typeAction,
+        });
       });
     });
 
