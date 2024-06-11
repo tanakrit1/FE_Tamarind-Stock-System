@@ -1,16 +1,18 @@
 <script setup>
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { getLoginStorage } from '../../helpers/set-storage';
 
-const $router = useRouter()
-const itemNavbar = ref([
+const itemBegin = [
     {
         name: 'หน้าแรก',
         path: '/',
-        menu: []
+        menu: [],
+        show: true,
     },
     {
         name: 'รับสินค้า',
+        show: true,
         menu: [
             {
                 name: 'รับสินค้าจากผู้จัดจำหน่าย',
@@ -24,6 +26,7 @@ const itemNavbar = ref([
     },
     {
         name: 'สินค้าออก',
+        show: true,
         menu: [
             {
                 name: 'ขายสินค้า',
@@ -41,6 +44,7 @@ const itemNavbar = ref([
     },
     {
         name: 'ข้อมูลพื้นฐาน',
+        show: true,
         menu: [
             {
                 name: 'ผู้ใช้งาน',
@@ -62,6 +66,7 @@ const itemNavbar = ref([
     },
     {
         name: 'รายงาน',
+        show: true,
         menu: [
             {
                 name: 'รายงานการนำเข้าสินค้า',
@@ -78,7 +83,9 @@ const itemNavbar = ref([
         ]
     },
     
-])
+]
+const $router = useRouter()
+const itemNavbar = ref([])
 const menuList = ref([])
 
 const onHoverItem = (menu) => {
@@ -88,6 +95,18 @@ const onHoverItem = (menu) => {
 const onChangePage = (path) => {
     $router.push(path)
 }
+
+onMounted(() => {
+    itemNavbar.value = itemBegin
+    const profile = getLoginStorage().profile
+    console.log("profile--> ", profile)
+    if( profile?.role == "ผู้ดูแลระบบ" ){
+        itemNavbar.value = itemBegin
+    }else{
+        const menuNameShow = ["หน้าแรก", "รับสินค้า", "สินค้าออก"]
+        itemNavbar.value = itemBegin.filter(item => menuNameShow.includes(item.name))
+    }
+})
 
 </script>
 
