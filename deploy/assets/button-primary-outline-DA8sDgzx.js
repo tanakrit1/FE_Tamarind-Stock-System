@@ -1,0 +1,1 @@
+import{f as o,j as r,D as n}from"./index-BfEDlx2e.js";const s={type:"button",class:"font-semibold px-8 py-2 border border-2 border-red-800 rounded-full text-red-800 hover:bg-red-800 hover:text-white"},c={__name:"button-primary-outline",props:["label"],setup(e){const t=e;return(a,l)=>(o(),r("button",s,n(t.label),1))}};export{c as _};
