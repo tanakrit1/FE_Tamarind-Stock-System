@@ -1109,6 +1109,8 @@ const onChangeType = () => {
 onMounted(async () => {
   store.commit("setStatusLoading", true);
   await onShowProduct();
+  inputSearch.value.in_productName = "ทั้งหมด";
+  selectSearch.value.in_productType = "ซื้อ-ขาย";
   store.commit("setStatusLoading", false);
 });
 
