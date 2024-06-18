@@ -136,13 +136,12 @@ const onLoadTable = async () => {
   console.log("fromDepositActive", fromDepositActive.value);
   if (fromDepositActive.value == true) {
     if (
-      (currentDate.value.startDate == "" &&
-        currentDate.value.endDate == "" &&
-        currentDate.value.startPeriodDate == "" &&
-        currentDate.value.endPeriodDate == "" &&
-        inputSearch.value.in_productName == "" &&
-        selectSearch.value.in_productType == "ฝาก") ||
-      inputSearch.value.in_productName == undefined
+      currentDate.value.startDate == "" &&
+      currentDate.value.endDate == "" &&
+      currentDate.value.startPeriodDate == "" &&
+      currentDate.value.endPeriodDate == "" &&
+      inputSearch.value.in_productName == "ทั้งหมด" &&
+      selectSearch.value.in_productType == "ฝาก"
     ) {
       console.log("ฝากมีวันที่ฝาก");
       const isValidDate = CheckCurrentDate();
@@ -152,7 +151,7 @@ const onLoadTable = async () => {
         const body = {
           page: exportToExcelActive.value ? 1 : pagination.value.page,
           limit: exportToExcelActive.value ? 10000 : pagination.value.limit,
-          sortField: "id",
+          sortField: "createdAt",
           sortType: "DESC",
           filterModel: {
             logicOperator: "and",
@@ -217,7 +216,92 @@ const onLoadTable = async () => {
         });
       }
     } else if (
+      inputSearch.value.in_productName == "ทั้งหมด" &&
+      selectSearch.value.in_productType == "ฝาก" &&
+      currentDate.value.startDate != "" &&
+      currentDate.value.endDate != ""
+    ) {
+      console.log("ทั้งหมด startDate------->");
+      const isValidDate = CheckCurrentDate();
+      if (isValidDate) {
+        store.commit("setStatusLoading", true);
+
+        const body = {
+          page: exportToExcelActive.value ? 1 : pagination.value.page,
+          limit: exportToExcelActive.value ? 10000 : pagination.value.limit,
+          sortField: "createdAt",
+          sortType: "DESC",
+          filterModel: {
+            logicOperator: "and",
+            items: [
+              {
+                field: "importDate",
+                operator: "between",
+                value: [currentDate.value.startDate, currentDate.value.endDate],
+              },
+            ],
+          },
+        };
+        console.log("body --> ", body);
+        await _apiDepositImport.searchDepositImport(body, (response) => {
+          if (response.statusCode === 200) {
+            if (response.data.length > 0) {
+              showTable.value = true;
+              fromDepositActive.value = true;
+              store.commit("setStatusLoading", false);
+              console.log("response5555--> ", response);
+              flattenedData = response.data.map((item) => ({
+                specialID: item.product.specialID,
+                productName: item.product.name,
+                productPrice: item.product.price,
+                quantity: item.quantity,
+                remain: item.remain,
+                price: item.price,
+                periodDate: item.periodDate,
+                supplierFirstName: item.supplier.firstName,
+                supplierLastName: item.supplier.lastName,
+                supplierPhone: item.supplier.phone,
+                supplierAddress: item.supplier.address,
+                supplierSubDistrict: item.supplier.subDistric,
+                supplierDistrict: item.supplier.distric,
+                supplierProvince: item.supplier.province,
+                supplierZipCode: item.supplier.zipCode,
+              }));
+              if (exportToExcelActive.value == true) {
+                dataExport = flattenedData;
+                exportToExcelActive.value = false;
+              } else {
+                rows.value = flattenedData;
+                pagination.value.totalPage = response.metadata.totalPage;
+                showTable.value = true;
+              }
+            } else {
+              store.commit("setStatusLoading", false);
+              showTable.value = false;
+              formAlert.value = {
+                status: true,
+                title: "แจ้งเตือน",
+                body: "ไม่พบข้อมูล",
+              };
+              rows.value = [];
+            }
+          } else {
+            showTable.value = false;
+            const mapValidation = response.message.map((item) => {
+              return `<li>${item}</li>`;
+            });
+            modalAlert.value = {
+              status: true,
+              title: "กรุณาตรวจสอบ",
+              body: mapValidation.join(""),
+            };
+            store.commit("setStatusLoading", false);
+          }
+        });
+      }
+    } else if (
       inputSearch.value.in_productName != "" &&
+      selectSearch.value.in_productType == "ฝาก" &&
       currentDate.value.startDate == "" &&
       currentDate.value.endDate == ""
     ) {
@@ -240,8 +324,8 @@ const onLoadTable = async () => {
           const body = {
             page: exportToExcelActive.value ? 1 : pagination.value.page,
             limit: exportToExcelActive.value ? 10000 : pagination.value.limit,
-            sortField: "id",
-            sortType: "ASC",
+            sortField: "createdAt",
+          sortType: "DESC",
             filterModel: {
               logicOperator: "and",
               items: [
@@ -311,9 +395,15 @@ const onLoadTable = async () => {
         }
       }
     } else if (
-      inputSearch.value.in_productName != "" &&
-      currentDate.value.startDate != "" &&
-      currentDate.value.endDate != ""
+      (inputSearch.value.in_productName != "" &&
+        currentDate.value.startDate != "" &&
+        currentDate.value.endDate != "") ||
+      (inputSearch.value.in_productName != "" &&
+        currentDate.value.startDate != "" &&
+        currentDate.value.endDate == "") ||
+      (inputSearch.value.in_productName != "" &&
+        currentDate.value.startDate == "" &&
+        currentDate.value.endDate != "")
     ) {
       if (selectSearch.value.in_productType == "") {
         formAlert.value = {
@@ -331,8 +421,8 @@ const onLoadTable = async () => {
           const body = {
             page: exportToExcelActive.value ? 1 : pagination.value.page,
             limit: exportToExcelActive.value ? 10000 : pagination.value.limit,
-            sortField: "id",
-            sortType: "ASC",
+            sortField: "createdAt",
+          sortType: "DESC",
             filterModel: {
               logicOperator: "and",
               items: [
@@ -410,9 +500,15 @@ const onLoadTable = async () => {
         }
       }
     } else if (
-      inputSearch.value.in_productName != "" &&
-      currentDate.value.startPeriodDate != "" &&
-      currentDate.value.endPeriodDate != ""
+      (inputSearch.value.in_productName != "" &&
+        currentDate.value.startPeriodDate != "" &&
+        currentDate.value.endPeriodDate != "") ||
+      (inputSearch.value.in_productName != "" &&
+        currentDate.value.startPeriodDate != "" &&
+        currentDate.value.endPeriodDate == "") ||
+      (inputSearch.value.in_productName != "" &&
+        currentDate.value.startPeriodDate == "" &&
+        currentDate.value.endPeriodDate != "")
     ) {
       if (selectSearch.value.in_productType == "") {
         formAlert.value = {
@@ -429,8 +525,8 @@ const onLoadTable = async () => {
           const body = {
             page: exportToExcelActive.value ? 1 : pagination.value.page,
             limit: exportToExcelActive.value ? 10000 : pagination.value.limit,
-            sortField: "id",
-            sortType: "ASC",
+            sortField: "createdAt",
+          sortType: "DESC",
             filterModel: {
               logicOperator: "and",
               items: [
@@ -508,11 +604,31 @@ const onLoadTable = async () => {
         }
       }
     } else if (
-      inputSearch.value.in_productName != "" &&
-      currentDate.value.startDate != "" &&
-      currentDate.value.endDate != "" &&
-      currentDate.value.startPeriodDate != "" &&
-      currentDate.value.endPeriodDate != ""
+      (inputSearch.value.in_productName != "" &&
+        currentDate.value.startDate != "" &&
+        currentDate.value.endDate != "" &&
+        currentDate.value.startPeriodDate != "" &&
+        currentDate.value.endPeriodDate != "") ||
+      (inputSearch.value.in_productName != "" &&
+        currentDate.value.startDate != "" &&
+        currentDate.value.endDate == "" &&
+        currentDate.value.startPeriodDate != "" &&
+        currentDate.value.endPeriodDate != "") ||
+      (inputSearch.value.in_productName != "" &&
+        currentDate.value.startDate == "" &&
+        currentDate.value.endDate != "" &&
+        currentDate.value.startPeriodDate != "" &&
+        currentDate.value.endPeriodDate != "") ||
+      (inputSearch.value.in_productName != "" &&
+        currentDate.value.startDate != "" &&
+        currentDate.value.endDate != "" &&
+        currentDate.value.startPeriodDate != "" &&
+        currentDate.value.endPeriodDate == "") ||
+      (inputSearch.value.in_productName != "" &&
+        currentDate.value.startDate != "" &&
+        currentDate.value.endDate != "" &&
+        currentDate.value.startPeriodDate == "" &&
+        currentDate.value.endPeriodDate != "")
     ) {
       if (selectSearch.value.in_productType == "") {
         formAlert.value = {
@@ -529,8 +645,8 @@ const onLoadTable = async () => {
           const body = {
             page: exportToExcelActive.value ? 1 : pagination.value.page,
             limit: exportToExcelActive.value ? 10000 : pagination.value.limit,
-            sortField: "id",
-            sortType: "ASC",
+            sortField: "createdAt",
+          sortType: "DESC",
             filterModel: {
               logicOperator: "and",
               items: [
@@ -539,6 +655,236 @@ const onLoadTable = async () => {
                   operator: "equals",
                   value: inputSearch.value.in_productName,
                 },
+                {
+                  field: "importDate",
+                  operator: "between",
+                  value: [
+                    currentDate.value.startDate,
+                    currentDate.value.endDate,
+                  ],
+                },
+                {
+                  field: "periodDate",
+                  operator: "between",
+                  value: [
+                    currentDate.value.startPeriodDate,
+                    currentDate.value.endPeriodDate,
+                  ],
+                },
+              ],
+            },
+          };
+          await _apiDepositImport.searchDepositImport(body, (response) => {
+            if (response.statusCode === 200) {
+              if (response.data.length > 0) {
+                showTable.value = true;
+                fromDepositActive.value = true;
+                store.commit("setStatusLoading", false);
+                console.log("response5555--> ", response);
+                flattenedData = response.data.map((item) => ({
+                  specialID: item.product.specialID,
+                  productName: item.product.name,
+                  productPrice: item.product.price,
+                  quantity: item.quantity,
+                  remain: item.remain,
+                  price: item.price,
+                  periodDate: item.periodDate,
+                  supplierFirstName: item.supplier.firstName,
+                  supplierLastName: item.supplier.lastName,
+                  supplierPhone: item.supplier.phone,
+                  supplierAddress: item.supplier.address,
+                  supplierSubDistrict: item.supplier.subDistric,
+                  supplierDistrict: item.supplier.distric,
+                  supplierProvince: item.supplier.province,
+                  supplierZipCode: item.supplier.zipCode,
+                }));
+                if (exportToExcelActive.value == true) {
+                  dataExport = flattenedData;
+                  exportToExcelActive.value = false;
+                } else {
+                  rows.value = flattenedData;
+                  pagination.value.totalPage = response.metadata.totalPage;
+                  showTable.value = true;
+                }
+              } else {
+                store.commit("setStatusLoading", false);
+                showTable.value = false;
+                formAlert.value = {
+                  status: true,
+                  title: "แจ้งเตือน",
+                  body: "ไม่พบข้อมูล",
+                };
+                rows.value = [];
+              }
+            } else {
+              showTable.value = false;
+              const mapValidation = response.message.map((item) => {
+                return `<li>${item}</li>`;
+              });
+              modalAlert.value = {
+                status: true,
+                title: "กรุณาตรวจสอบ",
+                body: mapValidation.join(""),
+              };
+              store.commit("setStatusLoading", false);
+            }
+          });
+        }
+      }
+    } else if (
+      (inputSearch.value.in_productName == "ทั้งหมด" &&
+        currentDate.value.startDate != "" &&
+        currentDate.value.endDate != "") ||
+      (inputSearch.value.in_productName == "ทั้งหมด" &&
+        currentDate.value.startDate != "" &&
+        currentDate.value.endDate == "") ||
+      (inputSearch.value.in_productName == "ทั้งหมด" &&
+        currentDate.value.startDate == "" &&
+        currentDate.value.endDate != "")
+    ) {
+      console.log("importDate ทั้งหมด");
+
+      if (selectSearch.value.in_productType == "") {
+        formAlert.value = {
+          status: true,
+          title: "เกิดข้อผิดพลาด",
+          body: "กรุณาเลือกประเภทสินค้า",
+        };
+        store.commit("setStatusLoading", false);
+        return;
+      } else {
+        const isValidDate = CheckCurrentDate();
+        if (isValidDate) {
+          store.commit("setStatusLoading", true);
+          const body = {
+            page: exportToExcelActive.value ? 1 : pagination.value.page,
+            limit: exportToExcelActive.value ? 10000 : pagination.value.limit,
+            sortField: "createdAt",
+          sortType: "DESC",
+            filterModel: {
+              logicOperator: "and",
+              items: [
+                {
+                  field: "importDate",
+                  operator: "between",
+                  value: [
+                    currentDate.value.startDate,
+                    currentDate.value.endDate,
+                  ],
+                },
+              ],
+            },
+          };
+          await _apiDepositImport.searchDepositImport(body, (response) => {
+            if (response.statusCode === 200) {
+              if (response.data.length > 0) {
+                showTable.value = true;
+                fromDepositActive.value = true;
+                store.commit("setStatusLoading", false);
+                console.log("response5555--> ", response);
+                flattenedData = response.data.map((item) => ({
+                  specialID: item.product.specialID,
+                  productName: item.product.name,
+                  productPrice: item.product.price,
+                  quantity: item.quantity,
+                  remain: item.remain,
+                  price: item.price,
+                  periodDate: item.periodDate,
+                  supplierFirstName: item.supplier.firstName,
+                  supplierLastName: item.supplier.lastName,
+                  supplierPhone: item.supplier.phone,
+                  supplierAddress: item.supplier.address,
+                  supplierSubDistrict: item.supplier.subDistric,
+                  supplierDistrict: item.supplier.distric,
+                  supplierProvince: item.supplier.province,
+                  supplierZipCode: item.supplier.zipCode,
+                }));
+                if (exportToExcelActive.value == true) {
+                  dataExport = flattenedData;
+                  exportToExcelActive.value = false;
+                } else {
+                  rows.value = flattenedData;
+                  pagination.value.totalPage = response.metadata.totalPage;
+                  showTable.value = true;
+                }
+              } else {
+                store.commit("setStatusLoading", false);
+                showTable.value = false;
+                formAlert.value = {
+                  status: true,
+                  title: "แจ้งเตือน",
+                  body: "ไม่พบข้อมูล",
+                };
+                rows.value = [];
+              }
+            } else {
+              showTable.value = false;
+              const mapValidation = response.message.map((item) => {
+                return `<li>${item}</li>`;
+              });
+              modalAlert.value = {
+                status: true,
+                title: "กรุณาตรวจสอบ",
+                body: mapValidation.join(""),
+              };
+              store.commit("setStatusLoading", false);
+            }
+          });
+        }
+      }
+    } else if (
+      (inputSearch.value.in_productName == "ทั้งหมด" &&
+        selectSearch.value.in_productType == "ฝาก" &&
+        currentDate.value.startDate != "" &&
+        currentDate.value.endDate != "" &&
+        currentDate.value.startPeriodDate != "" &&
+        currentDate.value.endPeriodDate != "") ||
+      (inputSearch.value.in_productName == "ทั้งหมด" &&
+        selectSearch.value.in_productType == "ฝาก" &&
+        currentDate.value.startDate != "" &&
+        currentDate.value.endDate != "" &&
+        currentDate.value.startPeriodDate != "" &&
+        currentDate.value.endPeriodDate == "") ||
+      (inputSearch.value.in_productName == "ทั้งหมด" &&
+        selectSearch.value.in_productType == "ฝาก" &&
+        currentDate.value.startDate != "" &&
+        currentDate.value.endDate != "" &&
+        currentDate.value.startPeriodDate == "" &&
+        currentDate.value.endPeriodDate != "") ||
+      (inputSearch.value.in_productName == "ทั้งหมด" &&
+        selectSearch.value.in_productType == "ฝาก" &&
+        currentDate.value.startDate == "" &&
+        currentDate.value.endDate == "" &&
+        currentDate.value.startPeriodDate != "" &&
+        currentDate.value.endPeriodDate == "") ||
+      (inputSearch.value.in_productName == "ทั้งหมด" &&
+        selectSearch.value.in_productType == "ฝาก" &&
+        currentDate.value.startDate == "" &&
+        currentDate.value.endDate == "" &&
+        currentDate.value.startPeriodDate == "" &&
+        currentDate.value.endPeriodDate != "")
+    ) {
+      console.log("ทั้งหมด startPeriodDate startDate------->");
+      if (selectSearch.value.in_productType == "") {
+        formAlert.value = {
+          status: true,
+          title: "เกิดข้อผิดพลาด",
+          body: "กรุณาเลือกประเภทสินค้า",
+        };
+        store.commit("setStatusLoading", false);
+        return;
+      } else {
+        const isValidDate = CheckCurrentDate();
+        if (isValidDate) {
+          store.commit("setStatusLoading", true);
+          const body = {
+            page: exportToExcelActive.value ? 1 : pagination.value.page,
+            limit: exportToExcelActive.value ? 10000 : pagination.value.limit,
+            sortField: "createdAt",
+          sortType: "DESC",
+            filterModel: {
+              logicOperator: "and",
+              items: [
                 {
                   field: "importDate",
                   operator: "between",
@@ -619,11 +965,10 @@ const onLoadTable = async () => {
   } else {
     console.log("fromDepositActive --> false");
     if (
-      (currentDate.value.startDate == "" &&
-        currentDate.value.endDate == "" &&
-        inputSearch.value.in_productName == "" &&
-        selectSearch.value.in_productType != "") ||
-      inputSearch.value.in_productName == undefined
+      currentDate.value.startDate == "" &&
+      currentDate.value.endDate == "" &&
+      inputSearch.value.in_productName == "ทั้งหมด" &&
+      selectSearch.value.in_productType != ""
     ) {
       console.log("ซื้อขายมีแต่ประเภทสินค้า");
       const isValidDate = CheckCurrentDate();
@@ -633,8 +978,7 @@ const onLoadTable = async () => {
         const body = {
           page: exportToExcelActive.value ? 1 : pagination.value.page,
           limit: exportToExcelActive.value ? 10000 : pagination.value.limit,
-          sortField: "id",
-          sortType: "DESC",
+                      sortType: "DESC",
           filterModel: {
             logicOperator: "and",
             items: [
@@ -722,8 +1066,8 @@ const onLoadTable = async () => {
           const body = {
             page: exportToExcelActive.value ? 1 : pagination.value.page,
             limit: exportToExcelActive.value ? 10000 : pagination.value.limit,
-            sortField: "id",
-            sortType: "ASC",
+            sortField: "createdAt",
+          sortType: "DESC",
             filterModel: {
               logicOperator: "and",
               items: [
@@ -797,9 +1141,14 @@ const onLoadTable = async () => {
         }
       }
     } else if (
-      inputSearch.value.in_productName == "" ||
-      (inputSearch.value.in_productName == undefined &&
+      (inputSearch.value.in_productName == "ทั้งหมด" &&
         currentDate.value.startDate != "" &&
+        currentDate.value.endDate != "") ||
+      (inputSearch.value.in_productName == "ทั้งหมด" &&
+        currentDate.value.startDate != "" &&
+        currentDate.value.endDate == "") ||
+      (inputSearch.value.in_productName == "ทั้งหมด" &&
+        currentDate.value.startDate == "" &&
         currentDate.value.endDate != "")
     ) {
       console.log("วันที่เท่านั้น");
@@ -878,9 +1227,116 @@ const onLoadTable = async () => {
         });
       }
     } else if (
-      inputSearch.value.in_productName != "" ||
-      (inputSearch.value.in_productName != undefined &&
+      inputSearch.value.in_productName != "" &&
+      currentDate.value.startDate != "" &&
+      currentDate.value.endDate != ""
+    ) {
+      console.log("ซื้อขายมีประเภทสินค้า");
+
+      if (selectSearch.value.in_productType == "") {
+        formAlert.value = {
+          status: true,
+          title: "เกิดข้อผิดพลาด",
+          body: "กรุณาเลือกประเภทสินค้า",
+        };
+        store.commit("setStatusLoading", false);
+        return;
+      } else {
+        const isValidDate = CheckCurrentDate();
+        if (isValidDate) {
+          store.commit("setStatusLoading", true);
+
+          const body = {
+            page: exportToExcelActive.value ? 1 : pagination.value.page,
+            limit: exportToExcelActive.value ? 10000 : pagination.value.limit,
+            sortField: "createdAt",
+          sortType: "DESC",
+            filterModel: {
+              logicOperator: "and",
+              items: [
+                {
+                  field: "product_name",
+                  operator: "equals",
+                  value: inputSearch.value.in_productName,
+                },
+                {
+                  field: "typeAction",
+                  operator: "equals",
+                  value: selectSearch.value.in_productType,
+                },
+                {
+                  field: "importDate",
+                  operator: "between",
+                  value: [
+                    currentDate.value.startDate,
+                    currentDate.value.endDate,
+                  ],
+                },
+              ],
+            },
+          };
+          await _apiSupplierImport.searchSupplierImport(body, (response) => {
+            if (response.statusCode === 200) {
+              if (response.data.length > 0) {
+                showTable.value = true;
+                fromDepositActive.value = false;
+                store.commit("setStatusLoading", false);
+                flattenedData = response.data.map((item) => ({
+                  specialID: item.product.specialID,
+                  productName: item.product.name,
+                  productPrice: item.product.price,
+                  typeAction: item.typeAction,
+                  quantity: item.quantity,
+                  price: item.price,
+                  periodDate: item.periodDate,
+                  supplierFirstName: item.supplier.firstName,
+                  supplierLastName: item.supplier.lastName,
+                  supplierPhone: item.supplier.phone,
+                  supplierAddress: item.supplier.address,
+                  supplierSubDistrict: item.supplier.subDistric,
+                  supplierDistrict: item.supplier.distric,
+                  supplierProvince: item.supplier.province,
+                  supplierZipCode: item.supplier.zipCode,
+                }));
+                if (exportToExcelActive.value == true) {
+                  dataExport = flattenedData;
+                  exportToExcelActive.value = false;
+                } else {
+                  rows.value = flattenedData;
+                  pagination.value.totalPage = response.metadata.totalPage;
+                  showTable.value = true;
+                }
+              } else {
+                store.commit("setStatusLoading", false);
+                showTable.value = false;
+                formAlert.value = {
+                  status: true,
+                  title: "แจ้งเตือน",
+                  body: "ไม่พบข้อมูล",
+                };
+                rows.value = [];
+              }
+            } else {
+              showTable.value = false;
+              const mapValidation = response.message.map((item) => {
+                return `<li>${item}</li>`;
+              });
+              modalAlert.value = {
+                status: true,
+                title: "กรุณาตรวจสอบ",
+                body: mapValidation.join(""),
+              };
+              store.commit("setStatusLoading", false);
+            }
+          });
+        }
+      }
+    } else if (
+      (inputSearch.value.in_productName != "" &&
         currentDate.value.startDate != "" &&
+        currentDate.value.endDate == "") ||
+      (inputSearch.value.in_productName != "" &&
+        currentDate.value.startDate == "" &&
         currentDate.value.endDate != "")
     ) {
       console.log("ซื้อขายมีประเภทสินค้า");
@@ -901,8 +1357,8 @@ const onLoadTable = async () => {
           const body = {
             page: exportToExcelActive.value ? 1 : pagination.value.page,
             limit: exportToExcelActive.value ? 10000 : pagination.value.limit,
-            sortField: "id",
-            sortType: "ASC",
+            sortField: "createdAt",
+          sortType: "DESC",
             filterModel: {
               logicOperator: "and",
               items: [
@@ -996,7 +1452,10 @@ const CheckCurrentDate = () => {
   // เริ่มต้นโดยตั้งค่าตัวแปรเพื่อใช้เก็บผลลัพธ์ของการตรวจสอบเงื่อนไข
   let isValid = true;
 
-  if (currentDate.value.endDate < currentDate.value.startDate && currentDate.value.endDate != "") {
+  if (
+    currentDate.value.endDate < currentDate.value.startDate &&
+    currentDate.value.endDate != ""
+  ) {
     formAlert.value = {
       status: true,
       title: "เกิดข้อผิดพลาด",
@@ -1041,7 +1500,8 @@ const CheckCurrentDate = () => {
   }
 
   if (
-    currentDate.value.endPeriodDate < currentDate.value.startPeriodDate && currentDate.value.endPeriodDate != ""
+    currentDate.value.endPeriodDate < currentDate.value.startPeriodDate &&
+    currentDate.value.endPeriodDate != ""
   ) {
     formAlert.value = {
       status: true,
