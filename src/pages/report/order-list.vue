@@ -86,7 +86,7 @@ const currentDate = ref({
 });
 
 const inputSearch = ref({
-  in_productName: "",
+  in_productName: "ทั้งหมด",
 });
 
 const selectSearch = ref({
@@ -235,7 +235,7 @@ const onLoadTable = async () => {
         }
       }
     } else if (
-      inputSearch.value.in_productName != "" && 
+      inputSearch.value.in_productName != "" &&
       selectSearch.value.in_exportType == "ฝาก" &&
       currentDate.value.startDate == "" &&
       currentDate.value.endDate == "" &&
@@ -265,7 +265,7 @@ const onLoadTable = async () => {
                   field: "product_name",
                   operator: "equals",
                   value: inputSearch.value.in_productName,
-                  }
+                },
               ],
             },
           };
@@ -332,11 +332,11 @@ const onLoadTable = async () => {
           });
         }
       }
-    }else if (
+    } else if (
       inputSearch.value.in_productName != "" &&
-        currentDate.value.startDate != "" &&
-        currentDate.value.endDate != "" && 
-        selectSearch.value.in_exportType == "ฝาก"
+      currentDate.value.startDate != "" &&
+      currentDate.value.endDate != "" &&
+      selectSearch.value.in_exportType == "ฝาก"
     ) {
       console.log("มีค่าวันที่รับเข้า");
       if (selectSearch.value.in_productType == "") {
@@ -350,97 +350,100 @@ const onLoadTable = async () => {
       } else {
         const isValidDate = CheckCurrentDate();
 
-      if (isValidDate) {
-        store.commit("setStatusLoading", true);
-        const body = {
-          page: exportToExcelActive.value ? 1 : pagination.value.page,
-          limit: exportToExcelActive.value ? 10000 : pagination.value.limit,
-          sortField: "product_specialID",
-          sortType: "ASC",
-          filterModel: {
-            logicOperator: "and",
-            items: [
-              {
-                field: "product_name",
-                operator: "equals",
-                value: inputSearch.value.in_productName,
-              },
-              {
-                field: "exportDate",
-                operator: "between",
-                value: [currentDate.value.startDate, currentDate.value.endDate],
-              },
-            ],
-          },
-        };
-        console.log("body --> ", body);
-        await _apiDepositExport.exportSearch(body, (response) => {
-          if (response.statusCode === 200) {
-            if (response.data.length > 0) {
-              showTable.value = true;
-              fromDepositActive.value = true;
-              store.commit("setStatusLoading", false);
-              console.log("_apiDepositExport--> ", response);
-              flattenedData = response.data.map((item) => ({
-                specialID: item.product.specialID,
-                productName: item.product.name,
-                productInPrice: item.product.price,
-                productOutPrice: item.product.priceOut,
-                priceDeposit: item.Import_Deposit.price, //ค่าฝาก
-                priceTotalDeposit: item.Import_Deposit.price, //ค่าฝาก
-                remain: item.Import_Deposit.remain, //คงเหลือ
-                quantity_import: item.Import_Deposit.quantity,
-                quantity: item.quantity,
-                periodDate: item.Import_Deposit.periodDate,
-                supplierFirstName: item.supplier.firstName,
-                supplierLastName: item.supplier.lastName,
-                supplierPhone: item.supplier.phone,
-                supplierAddress: item.supplier.address,
-                supplierSubDistrict: item.supplier.subDistric,
-                supplierDistrict: item.supplier.distric,
-                supplierProvince: item.supplier.province,
-                supplierZipCode: item.supplier.zipCode,
-                typeAction: (item.typeAction = "ฝาก"),
-              }));
-
-              if (exportToExcelActive.value == true) {
-                dataExport = flattenedData;
-                exportToExcelActive.value = false;
-              } else {
-                rows.value = flattenedData;
-                pagination.value.totalPage = response.metadata.totalPage;
+        if (isValidDate) {
+          store.commit("setStatusLoading", true);
+          const body = {
+            page: exportToExcelActive.value ? 1 : pagination.value.page,
+            limit: exportToExcelActive.value ? 10000 : pagination.value.limit,
+            sortField: "product_specialID",
+            sortType: "DESC ",
+            filterModel: {
+              logicOperator: "and",
+              items: [
+                {
+                  field: "product_name",
+                  operator: "equals",
+                  value: inputSearch.value.in_productName,
+                },
+                {
+                  field: "exportDate",
+                  operator: "between",
+                  value: [
+                    currentDate.value.startDate,
+                    currentDate.value.endDate,
+                  ],
+                },
+              ],
+            },
+          };
+          console.log("body --> ", body);
+          await _apiDepositExport.exportSearch(body, (response) => {
+            if (response.statusCode === 200) {
+              if (response.data.length > 0) {
                 showTable.value = true;
+                fromDepositActive.value = true;
+                store.commit("setStatusLoading", false);
+                console.log("_apiDepositExport--> ", response);
+                flattenedData = response.data.map((item) => ({
+                  specialID: item.product.specialID,
+                  productName: item.product.name,
+                  productInPrice: item.product.price,
+                  productOutPrice: item.product.priceOut,
+                  priceDeposit: item.Import_Deposit.price, //ค่าฝาก
+                  priceTotalDeposit: item.Import_Deposit.price, //ค่าฝาก
+                  remain: item.Import_Deposit.remain, //คงเหลือ
+                  quantity_import: item.Import_Deposit.quantity,
+                  quantity: item.quantity,
+                  periodDate: item.Import_Deposit.periodDate,
+                  supplierFirstName: item.supplier.firstName,
+                  supplierLastName: item.supplier.lastName,
+                  supplierPhone: item.supplier.phone,
+                  supplierAddress: item.supplier.address,
+                  supplierSubDistrict: item.supplier.subDistric,
+                  supplierDistrict: item.supplier.distric,
+                  supplierProvince: item.supplier.province,
+                  supplierZipCode: item.supplier.zipCode,
+                  typeAction: (item.typeAction = "ฝาก"),
+                }));
+
+                if (exportToExcelActive.value == true) {
+                  dataExport = flattenedData;
+                  exportToExcelActive.value = false;
+                } else {
+                  rows.value = flattenedData;
+                  pagination.value.totalPage = response.metadata.totalPage;
+                  showTable.value = true;
+                }
+              } else {
+                store.commit("setStatusLoading", false);
+                showTable.value = false;
+                formAlert.value = {
+                  status: true,
+                  title: "แจ้งเตือน",
+                  body: "ไม่พบข้อมูล",
+                };
+                rows.value = [];
               }
             } else {
-              store.commit("setStatusLoading", false);
               showTable.value = false;
-              formAlert.value = {
+              const mapValidation = response.message.map((item) => {
+                return `<li>${item}</li>`;
+              });
+              modalAlert.value = {
                 status: true,
-                title: "แจ้งเตือน",
-                body: "ไม่พบข้อมูล",
+                title: "กรุณาตรวจสอบ",
+                body: mapValidation.join(""),
               };
-              rows.value = [];
+              store.commit("setStatusLoading", false);
             }
-          } else {
-            showTable.value = false;
-            const mapValidation = response.message.map((item) => {
-              return `<li>${item}</li>`;
-            });
-            modalAlert.value = {
-              status: true,
-              title: "กรุณาตรวจสอบ",
-              body: mapValidation.join(""),
-            };
-            store.commit("setStatusLoading", false);
-          }
-        });
+          });
+        }
       }
-      }
-    }else if (
+    } else if (
       inputSearch.value.in_productName != "" &&
-        currentDate.value.startPeriodDate != "" &&
-        currentDate.value.endPeriodDate != "" &&
-        selectSearch.value.in_exportType == "ฝาก"
+      currentDate.value.startPeriodDate != "" &&
+      currentDate.value.endPeriodDate != "" &&
+      selectSearch.value.in_exportType == "ฝาก"
     ) {
       console.log("วันที่เบิก");
       if (selectSearch.value.in_productType == "") {
@@ -454,91 +457,94 @@ const onLoadTable = async () => {
       } else {
         const isValidDate = CheckCurrentDate();
 
-      if (isValidDate) {
-        store.commit("setStatusLoading", true);
-        const body = {
-          page: exportToExcelActive.value ? 1 : pagination.value.page,
-          limit: exportToExcelActive.value ? 10000 : pagination.value.limit,
-          sortField: "product_specialID",
-          sortType: "ASC",
-          filterModel: {
-            logicOperator: "and",
-            items: [
-              {
-                field: "product_name",
-                operator: "equals",
-                value: inputSearch.value.in_productName,
-              },
-              {
-                field: "importDeposit_periodDate",
-                operator: "between",
-                value: [currentDate.value.startPeriodDate, currentDate.value.endPeriodDate],
-              },
-            ],
-          },
-        };
-        console.log("body --> ", body);
-        await _apiDepositExport.exportSearch(body, (response) => {
-          if (response.statusCode === 200) {
-            if (response.data.length > 0) {
-              showTable.value = true;
-              fromDepositActive.value = true;
-              store.commit("setStatusLoading", false);
-              console.log("_apiDepositExport2--> ", response);
-              flattenedData = response.data.map((item) => ({
-                specialID: item.product.specialID,
-                productName: item.product.name,
-                productInPrice: item.product.price,
-                productOutPrice: item.product.priceOut,
-                priceDeposit: item.Import_Deposit.price, //ค่าฝาก
-                priceTotalDeposit: item.Import_Deposit.price, //ค่าฝาก
-                remain: item.Import_Deposit.remain, //คงเหลือ
-                quantity_import: item.Import_Deposit.quantity,
-                quantity: item.quantity,
-                periodDate: item.Import_Deposit.periodDate,
-                supplierFirstName: item.supplier.firstName,
-                supplierLastName: item.supplier.lastName,
-                supplierPhone: item.supplier.phone,
-                supplierAddress: item.supplier.address,
-                supplierSubDistrict: item.supplier.subDistric,
-                supplierDistrict: item.supplier.distric,
-                supplierProvince: item.supplier.province,
-                supplierZipCode: item.supplier.zipCode,
-                typeAction: (item.typeAction = "ฝาก"),
-              }));
-
-              if (exportToExcelActive.value == true) {
-                dataExport = flattenedData;
-                exportToExcelActive.value = false;
-              } else {
-                rows.value = flattenedData;
-                pagination.value.totalPage = response.metadata.totalPage;
+        if (isValidDate) {
+          store.commit("setStatusLoading", true);
+          const body = {
+            page: exportToExcelActive.value ? 1 : pagination.value.page,
+            limit: exportToExcelActive.value ? 10000 : pagination.value.limit,
+            sortField: "product_specialID",
+            sortType: "ASC",
+            filterModel: {
+              logicOperator: "and",
+              items: [
+                {
+                  field: "product_name",
+                  operator: "equals",
+                  value: inputSearch.value.in_productName,
+                },
+                {
+                  field: "importDeposit_periodDate",
+                  operator: "between",
+                  value: [
+                    currentDate.value.startPeriodDate,
+                    currentDate.value.endPeriodDate,
+                  ],
+                },
+              ],
+            },
+          };
+          console.log("body --> ", body);
+          await _apiDepositExport.exportSearch(body, (response) => {
+            if (response.statusCode === 200) {
+              if (response.data.length > 0) {
                 showTable.value = true;
+                fromDepositActive.value = true;
+                store.commit("setStatusLoading", false);
+                console.log("_apiDepositExport2--> ", response);
+                flattenedData = response.data.map((item) => ({
+                  specialID: item.product.specialID,
+                  productName: item.product.name,
+                  productInPrice: item.product.price,
+                  productOutPrice: item.product.priceOut,
+                  priceDeposit: item.Import_Deposit.price, //ค่าฝาก
+                  priceTotalDeposit: item.Import_Deposit.price, //ค่าฝาก
+                  remain: item.Import_Deposit.remain, //คงเหลือ
+                  quantity_import: item.Import_Deposit.quantity,
+                  quantity: item.quantity,
+                  periodDate: item.Import_Deposit.periodDate,
+                  supplierFirstName: item.supplier.firstName,
+                  supplierLastName: item.supplier.lastName,
+                  supplierPhone: item.supplier.phone,
+                  supplierAddress: item.supplier.address,
+                  supplierSubDistrict: item.supplier.subDistric,
+                  supplierDistrict: item.supplier.distric,
+                  supplierProvince: item.supplier.province,
+                  supplierZipCode: item.supplier.zipCode,
+                  typeAction: (item.typeAction = "ฝาก"),
+                }));
+
+                if (exportToExcelActive.value == true) {
+                  dataExport = flattenedData;
+                  exportToExcelActive.value = false;
+                } else {
+                  rows.value = flattenedData;
+                  pagination.value.totalPage = response.metadata.totalPage;
+                  showTable.value = true;
+                }
+              } else {
+                store.commit("setStatusLoading", false);
+                showTable.value = false;
+                formAlert.value = {
+                  status: true,
+                  title: "แจ้งเตือน",
+                  body: "ไม่พบข้อมูล",
+                };
+                rows.value = [];
               }
             } else {
-              store.commit("setStatusLoading", false);
               showTable.value = false;
-              formAlert.value = {
+              const mapValidation = response.message.map((item) => {
+                return `<li>${item}</li>`;
+              });
+              modalAlert.value = {
                 status: true,
-                title: "แจ้งเตือน",
-                body: "ไม่พบข้อมูล",
+                title: "กรุณาตรวจสอบ",
+                body: mapValidation.join(""),
               };
-              rows.value = [];
+              store.commit("setStatusLoading", false);
             }
-          } else {
-            showTable.value = false;
-            const mapValidation = response.message.map((item) => {
-              return `<li>${item}</li>`;
-            });
-            modalAlert.value = {
-              status: true,
-              title: "กรุณาตรวจสอบ",
-              body: mapValidation.join(""),
-            };
-            store.commit("setStatusLoading", false);
-          }
-        });
-      }
+          });
+        }
       }
     } else if (
       inputSearch.value.in_productName != "" &&
@@ -559,99 +565,102 @@ const onLoadTable = async () => {
       } else {
         const isValidDate = CheckCurrentDate();
 
-      if (isValidDate) {
-        store.commit("setStatusLoading", true);
-        const body = {
-          page: exportToExcelActive.value ? 1 : pagination.value.page,
-          limit: exportToExcelActive.value ? 10000 : pagination.value.limit,
-          sortField: "product_specialID",
-          sortType: "ASC",
-          filterModel: {
-            logicOperator: "and",
-            items: [
-              {
-                field: "product_name",
-                operator: "equals",
-                value: inputSearch.value.in_productName,
-              },
-              {
-                field: "exportDate",
-                operator: "between",
-                value: [currentDate.value.startDate, currentDate.value.endDate],
-              },
-              {
-                field: "importDeposit_periodDate",
-                operator: "between",
-                value: [
-                  currentDate.value.startPeriodDate,
-                  currentDate.value.endPeriodDate,
-                ],
-              },
-            ],
-          },
-        };
-        console.log("body --> ", body);
-        await _apiDepositExport.exportSearch(body, (response) => {
-          if (response.statusCode === 200) {
-            if (response.data.length > 0) {
-              showTable.value = true;
-              fromDepositActive.value = true;
-              store.commit("setStatusLoading", false);
-              console.log("_apiDepositExport--> ", response);
-              flattenedData = response.data.map((item) => ({
-                specialID: item.product.specialID,
-                productName: item.product.name,
-                productInPrice: item.product.price,
-                productOutPrice: item.product.priceOut,
-                priceDeposit: item.Import_Deposit.price, //ค่าฝาก
-                priceTotalDeposit: item.Import_Deposit.price, //ค่าฝาก
-                remain: item.Import_Deposit.remain, //คงเหลือ
-                quantity_import: item.Import_Deposit.quantity,
-                quantity: item.quantity,
-                periodDate: item.Import_Deposit.periodDate,
-                supplierFirstName: item.supplier.firstName,
-                supplierLastName: item.supplier.lastName,
-                supplierPhone: item.supplier.phone,
-                supplierAddress: item.supplier.address,
-                supplierSubDistrict: item.supplier.subDistric,
-                supplierDistrict: item.supplier.distric,
-                supplierProvince: item.supplier.province,
-                supplierZipCode: item.supplier.zipCode,
-                typeAction: (item.typeAction = "ฝาก"),
-              }));
-
-              if (exportToExcelActive.value == true) {
-                dataExport = flattenedData;
-                exportToExcelActive.value = false;
-              } else {
-                rows.value = flattenedData;
-                pagination.value.totalPage = response.metadata.totalPage;
+        if (isValidDate) {
+          store.commit("setStatusLoading", true);
+          const body = {
+            page: exportToExcelActive.value ? 1 : pagination.value.page,
+            limit: exportToExcelActive.value ? 10000 : pagination.value.limit,
+            sortField: "product_specialID",
+            sortType: "ASC",
+            filterModel: {
+              logicOperator: "and",
+              items: [
+                {
+                  field: "product_name",
+                  operator: "equals",
+                  value: inputSearch.value.in_productName,
+                },
+                {
+                  field: "exportDate",
+                  operator: "between",
+                  value: [
+                    currentDate.value.startDate,
+                    currentDate.value.endDate,
+                  ],
+                },
+                {
+                  field: "importDeposit_periodDate",
+                  operator: "between",
+                  value: [
+                    currentDate.value.startPeriodDate,
+                    currentDate.value.endPeriodDate,
+                  ],
+                },
+              ],
+            },
+          };
+          console.log("body --> ", body);
+          await _apiDepositExport.exportSearch(body, (response) => {
+            if (response.statusCode === 200) {
+              if (response.data.length > 0) {
                 showTable.value = true;
+                fromDepositActive.value = true;
+                store.commit("setStatusLoading", false);
+                console.log("_apiDepositExport--> ", response);
+                flattenedData = response.data.map((item) => ({
+                  specialID: item.product.specialID,
+                  productName: item.product.name,
+                  productInPrice: item.product.price,
+                  productOutPrice: item.product.priceOut,
+                  priceDeposit: item.Import_Deposit.price, //ค่าฝาก
+                  priceTotalDeposit: item.Import_Deposit.price, //ค่าฝาก
+                  remain: item.Import_Deposit.remain, //คงเหลือ
+                  quantity_import: item.Import_Deposit.quantity,
+                  quantity: item.quantity,
+                  periodDate: item.Import_Deposit.periodDate,
+                  supplierFirstName: item.supplier.firstName,
+                  supplierLastName: item.supplier.lastName,
+                  supplierPhone: item.supplier.phone,
+                  supplierAddress: item.supplier.address,
+                  supplierSubDistrict: item.supplier.subDistric,
+                  supplierDistrict: item.supplier.distric,
+                  supplierProvince: item.supplier.province,
+                  supplierZipCode: item.supplier.zipCode,
+                  typeAction: (item.typeAction = "ฝาก"),
+                }));
+
+                if (exportToExcelActive.value == true) {
+                  dataExport = flattenedData;
+                  exportToExcelActive.value = false;
+                } else {
+                  rows.value = flattenedData;
+                  pagination.value.totalPage = response.metadata.totalPage;
+                  showTable.value = true;
+                }
+              } else {
+                store.commit("setStatusLoading", false);
+                showTable.value = false;
+                formAlert.value = {
+                  status: true,
+                  title: "แจ้งเตือน",
+                  body: "ไม่พบข้อมูล",
+                };
+                rows.value = [];
               }
             } else {
-              store.commit("setStatusLoading", false);
               showTable.value = false;
-              formAlert.value = {
+              const mapValidation = response.message.map((item) => {
+                return `<li>${item}</li>`;
+              });
+              modalAlert.value = {
                 status: true,
-                title: "แจ้งเตือน",
-                body: "ไม่พบข้อมูล",
+                title: "กรุณาตรวจสอบ",
+                body: mapValidation.join(""),
               };
-              rows.value = [];
+              store.commit("setStatusLoading", false);
             }
-          } else {
-            showTable.value = false;
-            const mapValidation = response.message.map((item) => {
-              return `<li>${item}</li>`;
-            });
-            modalAlert.value = {
-              status: true,
-              title: "กรุณาตรวจสอบ",
-              body: mapValidation.join(""),
-            };
-            store.commit("setStatusLoading", false);
-          }
-        });
-      }
+          });
+        }
       }
     } else {
       store.commit("setStatusLoading", false);
@@ -679,7 +688,7 @@ const onLoadTable = async () => {
           page: exportToExcelActive.value ? 1 : pagination.value.page,
           limit: exportToExcelActive.value ? 10000 : pagination.value.limit,
           sortField: "product_specialID",
-          sortType: "ASC",
+          sortType: "DESC",
           filterModel: {
             logicOperator: "and",
             items: [
@@ -763,7 +772,7 @@ const onLoadTable = async () => {
           body: "กรุณาเลือกประเภทสินค้า",
         };
       } else {
-      const isValidDate = CheckCurrentDate();
+        const isValidDate = CheckCurrentDate();
 
         if (isValidDate) {
           store.commit("setStatusLoading", true);
@@ -847,7 +856,7 @@ const onLoadTable = async () => {
           });
         }
       }
-    }else if (
+    } else if (
       inputSearch.value.in_productName != "" &&
       currentDate.value.startDate != "" &&
       currentDate.value.endDate != ""
@@ -861,7 +870,7 @@ const onLoadTable = async () => {
           body: "กรุณาเลือกประเภทสินค้า",
         };
       } else {
-      const isValidDate = CheckCurrentDate();
+        const isValidDate = CheckCurrentDate();
 
         if (isValidDate) {
           store.commit("setStatusLoading", true);
@@ -953,14 +962,6 @@ const onLoadTable = async () => {
           });
         }
       }
-    } else {
-      store.commit("setStatusLoading", false);
-      showTable.value = false;
-      formAlert.value = {
-        status: true,
-        title: "แจ้งเตือน",
-        body: "ไม่พบข้อมูล",
-      };
     }
   }
 };
@@ -974,27 +975,13 @@ const CheckCurrentDate = () => {
   // เริ่มต้นโดยตั้งค่าตัวแปรเพื่อใช้เก็บผลลัพธ์ของการตรวจสอบเงื่อนไข
   let isValid = true;
 
-  if (currentDate.value.startDate > currentDate.value.endDate) {
-    formAlert.value = {
-      status: true,
-      title: "เกิดข้อผิดพลาด",
-      body: "วันที่เริ่มต้นต้องน้อยกว่าวันที่สิ้นสุด",
-    };
-    currentDate.value.startDate = "";
-    currentDate.value.endDate = "";
-    rows.value = [];
-
-    // ถ้าพบข้อผิดพลาดในการตรวจสอบ กำหนดค่า isValid เป็น false
-    isValid = false;
-  } else if (currentDate.value.endDate < currentDate.value.startDate) {
+ if (currentDate.value.endDate < currentDate.value.startDate && currentDate.value.endDate != "") {
     formAlert.value = {
       status: true,
       title: "เกิดข้อผิดพลาด",
       body: "วันที่สิ้นสุดต้องมากกว่าวันที่เริ่มต้น",
     };
-    currentDate.value.startDate = "";
-    currentDate.value.endDate = "";
-    rows.value = [];
+    showTable.value = false;
 
     // ถ้าพบข้อผิดพลาดในการตรวจสอบ กำหนดค่า isValid เป็น false
     isValid = false;
@@ -1007,9 +994,8 @@ const CheckCurrentDate = () => {
       title: "เกิดข้อผิดพลาด",
       body: "กรุณากรอกวันที่สิ้นสุด",
     };
-    currentDate.value.startDate = "";
-    currentDate.value.endDate = "";
-    rows.value = [];
+    showTable.value = false;
+
 
     // ถ้าพบข้อผิดพลาดในการตรวจสอบ กำหนดค่า isValid เป็น false
     isValid = false;
@@ -1022,37 +1008,22 @@ const CheckCurrentDate = () => {
       title: "เกิดข้อผิดพลาด",
       body: "กรุณากรอกวันที่เริ่มต้น",
     };
-    currentDate.value.startDate = "";
-    currentDate.value.endDate = "";
-    rows.value = [];
+    showTable.value = false;
+
 
     // ถ้าพบข้อผิดพลาดในการตรวจสอบ กำหนดค่า isValid เป็น false
     isValid = false;
   }
 
-  if (currentDate.value.startPeriodDate > currentDate.value.endPeriodDate) {
-    formAlert.value = {
-      status: true,
-      title: "เกิดข้อผิดพลาด",
-      body: "วันที่เริ่มต้นต้องน้อยกว่าวันที่สิ้นสุด",
-    };
-    currentDate.value.startPeriodDate = "";
-    currentDate.value.endPeriodDate = "";
-    rows.value = [];
-
-    // ถ้าพบข้อผิดพลาดในการตรวจสอบ กำหนดค่า isValid เป็น false
-    isValid = false;
-  } else if (
-    currentDate.value.endPeriodDate < currentDate.value.startPeriodDate
+if (
+    currentDate.value.endPeriodDate < currentDate.value.startPeriodDate && currentDate.value.endPeriodDate != ""
   ) {
     formAlert.value = {
       status: true,
       title: "เกิดข้อผิดพลาด",
       body: "วันที่สิ้นสุดต้องมากกว่าวันที่เริ่มต้น",
     };
-    currentDate.value.startPeriodDate = "";
-    currentDate.value.endPeriodDate = "";
-    rows.value = [];
+    showTable.value = false;
 
     // ถ้าพบข้อผิดพลาดในการตรวจสอบ กำหนดค่า isValid เป็น false
     isValid = false;
@@ -1065,9 +1036,8 @@ const CheckCurrentDate = () => {
       title: "เกิดข้อผิดพลาด",
       body: "กรุณากรอกวันที่สิ้นสุด",
     };
-    currentDate.value.startPeriodDate = "";
-    currentDate.value.endPeriodDate = "";
-    rows.value = [];
+    showTable.value = false;
+
 
     // ถ้าพบข้อผิดพลาดในการตรวจสอบ กำหนดค่า isValid เป็น false
     isValid = false;
@@ -1080,6 +1050,7 @@ const CheckCurrentDate = () => {
       title: "เกิดข้อผิดพลาด",
       body: "กรุณากรอกวันที่เริ่มต้น",
     };
+    showTable.value = false;
 
     // ถ้าพบข้อผิดพลาดในการตรวจสอบ กำหนดค่า isValid เป็น false
     isValid = false;
