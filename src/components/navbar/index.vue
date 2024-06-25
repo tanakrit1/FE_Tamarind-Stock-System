@@ -6,6 +6,8 @@ import buttonPrimary from '../buttons/button-primary.vue';
 import buttonPrimaryOutline from '../buttons/button-primary-outline.vue';
 // import confirm from '../alert/confirm.vue';
 import menuItem from './menu.vue'
+import { useRouter } from 'vue-router';
+const $router = useRouter()
 const emit = defineEmits()
 const profile = ref(null)
 const statusConfirm = ref(false)
@@ -52,7 +54,7 @@ onMounted(() => {
     <div class="h-16 top-0 absolute w-full flex items-center justify-between px-6 "
         style="background-color: #A2422C; z-index: 100">
         <div class="flex space-x-8 items-center">
-            <img src="../../assets/images/logo.png" class="rounded-full h-14 w-12 cursor-pointer" />
+            <img src="../../assets/images/logo.png" class="rounded-full h-14 w-12 cursor-pointer" @click="$router.push('/')" />
             <menuItem>
             </menuItem>
         </div>
