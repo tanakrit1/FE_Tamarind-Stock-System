@@ -10,6 +10,9 @@ import {
     LegendComponent,
 } from 'echarts/components';
 import VChart, { THEME_KEY } from 'vue-echarts';
+import _apiDashboard from "../../api/dashboard"
+import store from '../../store';
+import { color } from 'echarts';
 
 use([
     BarChart,
@@ -26,85 +29,157 @@ const optionChart1 = ref({})
 const optionChart2 = ref({})
 const optionChart3 = ref({})
 
-const setChart = () => {
+const tabChartStockActive = ref("buy")
+
+const valueChart1 = ref({
+    name: [],
+    data: []
+})
+const valueChart2 = ref({
+    name: [],
+    data: []
+})
+
+const valueChart3 = ref({
+    name: [],
+    data: []
+})
+
+const setChart = async () => {
+    console.log("option1--> ", valueChart1.value.name)
     optionChart1.value = {
+        // title: {
+        //     text: 'สินค้าคงคลัง'
+        // },
         tooltip: {
             trigger: 'axis',
             axisPointer: {
                 type: 'shadow'
             }
         },
+        legend: {},
         grid: {
             left: '3%',
             right: '4%',
             bottom: '3%',
             containLabel: true
         },
-        xAxis: [
-            {
-                type: 'category',
-                data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun','Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-                axisTick: {
-                    alignWithLabel: true
-                }
-            }
-        ],
-        yAxis: [
-            {
-                type: 'value'
-            }
-        ],
+        xAxis: {
+            type: 'value',
+            boundaryGap: [0, 0.01]
+        },
+        yAxis: {
+            type: 'category',
+            data: valueChart1.value.name
+        },
         series: [
             {
-                name: 'Direct',
+                // name: '',
                 type: 'bar',
-                barWidth: '60%',
-                data: [10, 52, 200, 334, 390, 330, 220, 10, 52, 200, 334, 390, 330, 220, 10, 52, 200, 334, 390, 330, 220]
-            }
+                data: valueChart1.value.data,
+                color: "#FFFB03"
+            },
         ]
     };
+
     optionChart2.value = {
+        // title: {
+        //     text: 'สินค้าคงคลัง'
+        // },
         tooltip: {
-            trigger: 'item'
+            trigger: 'axis',
+            axisPointer: {
+                type: 'shadow'
+            }
         },
-        legend: {
-            top: '5%',
-            left: 'center'
+        legend: {},
+        grid: {
+            left: '3%',
+            right: '4%',
+            bottom: '3%',
+            containLabel: true
+        },
+        xAxis: {
+            type: 'value',
+            boundaryGap: [0, 0.01]
+        },
+        yAxis: {
+            type: 'category',
+            data: valueChart2.value.name
         },
         series: [
             {
-                name: 'Access From',
-                type: 'pie',
-                radius: ['40%', '70%'],
-                avoidLabelOverlap: false,
-                label: {
-                    show: false,
-                    position: 'center'
-                },
-                emphasis: {
-                    label: {
-                        show: true,
-                        fontSize: 40,
-                        fontWeight: 'bold'
-                    }
-                },
-                labelLine: {
-                    show: false
-                },
-                data: [
-                    { value: 1048, name: 'Search Engine' },
-                    { value: 735, name: 'Direct' },
-                    { value: 580, name: 'Email' },
-                    { value: 484, name: 'Union Ads' },
-                    { value: 300, name: 'Video Ads' }
-                ]
-            }
+                // name: '',
+                type: 'bar',
+                data: valueChart2.value.data,
+                color: "#35FF03"
+            },
         ]
-    }
+    };
+
+    optionChart3.value = {
+        // title: {
+        //     text: 'สินค้าคงคลัง'
+        // },
+        tooltip: {
+            trigger: 'axis',
+            axisPointer: {
+                type: 'shadow'
+            }
+        },
+        legend: {},
+        grid: {
+            left: '3%',
+            right: '4%',
+            bottom: '3%',
+            containLabel: true
+        },
+        xAxis: {
+            type: 'value',
+            boundaryGap: [0, 0.01]
+        },
+        yAxis: {
+            type: 'category',
+            data: valueChart3.value.name
+        },
+        series: [
+            {
+                // name: '',
+                type: 'bar',
+                data: valueChart3.value.data
+            },
+        ]
+    };
 }
 
-onMounted(() => {
-    setChart()
+const onChangeTabStock = (value) => {
+    tabChartStockActive.value = value
+}
+
+onMounted(async () => {
+    store.commit("setStatusLoading", true);
+    await _apiDashboard.getData({}, async ({ data }) => {
+        // const option1 = { name: [], value: [] }
+        console.log("data--> ", data)
+        for (let i = 0; i < data.remaining.length; i++) {
+            valueChart1.value.name.push(data.remaining[i].name)
+            valueChart1.value.data.push(data.remaining[i].remaining_ซื้อขาย)
+
+            valueChart2.value.name.push(data.remaining[i].name)
+            valueChart2.value.data.push(data.remaining[i].remaining_ฝากเก็บ)
+        }
+
+        for(let i=0;i<data.productsToDeliverToday.length;i++){
+            valueChart3.value.name.push(data.productsToDeliverToday[i].name)
+            valueChart3.value.data.push(data.productsToDeliverToday[i].exportToday_ซื้อ)
+        }
+
+        await setChart()
+        tabChartStockActive.value = "buy"
+        store.commit("setStatusLoading", false);
+    })
+    
+
 })
 
 </script>
@@ -128,13 +203,40 @@ onMounted(() => {
                 <span class="text-5xl font-bold text-white ml-3">คน</span>
             </div>
         </div>
+        <div class="mt-10">
+            <div class="flex mb-2">
+                <div :class="{ 'font-bold py-2 px-8 rounded-l-lg cursor-pointer bg-white': true, 'tab-active': tabChartStockActive == 'buy' }"
+                    @click="onChangeTabStock('buy')">
+                    สินค้าคงคลัง(ซื้อ-ขาย)
+                </div>
+                <div :class="{ 'font-bold py-2 px-8  cursor-pointer bg-white': true, 'tab-active': tabChartStockActive == 'deposit' }"
+                    @click="onChangeTabStock('deposit')">
+                    สินค้าคงคลัง(ฝากเก็บ)
+                </div>
+                <div :class="{ 'font-bold py-2 px-8 rounded-r-lg cursor-pointer bg-white': true, 'tab-active': tabChartStockActive == 'orderAmountToday' }"
+                    @click="onChangeTabStock('orderAmountToday')">
+                    ยอดสั่งซื้อวันนี้
+                </div>
+            </div>
+            <!-- <p class="text-2xl font-bold text-red-800">สินค้าคงคลัง</p> -->
+            <div v-if="tabChartStockActive == 'buy'" class=" bg-red-800 pl-10 pr-10 pb-10 pt-0 rounded-lg "
+                :style="'background-color: #D9ADA1; border-left-width: 15px;border-left-color: #A2422C;' + 'height: ' + valueChart1.name.length * 35 + 'px'">
+                <v-chart class="chart1" :option="optionChart1" autoresize />
+            </div>
 
-        <div class="mt-10 bg-red-800 p-10 rounded-lg "
-            style="background-color: #D9ADA1; border-left-width: 15px;border-left-color: #A2422C">
-            <v-chart class="chart" :option="optionChart1" autoresize />
+            <div v-else-if="tabChartStockActive == 'deposit'" class=" bg-red-800 pl-10 pr-10 pb-10 pt-0 rounded-lg "
+                :style="'background-color: #D9ADA1; border-left-width: 15px;border-left-color: #A2422C;' + 'height: ' + valueChart1.name.length * 35 + 'px'">
+                <v-chart class="chart2" :option="optionChart2" autoresize />
+            </div>
+
+            <div v-else class=" bg-red-800 pl-10 pr-10 pb-10 pt-0 rounded-lg "
+                :style="'background-color: #D9ADA1; border-left-width: 15px;border-left-color: #A2422C;' + 'height: ' + valueChart1.name.length * 35 + 'px'">
+                <v-chart class="chart3" :option="optionChart3" autoresize />
+            </div>
+
         </div>
 
-        <div class="mt-10 flex justify-between space-x-16">
+        <!-- <div class="mt-10 flex justify-between space-x-16">
             <div class="grow">
                 <p class="text-2xl font-bold text-red-800">จังหวัดที่ซื้อมากที่สุด</p>
                 <div class="px-10  rounded-lg bg-white" style="border-left-width: 15px; border-left-color: #68524D">
@@ -148,7 +250,7 @@ onMounted(() => {
                     <v-chart style="height: 400px; width: 100%;" :option="optionChart2" autoresize />
                 </div>
             </div>
-        </div>
+        </div> -->
     </div>
     <!-- <div class="rounded-xl bg-white px-6 ">
         <span class="text-3xl font-bold text-lime-500">Testttt</span>
@@ -156,8 +258,15 @@ onMounted(() => {
     </div> -->
 </template>
 <style scoped>
-.chart {
-    height: 300px;
+/* .chart1 {
+    height: 600px;
     width: 100%;
+} */
+
+.tab-active {
+    background-color: #A2422C;
+    color: white;
 }
+
+
 </style>
