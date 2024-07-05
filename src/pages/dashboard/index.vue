@@ -12,7 +12,6 @@ import {
 import VChart, { THEME_KEY } from 'vue-echarts';
 import _apiDashboard from "../../api/dashboard"
 import store from '../../store';
-import { color } from 'echarts';
 
 use([
     BarChart,
@@ -28,6 +27,11 @@ use([
 const optionChart1 = ref({})
 const optionChart2 = ref({})
 const optionChart3 = ref({})
+const cardSum = ref({
+    salesToDay: 12560,
+    salesToMonth: 1200,
+    customerToMonth: 13000
+})
 
 const tabChartStockActive = ref("buy")
 
@@ -46,7 +50,6 @@ const valueChart3 = ref({
 })
 
 const setChart = async () => {
-    console.log("option1--> ", valueChart1.value.name)
     optionChart1.value = {
         // title: {
         //     text: 'สินค้าคงคลัง'
@@ -77,7 +80,7 @@ const setChart = async () => {
                 // name: '',
                 type: 'bar',
                 data: valueChart1.value.data,
-                color: "#FFFB03"
+                color: "#FFFFFF"
             },
         ]
     };
@@ -112,7 +115,7 @@ const setChart = async () => {
                 // name: '',
                 type: 'bar',
                 data: valueChart2.value.data,
-                color: "#35FF03"
+                color: "#FFFFFF"
             },
         ]
     };
@@ -146,7 +149,8 @@ const setChart = async () => {
             {
                 // name: '',
                 type: 'bar',
-                data: valueChart3.value.data
+                data: valueChart3.value.data,
+                color: "#FFFFFF"
             },
         ]
     };
@@ -171,7 +175,13 @@ onMounted(async () => {
 
         for(let i=0;i<data.productsToDeliverToday.length;i++){
             valueChart3.value.name.push(data.productsToDeliverToday[i].name)
-            valueChart3.value.data.push(data.productsToDeliverToday[i].exportToday_ซื้อ)
+            valueChart3.value.data.push(data.productsToDeliverToday[i].exportToday_ซื้อขาย)
+        }
+
+        cardSum.value = {
+            salesToDay: data.saleToday,
+            salesToMonth: data.saleMonth,
+            customerToMonth: data.totalCustomerMonth
         }
 
         await setChart()
@@ -188,34 +198,34 @@ onMounted(async () => {
     <div class="px-36 pb-10">
         <div class="flex justify-between space-x-24">
             <div class="rounded-xl bg-white px-10 py-6 h-36 w-1/3" style="background-color: #C2796A;">
-                <p class="text-white mb-3 font-semibold">จำนวนเงินทั้งหมด</p>
+                <p class="text-white mb-3 font-semibold">ยอดขาย(วันนี้)</p>
                 <span class="text-5xl font-bold text-white">฿</span>
-                <span class="text-5xl font-bold text-white ml-3">15,000</span>
+                <span class="text-5xl font-bold text-white ml-3">{{ cardSum.salesToDay.toLocaleString() }}</span>
             </div>
             <div class="rounded-xl bg-white px-10 py-6 h-36 w-1/3" style="background-color: #D37961;">
-                <p class="text-white mb-3 font-semibold">จำนวนรายงานสั่งซื้อทั้งหมด</p>
-                <!-- <span class="text-5xl font-bold text-white">฿</span> -->
-                <span class="text-5xl font-bold text-white ml-3">4,500</span>
+                <p class="text-white mb-3 font-semibold">ยอดขาย(ภายในเดือน)</p>
+                <span class="text-5xl font-bold text-white">฿</span>
+                <span class="text-5xl font-bold text-white ml-3">{{ cardSum.salesToMonth.toLocaleString() }}</span>
             </div>
             <div class="rounded-xl bg-white px-10 py-6 h-36 w-1/3" style="background-color: #9C857F;">
-                <p class="text-white mb-3 font-semibold">จำนวนลูกค้าทั้งหมด</p>
-                <span class="text-5xl font-bold text-white">2,450</span>
+                <p class="text-white mb-3 font-semibold">จำนวนลูกค้าทั้งหมด(ภายในเดือน)</p>
+                <span class="text-5xl font-bold text-white">{{ cardSum.customerToMonth.toLocaleString() }}</span>
                 <span class="text-5xl font-bold text-white ml-3">คน</span>
             </div>
         </div>
         <div class="mt-10">
             <div class="flex mb-2">
-                <div :class="{ 'font-bold py-2 px-8 rounded-l-lg cursor-pointer bg-white': true, 'tab-active': tabChartStockActive == 'buy' }"
+                <div :class="{ 'border-r-2 font-bold py-2 px-8 rounded-l-lg cursor-pointer bg-white': true, 'tab-active': tabChartStockActive == 'buy' }"
                     @click="onChangeTabStock('buy')">
                     สินค้าคงคลัง(ซื้อ-ขาย)
                 </div>
-                <div :class="{ 'font-bold py-2 px-8  cursor-pointer bg-white': true, 'tab-active': tabChartStockActive == 'deposit' }"
+                <div :class="{ 'border-r-2 font-bold py-2 px-8  cursor-pointer bg-white': true, 'tab-active': tabChartStockActive == 'deposit' }"
                     @click="onChangeTabStock('deposit')">
                     สินค้าคงคลัง(ฝากเก็บ)
                 </div>
                 <div :class="{ 'font-bold py-2 px-8 rounded-r-lg cursor-pointer bg-white': true, 'tab-active': tabChartStockActive == 'orderAmountToday' }"
                     @click="onChangeTabStock('orderAmountToday')">
-                    ยอดสั่งซื้อวันนี้
+                    ยอดสั่งซื้อวันนี้(ชิ้น)
                 </div>
             </div>
             <!-- <p class="text-2xl font-bold text-red-800">สินค้าคงคลัง</p> -->

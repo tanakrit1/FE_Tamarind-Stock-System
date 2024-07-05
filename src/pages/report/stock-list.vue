@@ -225,7 +225,7 @@ const onExportExcel = async () => {
           </svg>
 
           <span class="text-2xl font-bold text-red-800"
-            >รายการนำเข้าสินค้า</span
+            >รายงานสินค้าคงเหลือ</span
           >
         </div>
       </div>
