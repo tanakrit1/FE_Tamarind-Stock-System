@@ -364,11 +364,11 @@ const onLoadTable = async () => {
                 price: item.price,
                 customerFirstName: item.customer.firstName,
                 customerLastName: item.customer.lastName,
-                customerAddress: item.customer.address,
-                customerSubDistrict: item.customer.subDistric,
-                customerDistrict: item.customer.distric,
-                customerProvince: item.customer.province,
-                customerZipCode: item.customer.zipCode
+                customerAddress: item.shipAddress,
+                customerSubDistrict: item.shipSubDistrict,
+                customerDistrict: item.shipDistrict,
+                customerProvince: item.shipProvince,
+                customerZipCode: item.shipZipCode
             }
         })
         store.commit("setStatusLoading", false);
