@@ -58,8 +58,6 @@ const formProduct = ref({
   discription: "",
   quantity: "",
   totalPrice: "0.00",
-  price: ref(''),
-  quantity: ref(''),
 });
 
 const formSupplier = ref({
@@ -224,9 +222,9 @@ const onChangeProduct = (productID) => {
     formProduct.value.discription = "";
   }
 };
-
-
-
+const onChangeQuantity = (quantity) => {
+  formProduct.value.totalPrice = formProduct.value.price * quantity;
+};
 
 const onChangeSupplier = async (phone) => {
   store.commit("setStatusLoading", true);
@@ -466,18 +464,6 @@ const filterNumericInput = (event) => {
   formProduct.value.quantity = numericValue;
 };
 
-// Computed property to calculate total price
-const totalPrice = computed(() => {
-  const price = parseFloat(formProduct.price.value);
-  const quantity = parseFloat(formProduct.quantity.value);
-
-  if (!isNaN(price) && !isNaN(quantity)) {
-    return (price * quantity).toFixed(2);
-  } else {
-    return '';
-  }
-});
-
 onMounted(async () => {
   store.commit("setStatusLoading", true);
   clearData();
@@ -597,6 +583,7 @@ onMounted(async () => {
                 class="h-8 w-3/4 focus:outline-red-400 rounded bg-red-100 px-3"
                 type="text"
                 @input="filterNumericInput"
+                @change="(event) => onChangeQuantity(event.target.value)"
                 v-model="formProduct.quantity"
               />
               <span class="w-1/4 text-red-800 font-semibold">กิโลกรัม</span>
