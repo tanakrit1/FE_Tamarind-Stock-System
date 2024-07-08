@@ -568,7 +568,8 @@ onMounted(async () => {
             >
               <span class="w-1/4 text-red-800 font-semibold">ราคาต่อหน่วย</span>
               <input
-                type="text"
+                @change="onChangeQuantity(formProduct.quantity)"
+                type="number"
                 class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
                 v-model="formProduct.price"
               />
@@ -581,7 +582,7 @@ onMounted(async () => {
               <span class="w-1/4 text-red-800 font-semibold">ปริมาณ</span>
               <input
                 class="h-8 w-3/4 focus:outline-red-400 rounded bg-red-100 px-3"
-                type="text"
+                type="number"
                 @input="filterNumericInput"
                 @change="(event) => onChangeQuantity(event.target.value)"
                 v-model="formProduct.quantity"

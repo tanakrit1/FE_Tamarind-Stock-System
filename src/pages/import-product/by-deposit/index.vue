@@ -597,7 +597,7 @@ onMounted(async () => {
               />
               <span class="w-1/4 text-red-800 font-semibold">กิโลกรัม</span>
             </div>
-            <div
+            <!-- <div
               class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6"
             >
               <span class="w-1/4 text-red-800 font-semibold">จำนวนคงเหลือ</span>
@@ -608,7 +608,7 @@ onMounted(async () => {
                 disabled
               />
               <span class="w-1/4 text-red-800 font-semibold">กิโลกรัม</span>
-            </div>
+            </div> -->
           </div>
         </div>
       </div>
