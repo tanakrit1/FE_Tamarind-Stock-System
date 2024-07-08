@@ -35,6 +35,7 @@ const columnsSupplier = [
   { field: "specialID", label: "รหัส", width: "auto" },
   { field: "productName", label: "ชื่อสินค้า", width: "auto" },
   { field: "typeAction", label: "ประเภทสินค้า", width: "auto" },
+  { field: "createdAt", label: "วันที่ทำรายการ", width: "auto" },
   { field: "productPrice", label: "ราคาสินค้า", width: "auto" },
   { field: "quantity", label: "ปริมาณสินค้า", width: "auto" },
   { field: "price", label: "รวมทั้งสิ้น", width: "auto" },
@@ -52,6 +53,7 @@ const columnsDeposit = [
   { field: "specialID", label: "รหัส", width: "auto" },
   { field: "productName", label: "ชื่อสินค้า", width: "auto" },
   //   { field: "typeAction", label: "ประเภทสินค้า", width: "auto" },
+  { field: "createdAt", label: "วันที่ทำรายการ", width: "auto" },
   { field: "productPrice", label: "ราคาสินค้า", width: "auto" },
   { field: "quantity", label: "ปริมาณสินค้า", width: "auto" },
   { field: "remain", label: "จํานวนคงเหลือ", width: "auto" },
@@ -170,6 +172,7 @@ const onLoadTable = async () => {
                 specialID: item.product.specialID,
                 productName: item.product.name,
                 productPrice: item.product.price,
+                createdAt: item.createdAt,
                 quantity: item.quantity,
                 remain: item.remain,
                 price: item.price,
@@ -254,6 +257,7 @@ const onLoadTable = async () => {
                 specialID: item.product.specialID,
                 productName: item.product.name,
                 productPrice: item.product.price,
+                createdAt: item.createdAt,
                 quantity: item.quantity,
                 remain: item.remain,
                 price: item.price,
@@ -325,7 +329,7 @@ const onLoadTable = async () => {
             page: exportToExcelActive.value ? 1 : pagination.value.page,
             limit: exportToExcelActive.value ? 10000 : pagination.value.limit,
             sortField: "createdAt",
-          sortType: "DESC",
+            sortType: "DESC",
             filterModel: {
               logicOperator: "and",
               items: [
@@ -348,6 +352,7 @@ const onLoadTable = async () => {
                   specialID: item.product.specialID,
                   productName: item.product.name,
                   productPrice: item.product.price,
+                  createdAt: item.createdAt,
                   quantity: item.quantity,
                   remain: item.remain,
                   price: item.price,
@@ -422,7 +427,7 @@ const onLoadTable = async () => {
             page: exportToExcelActive.value ? 1 : pagination.value.page,
             limit: exportToExcelActive.value ? 10000 : pagination.value.limit,
             sortField: "createdAt",
-          sortType: "DESC",
+            sortType: "DESC",
             filterModel: {
               logicOperator: "and",
               items: [
@@ -453,6 +458,7 @@ const onLoadTable = async () => {
                   specialID: item.product.specialID,
                   productName: item.product.name,
                   productPrice: item.product.price,
+                  createdAt: item.createdAt,
                   quantity: item.quantity,
                   remain: item.remain,
                   price: item.price,
@@ -526,7 +532,7 @@ const onLoadTable = async () => {
             page: exportToExcelActive.value ? 1 : pagination.value.page,
             limit: exportToExcelActive.value ? 10000 : pagination.value.limit,
             sortField: "createdAt",
-          sortType: "DESC",
+            sortType: "DESC",
             filterModel: {
               logicOperator: "and",
               items: [
@@ -557,6 +563,7 @@ const onLoadTable = async () => {
                   specialID: item.product.specialID,
                   productName: item.product.name,
                   productPrice: item.product.price,
+                  createdAt: item.createdAt,
                   quantity: item.quantity,
                   remain: item.remain,
                   price: item.price,
@@ -646,7 +653,7 @@ const onLoadTable = async () => {
             page: exportToExcelActive.value ? 1 : pagination.value.page,
             limit: exportToExcelActive.value ? 10000 : pagination.value.limit,
             sortField: "createdAt",
-          sortType: "DESC",
+            sortType: "DESC",
             filterModel: {
               logicOperator: "and",
               items: [
@@ -685,6 +692,7 @@ const onLoadTable = async () => {
                   specialID: item.product.specialID,
                   productName: item.product.name,
                   productPrice: item.product.price,
+                  createdAt: item.createdAt,
                   quantity: item.quantity,
                   remain: item.remain,
                   price: item.price,
@@ -760,7 +768,7 @@ const onLoadTable = async () => {
             page: exportToExcelActive.value ? 1 : pagination.value.page,
             limit: exportToExcelActive.value ? 10000 : pagination.value.limit,
             sortField: "createdAt",
-          sortType: "DESC",
+            sortType: "DESC",
             filterModel: {
               logicOperator: "and",
               items: [
@@ -786,6 +794,7 @@ const onLoadTable = async () => {
                   specialID: item.product.specialID,
                   productName: item.product.name,
                   productPrice: item.product.price,
+                  createdAt: item.createdAt,
                   quantity: item.quantity,
                   remain: item.remain,
                   price: item.price,
@@ -881,7 +890,7 @@ const onLoadTable = async () => {
             page: exportToExcelActive.value ? 1 : pagination.value.page,
             limit: exportToExcelActive.value ? 10000 : pagination.value.limit,
             sortField: "createdAt",
-          sortType: "DESC",
+            sortType: "DESC",
             filterModel: {
               logicOperator: "and",
               items: [
@@ -915,6 +924,7 @@ const onLoadTable = async () => {
                   specialID: item.product.specialID,
                   productName: item.product.name,
                   productPrice: item.product.price,
+                  createdAt: item.createdAt,
                   quantity: item.quantity,
                   remain: item.remain,
                   price: item.price,
@@ -978,7 +988,7 @@ const onLoadTable = async () => {
         const body = {
           page: exportToExcelActive.value ? 1 : pagination.value.page,
           limit: exportToExcelActive.value ? 10000 : pagination.value.limit,
-                      sortType: "DESC",
+          sortType: "DESC",
           filterModel: {
             logicOperator: "and",
             items: [
@@ -1000,6 +1010,7 @@ const onLoadTable = async () => {
                 specialID: item.product.specialID,
                 productName: item.product.name,
                 productPrice: item.product.price,
+                createdAt: item.createdAt,
                 typeAction: item.typeAction,
                 quantity: item.quantity,
                 price: item.price,
@@ -1067,7 +1078,7 @@ const onLoadTable = async () => {
             page: exportToExcelActive.value ? 1 : pagination.value.page,
             limit: exportToExcelActive.value ? 10000 : pagination.value.limit,
             sortField: "createdAt",
-          sortType: "DESC",
+            sortType: "DESC",
             filterModel: {
               logicOperator: "and",
               items: [
@@ -1094,6 +1105,7 @@ const onLoadTable = async () => {
                   specialID: item.product.specialID,
                   productName: item.product.name,
                   productPrice: item.product.price,
+                  createdAt: item.createdAt,
                   typeAction: item.typeAction,
                   quantity: item.quantity,
                   price: item.price,
@@ -1181,6 +1193,7 @@ const onLoadTable = async () => {
                 specialID: item.product.specialID,
                 productName: item.product.name,
                 productPrice: item.product.price,
+                createdAt: item.createdAt,
                 typeAction: item.typeAction,
                 quantity: item.quantity,
                 price: item.price,
@@ -1250,7 +1263,7 @@ const onLoadTable = async () => {
             page: exportToExcelActive.value ? 1 : pagination.value.page,
             limit: exportToExcelActive.value ? 10000 : pagination.value.limit,
             sortField: "createdAt",
-          sortType: "DESC",
+            sortType: "DESC",
             filterModel: {
               logicOperator: "and",
               items: [
@@ -1285,6 +1298,7 @@ const onLoadTable = async () => {
                   specialID: item.product.specialID,
                   productName: item.product.name,
                   productPrice: item.product.price,
+                  createdAt: item.createdAt,
                   typeAction: item.typeAction,
                   quantity: item.quantity,
                   price: item.price,
@@ -1358,7 +1372,7 @@ const onLoadTable = async () => {
             page: exportToExcelActive.value ? 1 : pagination.value.page,
             limit: exportToExcelActive.value ? 10000 : pagination.value.limit,
             sortField: "createdAt",
-          sortType: "DESC",
+            sortType: "DESC",
             filterModel: {
               logicOperator: "and",
               items: [
@@ -1393,6 +1407,7 @@ const onLoadTable = async () => {
                   specialID: item.product.specialID,
                   productName: item.product.name,
                   productPrice: item.product.price,
+                  createdAt: item.createdAt,
                   typeAction: item.typeAction,
                   quantity: item.quantity,
                   price: item.price,
@@ -1585,6 +1600,7 @@ const onExportExcel = async () => {
       { header: "Special ID", key: "specialID", width: 15 },
       { header: "Product Name", key: "productName", width: 30 },
       { header: "Product Price", key: "productPrice", width: 15 },
+      { header: "CreatedAt", key: "createdAt", width: 15 },
       { header: "Quantity", key: "quantity", width: 15 },
       { header: "Remain", key: "remain", width: 15 },
       { header: "Price", key: "price", width: 15 },
@@ -1621,6 +1637,7 @@ const onExportExcel = async () => {
       const row = worksheet.addRow({
         specialID: item.specialID,
         productName: item.productName,
+        createdAt: item.createdAt,
         productPrice: item.productPrice,
         quantity: item.quantity,
         remain: item.remain,
@@ -1660,6 +1677,7 @@ const onExportExcel = async () => {
       { header: "Special ID", key: "specialID", width: 15 },
       { header: "Product Name", key: "productName", width: 30 },
       { header: "Type of Action", key: "typeAction", width: 20 },
+      { header: "CreatedAt", key: "createdAt", width: 15 },
       { header: "Product Price", key: "productPrice", width: 15 },
       { header: "Quantity", key: "quantity", width: 15 },
       { header: "Price", key: "price", width: 15 },
@@ -1696,6 +1714,7 @@ const onExportExcel = async () => {
       const row = worksheet.addRow({
         specialID: item.specialID,
         productName: item.productName,
+        createdAt: item.createdAt,
         typeAction: item.typeAction,
         productPrice: item.productPrice,
         quantity: item.quantity,
