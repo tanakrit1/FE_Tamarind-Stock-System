@@ -227,20 +227,6 @@ const onChangeProduct = (productID) => {
 
 
 
-const calculateTotalPrice = (price, quantity) => {
-  // คำนวณราคารวม
-  return price * quantity;
-};
-
-// เมื่อมีการเปลี่ยนแปลงค่า formProduct.value.price
-watchEffect(() => {
-  formProduct.value.totalPrice = calculateTotalPrice(formProduct.value.price, formProduct.quantity);
-});
-
-// เมื่อมีการเปลี่ยนแปลงค่า formProduct.quantity
-watchEffect(() => {
-  formProduct.value.totalPrice = calculateTotalPrice(formProduct.value.price, formProduct.quantity);
-});
 
 const onChangeSupplier = async (phone) => {
   store.commit("setStatusLoading", true);
