@@ -132,7 +132,6 @@ const onLoadData = async () => {
       }
       console.log("response", rows.value);
       store.commit("setStatusLoading", false);
-
     } else {
       showTable.value = false;
       if (typeof response.message === "string") {
@@ -357,102 +356,110 @@ function validateFormSupplier(supplier) {
 }
 
 const onSubmit = async () => {
-  console.log("***onSubmit***");
-  store.commit("setStatusLoading", true);
-  if (
-    !validateFormProduct(formProduct.value) ||
-    !validateFormSupplier(formSupplier.value) ||
-    formProduct.value.quantity === "0"
-  ) {
-    if (formProduct.value.quantity === "0") {
-      formAlert.value = {
-        status: true,
-        title: "เกิดข้อผิดพลาด",
-        body: "จํานวนสินค้าต้องไม่เป็น 0",
-      };
-      store.commit("setStatusLoading", false);
-      return;
-    } else {
-      formAlert.value = {
-        status: true,
-        title: "เกิดข้อผิดพลาด",
-        body: "กรุณากรอกข้อมูลให้ครบถ้วน",
-      };
-      store.commit("setStatusLoading", false);
-      return;
-    }
-  } else {
-    const body = {
-      //------transaction_import------//
-      quantity: formProduct.value.quantity,
-      price: Number(formProduct.value.totalPrice), //formProduct.value.totalPrice, formProduct.totalPrice
-      // priceDeposit:1152.05,
-      typeAction: formProduct.value.typeAction,
-      //--------product----------------//
-      product_id: Number(formProduct.value.productID), //formProduct.value.productID,
-      //--------supplier---------------//
-      firstName: formSupplier.value.firstName,
-      lastName: formSupplier.value.lastName,
-      address: formSupplier.value.address,
-      distric:
-        formSupplierActive.value === false
-          ? formSupplier.value.district
-          : district.find((item) => item.id === formSupplier.value.district)
-              .name_th,
-      province:
-        formSupplierActive.value === false
-          ? formSupplier.value.province
-          : province.find((item) => item.id === formSupplier.value.province)
-              .name_th,
-      subDistric:
-        formSupplierActive.value === false
-          ? formSupplier.value.subDistrict
-          : subDistrict.find(
-              (item) => item.id === formSupplier.value.subDistrict
-            ).name_th,
-      zipCode: formSupplier.value.zipCode.toString(),
-      phone: formSupplier.value.phone,
-    };
-
-    await _apiSupplierImport.createSupplierImport(body, (response) => {
-      if (response.statusCode === 200) {
-        formAlert.value = {
-          status: true,
-          title: "เเจ้งเตือน",
-          body: "บันทึกข้อมูลเรียบร้อย",
-        };
-        formSupplierActive.value = false;
-        clearData();
-        onLoadData();
-        onShowProduct();
-      } else {
-        const messages = response.message;
-        const formattedMessages = messages
-          .map((message) => `<li>${message}</li>`)
-          .join("");
+  const resultValidatePhone = validatePhone();
+  if (resultValidatePhone) {
+    console.log("***onSubmit***");
+    store.commit("setStatusLoading", true);
+    if (
+      !validateFormProduct(formProduct.value) ||
+      !validateFormSupplier(formSupplier.value) ||
+      formProduct.value.quantity === "0"
+    ) {
+      if (formProduct.value.quantity === "0") {
         formAlert.value = {
           status: true,
           title: "เกิดข้อผิดพลาด",
-          body: formattedMessages,
+          body: "จํานวนสินค้าต้องไม่เป็น 0",
         };
+        store.commit("setStatusLoading", false);
+        return;
+      } else {
+        formAlert.value = {
+          status: true,
+          title: "เกิดข้อผิดพลาด",
+          body: "กรุณากรอกข้อมูลให้ครบถ้วน",
+        };
+        store.commit("setStatusLoading", false);
+        return;
       }
-      store.commit("setStatusLoading", false);
-    });
-    console.log(body);
+    } else {
+      const body = {
+        //------transaction_import------//
+        quantity: formProduct.value.quantity,
+        price: Number(formProduct.value.totalPrice), //formProduct.value.totalPrice, formProduct.totalPrice
+        // priceDeposit:1152.05,
+        typeAction: formProduct.value.typeAction,
+        //--------product----------------//
+        product_id: Number(formProduct.value.productID), //formProduct.value.productID,
+        //--------supplier---------------//
+        firstName: formSupplier.value.firstName,
+        lastName: formSupplier.value.lastName,
+        address: formSupplier.value.address,
+        distric:
+          formSupplierActive.value === false
+            ? formSupplier.value.district
+            : district.find((item) => item.id === formSupplier.value.district)
+                .name_th,
+        province:
+          formSupplierActive.value === false
+            ? formSupplier.value.province
+            : province.find((item) => item.id === formSupplier.value.province)
+                .name_th,
+        subDistric:
+          formSupplierActive.value === false
+            ? formSupplier.value.subDistrict
+            : subDistrict.find(
+                (item) => item.id === formSupplier.value.subDistrict
+              ).name_th,
+        zipCode: formSupplier.value.zipCode.toString(),
+        phone: formSupplier.value.phone,
+      };
+
+      await _apiSupplierImport.createSupplierImport(body, (response) => {
+        if (response.statusCode === 200) {
+          formAlert.value = {
+            status: true,
+            title: "เเจ้งเตือน",
+            body: "บันทึกข้อมูลเรียบร้อย",
+          };
+          formSupplierActive.value = false;
+          clearData();
+          onLoadData();
+          onShowProduct();
+        } else {
+          const messages = response.message;
+          const formattedMessages = messages
+            .map((message) => `<li>${message}</li>`)
+            .join("");
+          formAlert.value = {
+            status: true,
+            title: "เกิดข้อผิดพลาด",
+            body: formattedMessages,
+          };
+        }
+        store.commit("setStatusLoading", false);
+      });
+      console.log(body);
+    }
+  } else {
+    formAlert.value = {
+      status: true,
+      title: "กรุณาตรวจสอบ",
+      body: "ข้อมูลเบอร์โทรศัพท์ไม่ถูกต้อง",
+    };
   }
 };
 
-const limitLength = (event) => {
-  const value = event.target.value;
-  if (value.length > 10) {
-    event.target.value = value.slice(0, 10);
-    formSupplier.value.phone = event.target.value;
+const validatePhone = () => {
+  if (!isNaN(Number(formSupplier.value.phone))) {
+    return true;
   }
+  return false;
 };
 
 const filterNumericInput = (event) => {
   const value = event.target.value;
-  const numericValue = value.replace(/\D/g, ''); // กรองตัวอักษรที่ไม่ใช่ตัวเลขออก
+  const numericValue = value.replace(/\D/g, ""); // กรองตัวอักษรที่ไม่ใช่ตัวเลขออก
   event.target.value = numericValue;
   formProduct.value.quantity = numericValue;
 };
@@ -561,7 +568,6 @@ onMounted(async () => {
             >
               <span class="w-1/4 text-red-800 font-semibold">ราคาต่อหน่วย</span>
               <input
-                disabled
                 type="text"
                 class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
                 v-model="formProduct.price"
@@ -581,14 +587,12 @@ onMounted(async () => {
                 v-model="formProduct.quantity"
               />
               <span class="w-1/4 text-red-800 font-semibold">กิโลกรัม</span>
-
             </div>
             <div
               class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6"
             >
               <span class="w-1/4 text-red-800 font-semibold">ราคา</span>
               <input
-                disabled
                 type="text"
                 class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
                 v-model="formProduct.totalPrice"
@@ -611,11 +615,9 @@ onMounted(async () => {
           >
             <label class="w-1/4 text-red-800 font-semibold">เบอร์โทร</label>
             <input
-              type="number"
-              placeholder="กรอกเบอร์โทรศัพท์ (10 หลัก)"
+              type="text"
               class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
               v-model="formSupplier.phone"
-              @input="limitLength($event)"
               @blur="(event) => onChangeSupplier(event.target.value)"
             />
           </div>

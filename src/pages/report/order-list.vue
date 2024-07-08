@@ -35,6 +35,7 @@ const columns = [
   { field: "specialID", label: "รหัส", width: "auto" },
   { field: "productName", label: "ชื่อสินค้า", width: "auto" },
   { field: "typeAction", label: "ประเภทสินค้านำออก", width: "auto" },
+  { field: "createdAt", label: "วันที่ทำรายการ", width: "auto" },
   { field: "productInPrice", label: "ราคารับซื้อ", width: "auto" },
   { field: "productOutPrice", label: "ราคาขายออก", width: "auto" },
   { field: "quantity", label: "ปริมาณการขาย", width: "auto" },
@@ -54,6 +55,7 @@ const columnsDeposit = [
   { field: "specialID", label: "รหัส", width: "auto" },
   { field: "productName", label: "ชื่อสินค้า", width: "auto" },
   { field: "typeAction", label: "ประเภทสินค้านำออก", width: "auto" },
+  { field: "createdAt", label: "วันที่ทำรายการ", width: "auto" },
   { field: "quantity_import", label: "ปริมาณฝากเข้า", width: "auto" },
   { field: "productInPrice", label: "ราคารับซื้อ", width: "auto" },
   { field: "productOutPrice", label: "ราคาขายออก", width: "auto" },
@@ -181,6 +183,7 @@ const onLoadTable = async () => {
                 flattenedData = response.data.map((item) => ({
                   specialID: item.product.specialID,
                   productName: item.product.name,
+                  createdAt: item.createdAt,
                   productInPrice: item.product.price,
                   productOutPrice: item.product.priceOut,
                   priceDeposit: item.Import_Deposit.price, //ค่าฝาก
@@ -278,6 +281,7 @@ const onLoadTable = async () => {
                 flattenedData = response.data.map((item) => ({
                   specialID: item.product.specialID,
                   productName: item.product.name,
+                  createdAt: item.createdAt,
                   productInPrice: item.product.price,
                   productOutPrice: item.product.priceOut,
                   priceDeposit: item.Import_Deposit.price, //ค่าฝาก
@@ -392,6 +396,7 @@ const onLoadTable = async () => {
                   remain: item.Import_Deposit.remain, //คงเหลือ
                   quantity_import: item.Import_Deposit.quantity,
                   quantity: item.quantity,
+                  createdAt: item.createdAt,
                   periodDate: item.Import_Deposit.periodDate,
                   supplierFirstName: item.supplier.firstName,
                   supplierLastName: item.supplier.lastName,
@@ -503,6 +508,7 @@ const onLoadTable = async () => {
                   priceTotalDeposit: item.Import_Deposit.price, //ค่าฝาก
                   remain: item.Import_Deposit.remain, //คงเหลือ
                   quantity_import: item.Import_Deposit.quantity,
+                  createdAt: item.createdAt,
                   quantity: item.quantity,
                   periodDate: item.Import_Deposit.periodDate,
                   supplierFirstName: item.supplier.firstName,
@@ -623,6 +629,7 @@ const onLoadTable = async () => {
                   remain: item.Import_Deposit.remain, //คงเหลือ
                   quantity_import: item.Import_Deposit.quantity,
                   quantity: item.quantity,
+                  createdAt: item.createdAt,
                   periodDate: item.Import_Deposit.periodDate,
                   supplierFirstName: item.supplier.firstName,
                   supplierLastName: item.supplier.lastName,
@@ -758,6 +765,7 @@ const onLoadTable = async () => {
                   remain: item.Import_Deposit.remain, //คงเหลือ
                   quantity_import: item.Import_Deposit.quantity,
                   quantity: item.quantity,
+                  createdAt: item.createdAt,
                   periodDate: item.Import_Deposit.periodDate,
                   supplierFirstName: item.supplier.firstName,
                   supplierLastName: item.supplier.lastName,
@@ -889,6 +897,7 @@ const onLoadTable = async () => {
                   productName: item.product.name,
                   productInPrice: item.product.price,
                   productOutPrice: item.product.priceOut,
+                  createdAt: item.createdAt,
                   priceDeposit: item.Import_Deposit.price, //ค่าฝาก
                   priceTotalDeposit: item.Import_Deposit.price, //ค่าฝาก
                   remain: item.Import_Deposit.remain, //คงเหลือ
@@ -974,10 +983,11 @@ const onLoadTable = async () => {
               showTable.value = true;
               fromDepositActive.value = false;
               store.commit("setStatusLoading", false);
-              console.log("name&typeAction--> ", response);
+              // console.log("name&typeAction--> ", response);
               flattenedData = response.data.map((item) => ({
                 specialID: item.product.specialID,
                 productName: item.product.name,
+                createdAt: item.createdAt,
                 productInPrice: item.product.price,
                 productOutPrice: item.product.priceOut,
                 typeAction: item.typeAction,
@@ -1071,10 +1081,11 @@ const onLoadTable = async () => {
                 showTable.value = true;
                 fromDepositActive.value = false;
                 store.commit("setStatusLoading", false);
-                console.log("name&typeAction--> ", response);
+                // console.log("name&typeAction--> ", response);
                 flattenedData = response.data.map((item) => ({
                   specialID: item.product.specialID,
                   productName: item.product.name,
+                  createdAt: item.createdAt,
                   productInPrice: item.product.price,
                   productOutPrice: item.product.priceOut,
                   typeAction: item.typeAction,
@@ -1184,6 +1195,7 @@ const onLoadTable = async () => {
                   productName: item.product.name,
                   productInPrice: item.product.price,
                   productOutPrice: item.product.priceOut,
+                  createdAt: item.createdAt,
                   typeAction: item.typeAction,
                   exportDate: item.exportDate,
                   quantity: item.quantity,
@@ -1296,6 +1308,7 @@ const onLoadTable = async () => {
                   productName: item.product.name,
                   productInPrice: item.product.price,
                   productOutPrice: item.product.priceOut,
+                  createdAt: item.createdAt,
                   typeAction: item.typeAction,
                   exportDate: item.exportDate,
                   quantity: item.quantity,
