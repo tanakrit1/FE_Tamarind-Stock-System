@@ -58,6 +58,8 @@ const formProduct = ref({
   discription: "",
   quantity: "",
   totalPrice: "0.00",
+  price: ref(''),
+  quantity: ref(''),
 });
 
 const formSupplier = ref({
@@ -222,9 +224,23 @@ const onChangeProduct = (productID) => {
     formProduct.value.discription = "";
   }
 };
-const onChangeQuantity = (quantity) => {
-  formProduct.value.totalPrice = formProduct.value.price * quantity;
+
+
+
+const calculateTotalPrice = (price, quantity) => {
+  // คำนวณราคารวม
+  return price * quantity;
 };
+
+// เมื่อมีการเปลี่ยนแปลงค่า formProduct.value.price
+watchEffect(() => {
+  formProduct.value.totalPrice = calculateTotalPrice(formProduct.value.price, formProduct.quantity);
+});
+
+// เมื่อมีการเปลี่ยนแปลงค่า formProduct.quantity
+watchEffect(() => {
+  formProduct.value.totalPrice = calculateTotalPrice(formProduct.value.price, formProduct.quantity);
+});
 
 const onChangeSupplier = async (phone) => {
   store.commit("setStatusLoading", true);
@@ -464,6 +480,18 @@ const filterNumericInput = (event) => {
   formProduct.value.quantity = numericValue;
 };
 
+// Computed property to calculate total price
+const totalPrice = computed(() => {
+  const price = parseFloat(formProduct.price.value);
+  const quantity = parseFloat(formProduct.quantity.value);
+
+  if (!isNaN(price) && !isNaN(quantity)) {
+    return (price * quantity).toFixed(2);
+  } else {
+    return '';
+  }
+});
+
 onMounted(async () => {
   store.commit("setStatusLoading", true);
   clearData();
@@ -583,7 +611,6 @@ onMounted(async () => {
                 class="h-8 w-3/4 focus:outline-red-400 rounded bg-red-100 px-3"
                 type="text"
                 @input="filterNumericInput"
-                @change="(event) => onChangeQuantity(event.target.value)"
                 v-model="formProduct.quantity"
               />
               <span class="w-1/4 text-red-800 font-semibold">กิโลกรัม</span>
@@ -593,6 +620,7 @@ onMounted(async () => {
             >
               <span class="w-1/4 text-red-800 font-semibold">ราคา</span>
               <input
+                disabled
                 type="text"
                 class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
                 v-model="formProduct.totalPrice"

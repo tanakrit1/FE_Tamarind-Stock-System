@@ -9,6 +9,7 @@ import _apiProduct from "../../api/master-products.js";
 import ExcelJS from "exceljs";
 import alert from "../../components/alert/alert.vue";
 import store from "../../store";
+import dayjs from "dayjs";
 
 const $router = useRouter();
 
@@ -183,7 +184,7 @@ const onLoadTable = async () => {
                 flattenedData = response.data.map((item) => ({
                   specialID: item.product.specialID,
                   productName: item.product.name,
-                  createdAt: item.createdAt,
+                  createdAt: dayjs(item.createdAt).format('DD-MM-YYYY'),
                   productInPrice: item.product.price,
                   productOutPrice: item.product.priceOut,
                   priceDeposit: item.Import_Deposit.price, //ค่าฝาก
@@ -281,7 +282,7 @@ const onLoadTable = async () => {
                 flattenedData = response.data.map((item) => ({
                   specialID: item.product.specialID,
                   productName: item.product.name,
-                  createdAt: item.createdAt,
+                  createdAt: dayjs(item.createdAt).format('DD-MM-YYYY'),
                   productInPrice: item.product.price,
                   productOutPrice: item.product.priceOut,
                   priceDeposit: item.Import_Deposit.price, //ค่าฝาก
@@ -396,7 +397,7 @@ const onLoadTable = async () => {
                   remain: item.Import_Deposit.remain, //คงเหลือ
                   quantity_import: item.Import_Deposit.quantity,
                   quantity: item.quantity,
-                  createdAt: item.createdAt,
+                  createdAt: dayjs(item.createdAt).format('DD-MM-YYYY'),
                   periodDate: item.Import_Deposit.periodDate,
                   supplierFirstName: item.supplier.firstName,
                   supplierLastName: item.supplier.lastName,
@@ -508,7 +509,7 @@ const onLoadTable = async () => {
                   priceTotalDeposit: item.Import_Deposit.price, //ค่าฝาก
                   remain: item.Import_Deposit.remain, //คงเหลือ
                   quantity_import: item.Import_Deposit.quantity,
-                  createdAt: item.createdAt,
+                  createdAt: dayjs(item.createdAt).format('DD-MM-YYYY'),
                   quantity: item.quantity,
                   periodDate: item.Import_Deposit.periodDate,
                   supplierFirstName: item.supplier.firstName,
@@ -629,7 +630,7 @@ const onLoadTable = async () => {
                   remain: item.Import_Deposit.remain, //คงเหลือ
                   quantity_import: item.Import_Deposit.quantity,
                   quantity: item.quantity,
-                  createdAt: item.createdAt,
+                  createdAt: dayjs(item.createdAt).format('DD-MM-YYYY'),
                   periodDate: item.Import_Deposit.periodDate,
                   supplierFirstName: item.supplier.firstName,
                   supplierLastName: item.supplier.lastName,
@@ -765,7 +766,7 @@ const onLoadTable = async () => {
                   remain: item.Import_Deposit.remain, //คงเหลือ
                   quantity_import: item.Import_Deposit.quantity,
                   quantity: item.quantity,
-                  createdAt: item.createdAt,
+                  createdAt: dayjs(item.createdAt).format('DD-MM-YYYY'),
                   periodDate: item.Import_Deposit.periodDate,
                   supplierFirstName: item.supplier.firstName,
                   supplierLastName: item.supplier.lastName,
@@ -897,7 +898,7 @@ const onLoadTable = async () => {
                   productName: item.product.name,
                   productInPrice: item.product.price,
                   productOutPrice: item.product.priceOut,
-                  createdAt: item.createdAt,
+                  createdAt: dayjs(item.createdAt).format('DD-MM-YYYY'),
                   priceDeposit: item.Import_Deposit.price, //ค่าฝาก
                   priceTotalDeposit: item.Import_Deposit.price, //ค่าฝาก
                   remain: item.Import_Deposit.remain, //คงเหลือ
@@ -987,7 +988,7 @@ const onLoadTable = async () => {
               flattenedData = response.data.map((item) => ({
                 specialID: item.product.specialID,
                 productName: item.product.name,
-                createdAt: item.createdAt,
+                createdAt: dayjs(item.createdAt).format('DD-MM-YYYY'),
                 productInPrice: item.product.price,
                 productOutPrice: item.product.priceOut,
                 typeAction: item.typeAction,
@@ -1085,7 +1086,7 @@ const onLoadTable = async () => {
                 flattenedData = response.data.map((item) => ({
                   specialID: item.product.specialID,
                   productName: item.product.name,
-                  createdAt: item.createdAt,
+                  createdAt: dayjs(item.createdAt).format('DD-MM-YYYY'),
                   productInPrice: item.product.price,
                   productOutPrice: item.product.priceOut,
                   typeAction: item.typeAction,
@@ -1195,7 +1196,7 @@ const onLoadTable = async () => {
                   productName: item.product.name,
                   productInPrice: item.product.price,
                   productOutPrice: item.product.priceOut,
-                  createdAt: item.createdAt,
+                  createdAt: dayjs(item.createdAt).format('DD-MM-YYYY'),
                   typeAction: item.typeAction,
                   exportDate: item.exportDate,
                   quantity: item.quantity,
@@ -1308,7 +1309,7 @@ const onLoadTable = async () => {
                   productName: item.product.name,
                   productInPrice: item.product.price,
                   productOutPrice: item.product.priceOut,
-                  createdAt: item.createdAt,
+                  createdAt: dayjs(item.createdAt).format('DD-MM-YYYY'),
                   typeAction: item.typeAction,
                   exportDate: item.exportDate,
                   quantity: item.quantity,
@@ -1494,6 +1495,7 @@ const onExportExcel = async () => {
       { header: "รหัสสินค้า", key: "specialID", width: 15 },
       { header: "ชื่อสินค้า", key: "productName", width: 30 },
       { header: "ประเภทสินค้า", key: "typeAction", width: 20 },
+      { header: "CreatedAt", key: "createdAt", width: 15 },
       { header: "ปริมาณฝากเข้า", key: "quantity_import", width: 15 },
       { header: "ราคารับซื้อ", key: "productInPrice", width: 15 },
       { header: "ราคาขายออก", key: "productOutPrice", width: 15 },
@@ -1536,6 +1538,7 @@ const onExportExcel = async () => {
       const row = worksheet.addRow({
         specialID: item.specialID,
         productName: item.productName,
+        createdAt: dayjs(item.createdAt).format('DD-MM-YYYY'),
         productInPrice: item.productInPrice,
         productOutPrice: item.productOutPrice,
         priceDeposit: item.priceDeposit, //ค่าฝาก
@@ -1581,6 +1584,7 @@ const onExportExcel = async () => {
       { header: "รหัสสินค้า", key: "specialID", width: 15 },
       { header: "ชื่อสินค้า", key: "productName", width: 30 },
       { header: "ประเภทสินค้า", key: "typeAction", width: 20 },
+      { header: "CreatedAt", key: "createdAt", width: 15 },
       { header: "ราคารับซื้อ", key: "productInPrice", width: 15 },
       { header: "ราคาขายออก", key: "productOutPrice", width: 15 },
       { header: "ปริมาณการขาย", key: "quantity", width: 15 },
@@ -1619,6 +1623,7 @@ const onExportExcel = async () => {
       const row = worksheet.addRow({
         specialID: item.specialID,
         productName: item.productName,
+        createdAt: dayjs(item.createdAt).format('DD-MM-YYYY'),
         productInPrice: item.productInPrice,
         productOutPrice: item.productOutPrice,
         typeAction: item.typeAction,

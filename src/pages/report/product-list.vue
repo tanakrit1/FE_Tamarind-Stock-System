@@ -9,6 +9,7 @@ import _apiProduct from "../../api/master-products.js";
 import ExcelJS from "exceljs";
 import alert from "../../components/alert/alert.vue";
 import store from "../../store";
+import dayjs from "dayjs";
 
 const $router = useRouter();
 
@@ -172,7 +173,7 @@ const onLoadTable = async () => {
                 specialID: item.product.specialID,
                 productName: item.product.name,
                 productPrice: item.product.price,
-                createdAt: item.createdAt,
+                createdAt: dayjs(item.createdAt).format('DD-MM-YYYY'),
                 quantity: item.quantity,
                 remain: item.remain,
                 price: item.price,
@@ -257,7 +258,7 @@ const onLoadTable = async () => {
                 specialID: item.product.specialID,
                 productName: item.product.name,
                 productPrice: item.product.price,
-                createdAt: item.createdAt,
+                createdAt: dayjs(item.createdAt).format('DD-MM-YYYY'),
                 quantity: item.quantity,
                 remain: item.remain,
                 price: item.price,
@@ -352,7 +353,7 @@ const onLoadTable = async () => {
                   specialID: item.product.specialID,
                   productName: item.product.name,
                   productPrice: item.product.price,
-                  createdAt: item.createdAt,
+                  createdAt: dayjs(item.createdAt).format('DD-MM-YYYY'),
                   quantity: item.quantity,
                   remain: item.remain,
                   price: item.price,
@@ -458,7 +459,7 @@ const onLoadTable = async () => {
                   specialID: item.product.specialID,
                   productName: item.product.name,
                   productPrice: item.product.price,
-                  createdAt: item.createdAt,
+                  createdAt: dayjs(item.createdAt).format('DD-MM-YYYY'),
                   quantity: item.quantity,
                   remain: item.remain,
                   price: item.price,
@@ -563,7 +564,7 @@ const onLoadTable = async () => {
                   specialID: item.product.specialID,
                   productName: item.product.name,
                   productPrice: item.product.price,
-                  createdAt: item.createdAt,
+                  createdAt: dayjs(item.createdAt).format('DD-MM-YYYY'),
                   quantity: item.quantity,
                   remain: item.remain,
                   price: item.price,
@@ -692,7 +693,7 @@ const onLoadTable = async () => {
                   specialID: item.product.specialID,
                   productName: item.product.name,
                   productPrice: item.product.price,
-                  createdAt: item.createdAt,
+                  createdAt: dayjs(item.createdAt).format('DD-MM-YYYY'),
                   quantity: item.quantity,
                   remain: item.remain,
                   price: item.price,
@@ -794,7 +795,7 @@ const onLoadTable = async () => {
                   specialID: item.product.specialID,
                   productName: item.product.name,
                   productPrice: item.product.price,
-                  createdAt: item.createdAt,
+                  createdAt: dayjs(item.createdAt).format('DD-MM-YYYY'),
                   quantity: item.quantity,
                   remain: item.remain,
                   price: item.price,
@@ -924,7 +925,7 @@ const onLoadTable = async () => {
                   specialID: item.product.specialID,
                   productName: item.product.name,
                   productPrice: item.product.price,
-                  createdAt: item.createdAt,
+                  createdAt: dayjs(item.createdAt).format('DD-MM-YYYY'),
                   quantity: item.quantity,
                   remain: item.remain,
                   price: item.price,
@@ -1010,7 +1011,7 @@ const onLoadTable = async () => {
                 specialID: item.product.specialID,
                 productName: item.product.name,
                 productPrice: item.product.price,
-                createdAt: item.createdAt,
+                createdAt: dayjs(item.createdAt).format('DD-MM-YYYY'),
                 typeAction: item.typeAction,
                 quantity: item.quantity,
                 price: item.price,
@@ -1105,7 +1106,7 @@ const onLoadTable = async () => {
                   specialID: item.product.specialID,
                   productName: item.product.name,
                   productPrice: item.product.price,
-                  createdAt: item.createdAt,
+                  createdAt: dayjs(item.createdAt).format('DD-MM-YYYY'),
                   typeAction: item.typeAction,
                   quantity: item.quantity,
                   price: item.price,
@@ -1193,7 +1194,7 @@ const onLoadTable = async () => {
                 specialID: item.product.specialID,
                 productName: item.product.name,
                 productPrice: item.product.price,
-                createdAt: item.createdAt,
+                createdAt: dayjs(item.createdAt).format('DD-MM-YYYY'),
                 typeAction: item.typeAction,
                 quantity: item.quantity,
                 price: item.price,
@@ -1298,7 +1299,7 @@ const onLoadTable = async () => {
                   specialID: item.product.specialID,
                   productName: item.product.name,
                   productPrice: item.product.price,
-                  createdAt: item.createdAt,
+                  createdAt: dayjs(item.createdAt).format('DD-MM-YYYY'),
                   typeAction: item.typeAction,
                   quantity: item.quantity,
                   price: item.price,
@@ -1407,7 +1408,7 @@ const onLoadTable = async () => {
                   specialID: item.product.specialID,
                   productName: item.product.name,
                   productPrice: item.product.price,
-                  createdAt: item.createdAt,
+                  createdAt: dayjs(item.createdAt).format('DD-MM-YYYY'),
                   typeAction: item.typeAction,
                   quantity: item.quantity,
                   price: item.price,
@@ -1637,7 +1638,7 @@ const onExportExcel = async () => {
       const row = worksheet.addRow({
         specialID: item.specialID,
         productName: item.productName,
-        createdAt: item.createdAt,
+        createdAt: dayjs(item.createdAt).format('DD-MM-YYYY'),
         productPrice: item.productPrice,
         quantity: item.quantity,
         remain: item.remain,
@@ -1711,10 +1712,12 @@ const onExportExcel = async () => {
 
     dataExport.forEach((item, index) => {
       // Add row to the worksheet
+      const formattedCreatedAt = dayjs(item.createdAt).format('DD-MM-YYYY');
+
       const row = worksheet.addRow({
         specialID: item.specialID,
         productName: item.productName,
-        createdAt: item.createdAt,
+        createdAt: dayjs(item.createdAt).format('DD-MM-YYYY'),
         typeAction: item.typeAction,
         productPrice: item.productPrice,
         quantity: item.quantity,
