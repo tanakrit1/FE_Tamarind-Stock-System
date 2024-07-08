@@ -173,7 +173,7 @@ const onLoadTable = async () => {
                 specialID: item.product.specialID,
                 productName: item.product.name,
                 productPrice: item.product.price,
-                createdAt: dayjs(item.createdAt).format('DD-MM-YYYY'),
+                createdAt: dayjs(item.createdAt).format("DD-MM-YYYY"),
                 quantity: item.quantity,
                 remain: item.remain,
                 price: item.price,
@@ -258,7 +258,7 @@ const onLoadTable = async () => {
                 specialID: item.product.specialID,
                 productName: item.product.name,
                 productPrice: item.product.price,
-                createdAt: dayjs(item.createdAt).format('DD-MM-YYYY'),
+                createdAt: dayjs(item.createdAt).format("DD-MM-YYYY"),
                 quantity: item.quantity,
                 remain: item.remain,
                 price: item.price,
@@ -353,7 +353,7 @@ const onLoadTable = async () => {
                   specialID: item.product.specialID,
                   productName: item.product.name,
                   productPrice: item.product.price,
-                  createdAt: dayjs(item.createdAt).format('DD-MM-YYYY'),
+                  createdAt: dayjs(item.createdAt).format("DD-MM-YYYY"),
                   quantity: item.quantity,
                   remain: item.remain,
                   price: item.price,
@@ -459,7 +459,7 @@ const onLoadTable = async () => {
                   specialID: item.product.specialID,
                   productName: item.product.name,
                   productPrice: item.product.price,
-                  createdAt: dayjs(item.createdAt).format('DD-MM-YYYY'),
+                  createdAt: dayjs(item.createdAt).format("DD-MM-YYYY"),
                   quantity: item.quantity,
                   remain: item.remain,
                   price: item.price,
@@ -564,7 +564,7 @@ const onLoadTable = async () => {
                   specialID: item.product.specialID,
                   productName: item.product.name,
                   productPrice: item.product.price,
-                  createdAt: dayjs(item.createdAt).format('DD-MM-YYYY'),
+                  createdAt: dayjs(item.createdAt).format("DD-MM-YYYY"),
                   quantity: item.quantity,
                   remain: item.remain,
                   price: item.price,
@@ -693,7 +693,7 @@ const onLoadTable = async () => {
                   specialID: item.product.specialID,
                   productName: item.product.name,
                   productPrice: item.product.price,
-                  createdAt: dayjs(item.createdAt).format('DD-MM-YYYY'),
+                  createdAt: dayjs(item.createdAt).format("DD-MM-YYYY"),
                   quantity: item.quantity,
                   remain: item.remain,
                   price: item.price,
@@ -795,7 +795,7 @@ const onLoadTable = async () => {
                   specialID: item.product.specialID,
                   productName: item.product.name,
                   productPrice: item.product.price,
-                  createdAt: dayjs(item.createdAt).format('DD-MM-YYYY'),
+                  createdAt: dayjs(item.createdAt).format("DD-MM-YYYY"),
                   quantity: item.quantity,
                   remain: item.remain,
                   price: item.price,
@@ -925,7 +925,7 @@ const onLoadTable = async () => {
                   specialID: item.product.specialID,
                   productName: item.product.name,
                   productPrice: item.product.price,
-                  createdAt: dayjs(item.createdAt).format('DD-MM-YYYY'),
+                  createdAt: dayjs(item.createdAt).format("DD-MM-YYYY"),
                   quantity: item.quantity,
                   remain: item.remain,
                   price: item.price,
@@ -1011,7 +1011,7 @@ const onLoadTable = async () => {
                 specialID: item.product.specialID,
                 productName: item.product.name,
                 productPrice: item.product.price,
-                createdAt: dayjs(item.createdAt).format('DD-MM-YYYY'),
+                createdAt: dayjs(item.createdAt).format("DD-MM-YYYY"),
                 typeAction: item.typeAction,
                 quantity: item.quantity,
                 price: item.price,
@@ -1106,7 +1106,7 @@ const onLoadTable = async () => {
                   specialID: item.product.specialID,
                   productName: item.product.name,
                   productPrice: item.product.price,
-                  createdAt: dayjs(item.createdAt).format('DD-MM-YYYY'),
+                  createdAt: dayjs(item.createdAt).format("DD-MM-YYYY"),
                   typeAction: item.typeAction,
                   quantity: item.quantity,
                   price: item.price,
@@ -1194,7 +1194,7 @@ const onLoadTable = async () => {
                 specialID: item.product.specialID,
                 productName: item.product.name,
                 productPrice: item.product.price,
-                createdAt: dayjs(item.createdAt).format('DD-MM-YYYY'),
+                createdAt: dayjs(item.createdAt).format("DD-MM-YYYY"),
                 typeAction: item.typeAction,
                 quantity: item.quantity,
                 price: item.price,
@@ -1299,7 +1299,7 @@ const onLoadTable = async () => {
                   specialID: item.product.specialID,
                   productName: item.product.name,
                   productPrice: item.product.price,
-                  createdAt: dayjs(item.createdAt).format('DD-MM-YYYY'),
+                  createdAt: dayjs(item.createdAt).format("DD-MM-YYYY"),
                   typeAction: item.typeAction,
                   quantity: item.quantity,
                   price: item.price,
@@ -1408,7 +1408,7 @@ const onLoadTable = async () => {
                   specialID: item.product.specialID,
                   productName: item.product.name,
                   productPrice: item.product.price,
-                  createdAt: dayjs(item.createdAt).format('DD-MM-YYYY'),
+                  createdAt: dayjs(item.createdAt).format("DD-MM-YYYY"),
                   typeAction: item.typeAction,
                   quantity: item.quantity,
                   price: item.price,
@@ -1638,7 +1638,7 @@ const onExportExcel = async () => {
       const row = worksheet.addRow({
         specialID: item.specialID,
         productName: item.productName,
-        createdAt: dayjs(item.createdAt).format('DD-MM-YYYY'),
+        createdAt: dayjs(item.createdAt).format("DD-MM-YYYY"),
         productPrice: item.productPrice,
         quantity: item.quantity,
         remain: item.remain,
@@ -1712,12 +1712,12 @@ const onExportExcel = async () => {
 
     dataExport.forEach((item, index) => {
       // Add row to the worksheet
-      const formattedCreatedAt = dayjs(item.createdAt).format('DD-MM-YYYY');
+      const formattedCreatedAt = dayjs(item.createdAt).format("DD-MM-YYYY");
 
       const row = worksheet.addRow({
         specialID: item.specialID,
         productName: item.productName,
-        createdAt: dayjs(item.createdAt).format('DD-MM-YYYY'),
+        createdAt: dayjs(item.createdAt).format("DD-MM-YYYY"),
         typeAction: item.typeAction,
         productPrice: item.productPrice,
         quantity: item.quantity,
@@ -1938,13 +1938,28 @@ const onExportExcel = async () => {
       </div>
     </div>
   </div>
-  <div v-if="showTable" class="rounded-xl mb-10 overflow-auto">
-    <tableManage
-      v-if="fromDepositActive"
-      :columns="columnsDeposit"
-      :rows="rows"
-    />
-    <tableManage v-else :columns="columnsSupplier" :rows="rows" />
+  <div v-if="showTable" class="mx-20">
+    <div class="flex w-full py-5">
+      <div
+        class="card bg-base-300 rounded-box grid h-20 flex-grow place-items-center"
+      >
+        content
+      </div>
+      <div class="divider divider-horizontal">OR</div>
+      <div
+        class="card bg-base-300 rounded-box grid h-20 flex-grow place-items-center"
+      >
+        content
+      </div>
+    </div>
+    <div class="overflow-auto rounded-xl">
+      <tableManage
+        v-if="fromDepositActive"
+        :columns="columnsDeposit"
+        :rows="rows"
+      />
+      <tableManage v-else :columns="columnsSupplier" :rows="rows" />
+    </div>
     <div class="flex justify-end py-5">
       <paginationPage
         v-model:currentPage="pagination.page"
