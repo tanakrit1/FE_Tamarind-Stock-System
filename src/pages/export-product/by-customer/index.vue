@@ -146,6 +146,7 @@ const onChangeProduct = (productID) => {
 }
 
 const onChangeQuantity = (quantity) => {
+    console.log("formOrder.value.price--> ", formOrder.value.price)
     formOrder.value.totalPrice = formOrder.value.price * quantity
 }
 
@@ -196,14 +197,22 @@ const onSearchCustomer = async (phone) => {
     await _apiCustomer.search(body, response => {
         if (response.statusCode === 200) {
             if (response.data.length > 0) {
-                formCustomerActive.value = false
-                formCustomerDisable.value = true
+                const provinceValue = province.find( (item) => item.name_th == response.data[0].province )?.id;
+                const districtValue = district.find( (item) => item.name_th == response.data[0].distric && item.province_id == provinceValue )?.id;
+                const subDistrictValue = subDistrict.find( (item) => item.name_th == response.data[0].subDistric && item.amphure_id == districtValue )?.id;
+
+                onChangeProvince(provinceValue);
+                onChangeDistrict(districtValue);
+                onChangeSubDistrict(subDistrictValue);
+
+                formCustomerActive.value = true
+                formCustomerDisable.value = false
                 formCustomer.value.firstName = response.data[0].firstName
                 formCustomer.value.lastName = response.data[0].lastName
                 formCustomer.value.address = response.data[0].address
-                formCustomer.value.province = response.data[0].province
-                formCustomer.value.district = response.data[0].distric
-                formCustomer.value.subDistrict = response.data[0].subDistric
+                formCustomer.value.province = provinceValue
+                formCustomer.value.district = districtValue
+                formCustomer.value.subDistrict = subDistrictValue
                 formCustomer.value.zipCode = response.data[0].zipCode
                 formCustomer.value.phone = response.data[0].phone
             } else {
@@ -268,7 +277,7 @@ const onCreateTransection = async (pFormOrder, pFormCustomer) => {
         distric: formCustomerActive.value === false ? pFormCustomer.district : district.find(item => item.id == pFormCustomer.district).name_th,
         province: formCustomerActive.value === false ? pFormCustomer.province : province.find(item => item.id == pFormCustomer.province).name_th,
         zipCode: pFormCustomer.zipCode.toString(),
-        phone: pFormCustomer.phone
+        phone: pFormCustomer.phone,
     }
     await _apiTranExport.create(body, response => {
         console.log("response : ", response)
@@ -347,7 +356,7 @@ const onLoadTable = async () => {
     }
 
     await _apiTranExport.search(body, response => {
-        console.log("response : ", response)
+        console.log("response--->  : ", response)
         rows.value = response.data.map(item => {
             return {
                 productName: item.product.name,
@@ -447,8 +456,8 @@ onMounted(async () => {
                                     </div>
                                     <div>
                                         <span class="text-red-800 font-semibold">ราคาสินค้า</span>
-                                        <input class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3" disabled
-                                            type="text" v-model="formOrder.price" />
+                                        <input class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"  @change="() => onChangeQuantity(formOrder.quantity)"
+                                            type="number" v-model="formOrder.price" />
                                     </div>
                                 </div>
                                 <!-- <div class="mb-3">

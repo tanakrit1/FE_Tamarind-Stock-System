@@ -487,7 +487,7 @@ onMounted(async () => {
             </div>
             <div class="w-full bg-white rounded-xl py-5">
                 <div class="px-6">
-                    <span class="text-lg font-semibold text-red-800">ข้อมูลลูกค้า</span>
+                    <span class="text-lg font-semibold text-red-800">ข้อมูลผู้เบิก</span>
                 </div>
                 <hr class="mt-2 mx-6" style="border: 1px solid #c2796a" />
                 <div class="flex flex-row flex-wrap px-10 mt-3 ">

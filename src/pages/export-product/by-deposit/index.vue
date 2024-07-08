@@ -466,11 +466,11 @@ onMounted(async () => {
                                             @change="(event) => onChangeQuantity(event.target.value)" type="number"
                                             v-model="formOrder.quantity" />
                                     </div>
-                                    <div>
+                                    <!-- <div>
                                         <span class="text-red-800 font-semibold">ราคาสินค้า</span>
                                         <input class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3" disabled
                                             type="text" v-model="formOrder.price" />
-                                    </div>
+                                    </div> -->
                                 </div>
                                 <!-- <div class="mb-3">
                   <span class="text-red-800 font-semibold">ประเภทสินค้า</span>
