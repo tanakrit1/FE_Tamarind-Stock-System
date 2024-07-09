@@ -18,6 +18,11 @@ const pagination = ref({
   limit: 10,
   totalPage: 0,
 });
+
+const showStock = ref({
+  show_sumquantity : "",
+  show_totalItems : "",
+});
 const onChangePagination = (val) => {
   pagination.page = val;
   onSubmit();
@@ -203,7 +208,8 @@ const onLoadTable = async () => {
                   supplierZipCode: item.supplier.zipCode,
                   typeAction: (item.typeAction = "ฝาก"),
                 }));
-
+                showStock.value.show_sumquantity = response.metadata.sumquantity;
+                showStock.value.show_totalItems = response.metadata.totalItems;
                 if (exportToExcelActive.value == true) {
                   dataExport = flattenedData;
                   exportToExcelActive.value = false;
@@ -301,7 +307,8 @@ const onLoadTable = async () => {
                   supplierZipCode: item.supplier.zipCode,
                   typeAction: (item.typeAction = "ฝาก"),
                 }));
-
+                showStock.value.show_sumquantity = response.metadata.sumquantity;
+                showStock.value.show_totalItems = response.metadata.totalItems;
                 if (exportToExcelActive.value == true) {
                   dataExport = flattenedData;
                   exportToExcelActive.value = false;
@@ -409,7 +416,8 @@ const onLoadTable = async () => {
                   supplierZipCode: item.supplier.zipCode,
                   typeAction: (item.typeAction = "ฝาก"),
                 }));
-
+                showStock.value.show_sumquantity = response.metadata.sumquantity;
+                showStock.value.show_totalItems = response.metadata.totalItems;
                 if (exportToExcelActive.value == true) {
                   dataExport = flattenedData;
                   exportToExcelActive.value = false;
@@ -522,7 +530,8 @@ const onLoadTable = async () => {
                   supplierZipCode: item.supplier.zipCode,
                   typeAction: (item.typeAction = "ฝาก"),
                 }));
-
+                showStock.value.show_sumquantity = response.metadata.sumquantity;
+                showStock.value.show_totalItems = response.metadata.totalItems;
                 if (exportToExcelActive.value == true) {
                   dataExport = flattenedData;
                   exportToExcelActive.value = false;
@@ -642,7 +651,8 @@ const onLoadTable = async () => {
                   supplierZipCode: item.supplier.zipCode,
                   typeAction: (item.typeAction = "ฝาก"),
                 }));
-
+                showStock.value.show_sumquantity = response.metadata.sumquantity;
+                showStock.value.show_totalItems = response.metadata.totalItems;
                 if (exportToExcelActive.value == true) {
                   dataExport = flattenedData;
                   exportToExcelActive.value = false;
@@ -778,7 +788,8 @@ const onLoadTable = async () => {
                   supplierZipCode: item.supplier.zipCode,
                   typeAction: (item.typeAction = "ฝาก"),
                 }));
-
+                showStock.value.show_sumquantity = response.metadata.sumquantity;
+                showStock.value.show_totalItems = response.metadata.totalItems;
                 if (exportToExcelActive.value == true) {
                   dataExport = flattenedData;
                   exportToExcelActive.value = false;
@@ -915,7 +926,8 @@ const onLoadTable = async () => {
                   supplierZipCode: item.supplier.zipCode,
                   typeAction: (item.typeAction = "ฝาก"),
                 }));
-
+                showStock.value.show_sumquantity = response.metadata.sumquantity;
+                showStock.value.show_totalItems = response.metadata.totalItems;
                 if (exportToExcelActive.value == true) {
                   dataExport = flattenedData;
                   exportToExcelActive.value = false;
@@ -1004,7 +1016,8 @@ const onLoadTable = async () => {
                 customerProvince: item.customer.province,
                 customerZipCode: item.customer.zipCode,
               }));
-
+              showStock.value.show_sumquantity = response.metadata.sumquantity;
+              showStock.value.show_totalItems = response.metadata.totalItems;
               if (exportToExcelActive.value == true) {
                 dataExport = flattenedData;
                 exportToExcelActive.value = false;
@@ -1102,7 +1115,8 @@ const onLoadTable = async () => {
                   customerProvince: item.customer.province,
                   customerZipCode: item.customer.zipCode,
                 }));
-
+                showStock.value.show_sumquantity = response.metadata.sumquantity;
+                showStock.value.show_totalItems = response.metadata.totalItems;
                 if (exportToExcelActive.value == true) {
                   dataExport = flattenedData;
                   exportToExcelActive.value = false;
@@ -1210,7 +1224,8 @@ const onLoadTable = async () => {
                   customerProvince: item.customer.province,
                   customerZipCode: item.customer.zipCode,
                 }));
-
+                showStock.value.show_sumquantity = response.metadata.sumquantity;
+                showStock.value.show_totalItems = response.metadata.totalItems;
                 if (exportToExcelActive.value == true) {
                   dataExport = flattenedData;
                   exportToExcelActive.value = false;
@@ -1323,7 +1338,8 @@ const onLoadTable = async () => {
                   customerProvince: item.customer.province,
                   customerZipCode: item.customer.zipCode,
                 }));
-
+                showStock.value.show_sumquantity = response.metadata.sumquantity;
+                showStock.value.show_totalItems = response.metadata.totalItems;
                 if (exportToExcelActive.value == true) {
                   dataExport = flattenedData;
                   exportToExcelActive.value = false;

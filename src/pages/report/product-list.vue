@@ -89,6 +89,11 @@ const inputSearch = ref({
   in_productName: "ทั้งหมด",
 });
 
+const showStock = ref({
+  show_sumquantity : "",
+  show_totalItems : "",
+});
+
 const selectSearch = ref({
   in_productType: "ซื้อ-ขาย",
 });
@@ -130,13 +135,13 @@ const onShowProduct = async () => {
 };
 
 const onLoadTable = async () => {
-  console.log("in_productType", selectSearch.value.in_productType);
-  console.log("in_productName", inputSearch.value.in_productName);
-  console.log("startDate", currentDate.value.startDate);
-  console.log("endDate", currentDate.value.endDate);
-  console.log("startPeriodDate", currentDate.value.startPeriodDate);
-  console.log("endPeriodDate", currentDate.value.endPeriodDate);
-  console.log("fromDepositActive", fromDepositActive.value);
+  // console.log("in_productType", selectSearch.value.in_productType);
+  // console.log("in_productName", inputSearch.value.in_productName);
+  // console.log("startDate", currentDate.value.startDate);
+  // console.log("endDate", currentDate.value.endDate);
+  // console.log("startPeriodDate", currentDate.value.startPeriodDate);
+  // console.log("endPeriodDate", currentDate.value.endPeriodDate);
+  // console.log("fromDepositActive", fromDepositActive.value);
   if (fromDepositActive.value == true) {
     if (
       currentDate.value.startDate == "" &&
@@ -161,7 +166,7 @@ const onLoadTable = async () => {
             items: [],
           },
         };
-        console.log("body --> ", body);
+        // console.log("body --> ", body);
         await _apiDepositImport.searchDepositImport(body, (response) => {
           if (response.statusCode === 200) {
             if (response.data.length > 0) {
@@ -187,6 +192,8 @@ const onLoadTable = async () => {
                 supplierProvince: item.supplier.province,
                 supplierZipCode: item.supplier.zipCode,
               }));
+              showStock.value.show_sumquantity = response.metadata.sumquantity;
+              showStock.value.show_totalItems = response.metadata.totalItems;
               if (exportToExcelActive.value == true) {
                 dataExport = flattenedData;
                 exportToExcelActive.value = false;
@@ -272,6 +279,8 @@ const onLoadTable = async () => {
                 supplierProvince: item.supplier.province,
                 supplierZipCode: item.supplier.zipCode,
               }));
+              showStock.value.show_sumquantity = response.metadata.sumquantity;
+              showStock.value.show_totalItems = response.metadata.totalItems;
               if (exportToExcelActive.value == true) {
                 dataExport = flattenedData;
                 exportToExcelActive.value = false;
@@ -367,6 +376,8 @@ const onLoadTable = async () => {
                   supplierProvince: item.supplier.province,
                   supplierZipCode: item.supplier.zipCode,
                 }));
+                showStock.value.show_sumquantity = response.metadata.sumquantity;
+              showStock.value.show_totalItems = response.metadata.totalItems;
                 if (exportToExcelActive.value == true) {
                   dataExport = flattenedData;
                   exportToExcelActive.value = false;
@@ -473,6 +484,8 @@ const onLoadTable = async () => {
                   supplierProvince: item.supplier.province,
                   supplierZipCode: item.supplier.zipCode,
                 }));
+                showStock.value.show_sumquantity = response.metadata.sumquantity;
+              showStock.value.show_totalItems = response.metadata.totalItems;
                 if (exportToExcelActive.value == true) {
                   dataExport = flattenedData;
                   exportToExcelActive.value = false;
@@ -578,6 +591,8 @@ const onLoadTable = async () => {
                   supplierProvince: item.supplier.province,
                   supplierZipCode: item.supplier.zipCode,
                 }));
+                showStock.value.show_sumquantity = response.metadata.sumquantity;
+              showStock.value.show_totalItems = response.metadata.totalItems;
                 if (exportToExcelActive.value == true) {
                   dataExport = flattenedData;
                   exportToExcelActive.value = false;
@@ -809,6 +824,8 @@ const onLoadTable = async () => {
                   supplierProvince: item.supplier.province,
                   supplierZipCode: item.supplier.zipCode,
                 }));
+                showStock.value.show_sumquantity = response.metadata.sumquantity;
+              showStock.value.show_totalItems = response.metadata.totalItems;
                 if (exportToExcelActive.value == true) {
                   dataExport = flattenedData;
                   exportToExcelActive.value = false;
@@ -939,6 +956,8 @@ const onLoadTable = async () => {
                   supplierProvince: item.supplier.province,
                   supplierZipCode: item.supplier.zipCode,
                 }));
+                showStock.value.show_sumquantity = response.metadata.sumquantity;
+              showStock.value.show_totalItems = response.metadata.totalItems;
                 if (exportToExcelActive.value == true) {
                   dataExport = flattenedData;
                   exportToExcelActive.value = false;
@@ -1007,6 +1026,7 @@ const onLoadTable = async () => {
               showTable.value = true;
               fromDepositActive.value = false;
               store.commit("setStatusLoading", false);
+              console.log("response5555--> ", response);
               flattenedData = response.data.map((item) => ({
                 specialID: item.product.specialID,
                 productName: item.product.name,
@@ -1025,6 +1045,9 @@ const onLoadTable = async () => {
                 supplierProvince: item.supplier.province,
                 supplierZipCode: item.supplier.zipCode,
               }));
+              
+              showStock.value.show_sumquantity = response.metadata.sumquantity;
+              showStock.value.show_totalItems = response.metadata.totalItems;
               if (exportToExcelActive.value == true) {
                 dataExport = flattenedData;
                 exportToExcelActive.value = false;
@@ -1102,6 +1125,7 @@ const onLoadTable = async () => {
                 showTable.value = true;
                 fromDepositActive.value = false;
                 store.commit("setStatusLoading", false);
+                console.log("response5555--> ", response);
                 flattenedData = response.data.map((item) => ({
                   specialID: item.product.specialID,
                   productName: item.product.name,
@@ -1120,6 +1144,8 @@ const onLoadTable = async () => {
                   supplierProvince: item.supplier.province,
                   supplierZipCode: item.supplier.zipCode,
                 }));
+                showStock.value.show_sumquantity = response.metadata.sumquantity;
+              showStock.value.show_totalItems = response.metadata.totalItems;
                 if (exportToExcelActive.value == true) {
                   dataExport = flattenedData;
                   exportToExcelActive.value = false;
@@ -1208,6 +1234,8 @@ const onLoadTable = async () => {
                 supplierProvince: item.supplier.province,
                 supplierZipCode: item.supplier.zipCode,
               }));
+              showStock.value.show_sumquantity = response.metadata.sumquantity;
+              showStock.value.show_totalItems = response.metadata.totalItems;
               if (exportToExcelActive.value == true) {
                 dataExport = flattenedData;
                 exportToExcelActive.value = false;
@@ -1313,6 +1341,8 @@ const onLoadTable = async () => {
                   supplierProvince: item.supplier.province,
                   supplierZipCode: item.supplier.zipCode,
                 }));
+                showStock.value.show_sumquantity = response.metadata.sumquantity;
+              showStock.value.show_totalItems = response.metadata.totalItems;
                 if (exportToExcelActive.value == true) {
                   dataExport = flattenedData;
                   exportToExcelActive.value = false;
@@ -1422,6 +1452,8 @@ const onLoadTable = async () => {
                   supplierProvince: item.supplier.province,
                   supplierZipCode: item.supplier.zipCode,
                 }));
+                showStock.value.show_sumquantity = response.metadata.sumquantity;
+              showStock.value.show_totalItems = response.metadata.totalItems;
                 if (exportToExcelActive.value == true) {
                   dataExport = flattenedData;
                   exportToExcelActive.value = false;
@@ -1943,13 +1975,15 @@ const onExportExcel = async () => {
       <div
         class="card bg-base-300 rounded-box grid h-20 flex-grow place-items-center"
       >
-        content
+        <h1>ปริมาณการสั่งซื้อ</h1>
+        <h1>{{ showStock.show_sumquantity }}</h1>
       </div>
       <div class="divider divider-horizontal">OR</div>
       <div
         class="card bg-base-300 rounded-box grid h-20 flex-grow place-items-center"
       >
-        content
+      <h1>จำนวนการสั่งซื้อ</h1>
+      <h1>{{ showStock.show_totalItems }}</h1>
       </div>
     </div>
     <div class="overflow-auto rounded-xl">
