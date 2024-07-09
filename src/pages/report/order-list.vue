@@ -1862,6 +1862,21 @@ const onExportExcel = async () => {
     </div>
   </div>
   <div v-if="showTable" class="mx-20">
+    <div class="flex w-full py-5">
+      <div
+        class="card bg-base-300 rounded-box grid h-20 flex-grow place-items-center"
+      >
+        <h1>ปริมาณการสั่งซื้อ</h1>
+        <h1>{{ showStock.show_sumquantity }}</h1>
+      </div>
+      <div class="divider divider-horizontal">OR</div>
+      <div
+        class="card bg-base-300 rounded-box grid h-20 flex-grow place-items-center"
+      >
+      <h1>จำนวนการสั่งซื้อ</h1>
+      <h1>{{ showStock.show_totalItems }}</h1>
+      </div>
+    </div>
     <div class="overflow-auto rounded-xl">
       <tableManage
         v-if="fromDepositActive"
