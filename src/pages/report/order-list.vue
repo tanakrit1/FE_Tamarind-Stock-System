@@ -1861,7 +1861,7 @@ const onExportExcel = async () => {
       </div>
     </div>
   </div>
-  <div v-if="showTable" class="mx-20">
+  <div v-if="showTable" class="mx-5">
     <div class="flex w-full py-5">
       <div
         class="card bg-base-300 rounded-box grid h-20 flex-grow place-items-center"
@@ -1869,7 +1869,7 @@ const onExportExcel = async () => {
         <h1 class="text-red-800 font-semibold text-xl font-bold">ปริมาณการสั่งซื้อ</h1>
         <h1>{{ showStock.show_sumquantity }}</h1>
       </div>
-      <div class="divider divider-horizontal">OR</div>
+      <div class="divider divider-horizontal text-red-800 font-semibold text-xl">OR</div>
       <div
         class="card bg-base-300 rounded-box grid h-20 flex-grow place-items-center"
       >
