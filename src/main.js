@@ -10,5 +10,6 @@ app.use(router);
 app.use(store)
 // app.use(VueEcharts)
 
-Axios.defaults.baseURL = import.meta.env.VITE_API_URL
+// Axios.defaults.baseURL = import.meta.env.VITE_API_URL
+Axios.defaults.baseURL = 'https://www.makhamsamkler.com:9800'
 app.mount("#app");
