@@ -153,7 +153,17 @@ const onChangeQuantity = (quantity) => {
 const onLoadDDL = async () => {
     const body = {
         page: 1,
-        limit: 1000
+        limit: 1000,
+        filterModel: {
+        logicOperator: "and",
+        items: [
+            {
+                field: "type",
+                operator: "equals",
+                value: "ซื้อ-ขาย"
+            }
+        ]
+    }
     }
     await _apiProduct.search(body, (response) => {
         if (response.statusCode === 200) {
@@ -489,7 +499,7 @@ onMounted(async () => {
                             <span class="text-red-800 text-sm text-center px-5">{{ formOrder.quantity.toLocaleString()
                                 }}</span>
 
-                            <span class="text-red-800 text-sm text-center">ชิ้น</span>
+                            <span class="text-red-800 text-sm text-center">กิโลกรัม</span>
                         </div>
                         <!-- <div class="flex flex-row-3">
                             <span class="text-red-800 text-sm text-center px-10">ส่วนลด

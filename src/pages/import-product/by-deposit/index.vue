@@ -156,7 +156,17 @@ const onShowProduct = async () => {
 
   const body = {
     page: 1,
-    limit: 10,
+    limit: 1000,
+    filterModel: {
+        logicOperator: "and",
+        items: [
+            {
+                field: "type",
+                operator: "equals",
+                value: "ฝาก"
+            }
+        ]
+    }
   };
   await _apiProduct.search(body, (response) => {
     if (response.statusCode === 200) {
@@ -615,7 +625,7 @@ onMounted(async () => {
       <div class="w-full bg-white rounded-xl py-3">
         <div class="px-6">
           <span class="text-lg font-semibold text-red-800"
-            >ข้อมูลผู้จัดจำหน่าย</span
+            >ข้อมูลผู้ฝาก</span
           >
         </div>
         <hr class="mt-2 mx-6" style="border: 1px solid #c2796a" />

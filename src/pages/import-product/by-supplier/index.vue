@@ -156,7 +156,17 @@ const onShowProduct = async () => {
 
   const body = {
     page: 1,
-    limit: 10,
+    limit: 1000,
+    filterModel: {
+        logicOperator: "and",
+        items: [
+            {
+                field: "type",
+                operator: "equals",
+                value: "ซื้อ-ขาย"
+            }
+        ]
+    }
   };
   await _apiProduct.search(body, (response) => {
     if (response.statusCode === 200) {

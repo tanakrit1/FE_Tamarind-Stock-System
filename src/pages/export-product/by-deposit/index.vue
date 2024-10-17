@@ -501,7 +501,7 @@ onMounted(async () => {
                             <span class="text-red-800 text-sm text-center px-5">{{ formOrder.quantity.toLocaleString()
                                 }}</span>
 
-                            <span class="text-red-800 text-sm text-center">ชิ้น</span>
+                            <span class="text-red-800 text-sm text-center">กิโลกรัม</span>
                         </div>
                         <!-- <div class="flex flex-row-3">
                             <span class="text-red-800 text-sm text-center px-10">ส่วนลด

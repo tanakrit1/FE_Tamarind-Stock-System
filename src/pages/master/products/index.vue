@@ -320,15 +320,15 @@ onMounted(async () => {
             </select>
           </div>
 
-          <div class="basis-1/2 px-3 space-y-2">
-            <label>ราคาขื้อเข้า</label><br />
+          <div class="basis-1/2 px-3 space-y-2" v-if="formModal.in_type=='ซื้อ-ขาย'" >
+            <label>ราคาซื้อเข้า</label><br />
             <input
               type="number"
               class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
               v-model="formModal.in_price"
             />
           </div>
-          <div class="basis-1/2 px-3 space-y-2">
+          <div class="basis-1/2 px-3 space-y-2" v-if="formModal.in_type=='ซื้อ-ขาย'">
             <label>ราคาขายออก</label><br />
             <input
               type="number"

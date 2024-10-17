@@ -42,12 +42,13 @@ const onLogin = async () => {
 
 <template>
     <div class="w-screen h-screen flex flex-col lg:flex-row  lg:items-start lg:justify-start  bg-orange-50 ">
-        <div class="pt-5 px-5 lg:px-40">
-            <p class="text-3xl font-extrabold ">ระบบจัดการคลังสินค้ามะขาม</p>
-            <p class="text-lg font-extrabold ">โครงการส่งเสริมธุรกิจพื้นบ้านจังหวัดอุตรดิตถ์</p>
+        <div class="pt-8 px-5 lg:px-40">
+            <!-- <p class="text-3xl font-extrabold ">ระบบจัดการคลังสินค้ามะขาม</p> -->
+            <p class="text-xl font-extrabold ">การเพิ่มขีดความสามารถในการประกอบการของเครือข่ายธุรกิจมะขามสามเกลอให้เข้มแข็ง </p>
+            <p class="text-xl font-extrabold "> บนฐานการผลิตโดยชุมชนเพื่อชุมชน</p>
         </div>
-        <div class="flex lg:justify-start lg:items-start px-5 pt-32 lg:pt-24 lg:pl-40 lg:absolute">
-            <img class="rounded-3xl " src="../../assets//images/banner-login.jpg" />
+        <div class="flex lg:justify-start lg:items-start px-5 pt-32 lg:pt-30 lg:pl-40 lg:absolute ">
+            <img class="rounded-3xl border-4 border-[#A2422C]" src="../../assets/images/logo2.png" />
         </div>
 
         <!-- ------------------------------------------------------------------------------------------------- -->
@@ -75,10 +76,11 @@ const onLogin = async () => {
                             <label class="text-white ">จดจำผู้ใช้งานในระบบ</label>
                         </div>
                     </div> -->
-                    <div class="mt-10">
+                    <div class="mt-10 mb-2">
                         <button type="submit"
                             class="bg-white rounded-full px-8 py-1 text-orange-700 hover:bg-orange-100">เข้าสู่ระบบ</button>
                     </div>
+                    <span class="text-white font-semibold pl-2 ">version 0.0.1</span>
                 </div>
             </div>
         </form>
