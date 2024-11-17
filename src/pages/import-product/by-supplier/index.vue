@@ -30,7 +30,7 @@ const columns = [
 ];
 
 const rows = ref([]);
-
+const unit = ref("กิโลกรัม");
 const pagination = ref({
   page: 1,
   limit: 5,
@@ -169,7 +169,9 @@ const onShowProduct = async () => {
     }
   };
   await _apiProduct.search(body, (response) => {
+    console.log("***--> ", response)
     if (response.statusCode === 200) {
+        
       dataInput.value.product = response.data.map((item) => {
         return {
           specialID: item.specialID,
@@ -219,9 +221,10 @@ const onChangeProduct = (productID) => {
     formProduct.value.productName = dataInput.value.product[0].name;
     formProduct.value.typeAction = "ซื้อ-ขาย";
 
-    // console.log("formProduct", formProduct.value);
+    unit.value = dataInput.value.listProductAll.find(item => item.id == productID).unit
     console.log("dataInput", dataInput.value.product[0].name);
     console.log("dataInput---->", dataInput.value.product);
+
   } else {
     formProduct.value.price = "";
     formProduct.value.totalPrice = "0.00";
@@ -597,7 +600,7 @@ onMounted(async () => {
                 @change="(event) => onChangeQuantity(event.target.value)"
                 v-model="formProduct.quantity"
               />
-              <span class="w-1/4 text-red-800 font-semibold">กิโลกรัม</span>
+              <span class="w-1/4 text-red-800 font-semibold">{{unit}}</span>
             </div>
             <div
               class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6"

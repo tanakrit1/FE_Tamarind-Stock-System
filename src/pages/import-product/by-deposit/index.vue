@@ -33,7 +33,7 @@ const columns = [
 ];
 
 const rows = ref([]);
-
+const unit = ref("กิโลกรัม");
 const pagination = ref({
   page: 1,
   limit: 5,
@@ -217,7 +217,7 @@ const onChangeProduct = (productID) => {
     formProduct.value.productName = dataInput.value.name;
     formProduct.value.typeAction = "ฝาก";
     setCurrentDate();
-
+    unit.value = dataInput.value.listProductAll.find(item => item.id == productID).unit
     // console.log("formProduct", formProduct.value);
     // console.log("dataInput", dataInput.value.product[0].name);
     // console.log("dataInput---->", dataInput.value.product);
@@ -605,7 +605,7 @@ onMounted(async () => {
                 v-model="formProduct.quantity"
                 @input="filterNumericInput($event)"
               />
-              <span class="w-1/4 text-red-800 font-semibold">กิโลกรัม</span>
+              <span class="w-1/4 text-red-800 font-semibold">{{unit}}</span>
             </div>
             <!-- <div
               class="lg:basis-1/2 basis-full space-x-3 flex items-center px-6 mb-6"

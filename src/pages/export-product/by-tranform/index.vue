@@ -23,6 +23,7 @@ const columns = [
     { field: "customerProvince", label: "จังหวัด", width: "20%" },
     { field: "customerZipCode", label: "ไปรษณีย์", width: "10%" },
 ]
+const unit = ref("กิโลกรัม")
 const rows = ref([]);
 const ddl = ref({
     province: [],
@@ -143,7 +144,7 @@ const onChangeProduct = (productID) => {
     } else {
         formOrder.value.price = ""
     }
-
+    unit.value = ddl.value.listProductAll.find(item => item.id == productID).unit
 }
 
 const onChangeQuantity = (quantity) => {
@@ -472,7 +473,7 @@ onMounted(async () => {
                             <span class="text-red-800 text-sm text-center px-5">{{ formOrder.quantity.toLocaleString()
                                 }}</span>
 
-                            <span class="text-red-800 text-sm text-center">กิโลกรัม</span>
+                            <span class="text-red-800 text-sm text-center">{{unit}}</span>
                         </div>
                         <!-- <div class="flex flex-row-3">
                             <span class="text-red-800 text-sm text-center px-10">ส่วนลด

@@ -28,6 +28,7 @@ const columns = [
     // { field: "supplierZipCode", label: "ไปรษณีย์", width: "10%" },
 ]
 const rows = ref([]);
+const unit = ref("กิโลกรัม");
 const rowsOriginal = ref([])
 const rowAction = ref(null)
 const effectClearTable = ref(false)
@@ -328,6 +329,7 @@ const onLoadTable = async () => {
     }
 
     await _apiTranImport.searchDepositImport(body, response => {
+        console.log("response-->", response)
         pagination.value.totalPage = response.metadata.totalPage
         rowsOriginal.value = response.data
         rows.value = response.data.map(item => {
@@ -366,6 +368,7 @@ const onTranform = (row) => {
         price: "0",
         totalPrice: "0"
     }
+    unit.value = findRows.product.unit
 
     formSupplier.value = {
         firstName: findRows.supplier.firstName,
@@ -501,7 +504,7 @@ onMounted(async () => {
                             <span class="text-red-800 text-sm text-center px-5">{{ formOrder.quantity.toLocaleString()
                                 }}</span>
 
-                            <span class="text-red-800 text-sm text-center">กิโลกรัม</span>
+                            <span class="text-red-800 text-sm text-center">{{unit}}</span>
                         </div>
                         <!-- <div class="flex flex-row-3">
                             <span class="text-red-800 text-sm text-center px-10">ส่วนลด

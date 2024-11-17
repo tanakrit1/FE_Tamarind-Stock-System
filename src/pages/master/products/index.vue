@@ -5,6 +5,7 @@ import buttonPrimaryOutline from "../../../components/buttons/button-primary-out
 import { onMounted, ref } from "vue";
 import tableManage from "../../../components/tables/table-manage.vue";
 import _apiProduct from "../../../api/master-products";
+import _apiProductType from "../../../api/master-products-type";
 import Alert from "../../../components/alert/alert.vue";
 import store from "../../../store";
 import paginationPage from "../../../components/pagination/pagination-page.vue";
@@ -42,9 +43,12 @@ const formModal = ref({
   in_price: "",
   in_price_out: "",
   in_type: "",
+  in_productType: "",
+  in_unit: "",
 });
 const modeModal = ref("add");
 const rowAction = ref(null);
+const ddlType = ref([])
 
 const modalAlert = ref({
   status: false,
@@ -60,6 +64,8 @@ const onClearFormModal = () => {
     in_price: "",
     in_price_out: "",
     in_type: "",
+    in_productType: "",
+    in_unit: "",
   };
 };
 
@@ -113,27 +119,32 @@ const onOpenModal = (mode) => {
       in_price: Number(rowAction.value.price),
       in_price_out: Number(rowAction.value.priceOut),
       in_type: rowAction.value.type,
+      in_productType: rowAction.value?.ProductTypes?.id,
+      in_unit: rowAction.value?.unit
+    //   in_productType
     };
   }
   document.getElementById("modal-employee").showModal();
 };
 
 const onSubmitModal = async () => {
-  console.log("***Submit***");
+//   console.log("***Submit***");
   if (modeModal.value === "add") {
-    console.log("***Add***");
+    // console.log("***Add***");
     const body = {
       specialID: formModal.value.in_specialID,
       name: formModal.value.in_name,
       price: Number(formModal.value.in_price),
       priceOut: Number(formModal.value.in_price_out),
       type: formModal.value.in_type,
+      productType_Id: Number(formModal.value.in_productType),
+      unit: formModal.value.in_unit
     };
-    console.log("body --> ", body);
+    // console.log("body --> ", body);
     await _apiProduct.create(body, async (response) => {
-      console.log("responseCreate --> ", response);
+    //   console.log("responseCreate --> ", response);
       if (response.statusCode === 200) {
-        console.log("responseCreate --> ", response);
+        // console.log("responseCreate --> ", response);
         modalAlert.value = {
           status: true,
           title: "สำเร็จ",
@@ -161,7 +172,7 @@ const onSubmitModal = async () => {
       }
     });
   } else {
-    console.log("***Edit***");
+    // console.log("***Edit***");
     const body = {
       //   id: formModal.value.in_id,
       //   specialID: formModal.value.in_specialID,
@@ -169,11 +180,13 @@ const onSubmitModal = async () => {
       price: Number(formModal.value.in_price),
       priceOut: Number(formModal.value.in_price_out),
       type: formModal.value.in_type,
+      productType_Id: Number(formModal.value.in_productType),
+      unit: formModal.value.in_unit
     };
     await _apiProduct.update(body, rowAction.value.id, async (response) => {
-      console.log("responseUpdate --> ", response);
+    //   console.log("responseUpdate --> ", response);
       if (response.statusCode === 200) {
-        console.log("responseUpdate --> ", response);
+        // console.log("responseUpdate --> ", response);
         modalAlert.value = {
           status: true,
           title: "สำเร็จ",
@@ -213,6 +226,21 @@ const onLoadData = async () => {
       console.log("response --> ", response);
       rows.value = response.data;
       pagination.value.totalPage = response.metadata.totalPage;
+    }
+  });
+
+  const json = {
+    page: 1,
+    limit: 100,
+    filterModel: {
+        logicOperator: "and",
+        items: []
+    }
+}
+  await _apiProductType.search(json, (response) => {
+    if (response.statusCode === 200) {
+      console.log("responseaa --> ", response);
+      ddlType.value = response.data
     }
   });
 };
@@ -290,7 +318,7 @@ onMounted(async () => {
         </h3>
         <hr class="mt-2" style="border: 1px solid #c2796a" />
         <div class="py-4 flex flex-wrap">
-          <div class="basis-1/2 px-3 space-y-2" v-if="modeModal === 'edit'">
+          <div class="basis-1/2 px-3 space-y-2 mb-3" v-if="modeModal === 'edit'">
             <label>รหัสสินค้า</label><br />
             <input
               type="text"
@@ -299,7 +327,7 @@ onMounted(async () => {
               disabled
             />
           </div>
-          <div class="basis-1/2 px-3 space-y-2">
+          <div class="basis-1/2 px-3 space-y-2 mb-3">
             <label>ชื่อสินค้า</label><br />
             <input
               type="text"
@@ -307,8 +335,8 @@ onMounted(async () => {
               v-model="formModal.in_name"
             />
           </div>
-          <div class="basis-1/2 px-3 space-y-2">
-            <label for="productType">ประเภทสินค้า</label><br />
+          <div class="basis-1/2 px-3 space-y-2 mb-3">
+            <label for="productType">การรับเข้า</label><br />
             <select
               name="productType"
               id="productType"
@@ -319,8 +347,9 @@ onMounted(async () => {
               <option value="ฝาก">ฝาก</option>
             </select>
           </div>
+          
 
-          <div class="basis-1/2 px-3 space-y-2" v-if="formModal.in_type=='ซื้อ-ขาย'" >
+          <div class="basis-1/2 px-3 space-y-2 mb-3" v-if="formModal.in_type=='ซื้อ-ขาย'" >
             <label>ราคาซื้อเข้า</label><br />
             <input
               type="number"
@@ -328,13 +357,40 @@ onMounted(async () => {
               v-model="formModal.in_price"
             />
           </div>
-          <div class="basis-1/2 px-3 space-y-2" v-if="formModal.in_type=='ซื้อ-ขาย'">
+          <div class="basis-1/2 px-3 space-y-2 mb-3" v-if="formModal.in_type=='ซื้อ-ขาย'">
             <label>ราคาขายออก</label><br />
             <input
               type="number"
               class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
               v-model="formModal.in_price_out"
             />
+          </div>
+
+          <div class="basis-1/2 px-3 space-y-2 mb-3">
+            <label for="productType">ประเภทสินค้า</label><br />
+            <select
+              required
+              name="productType"
+              id="productType"
+              class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
+              v-model="formModal.in_productType"
+            >
+              <option v-for="(item, index) in ddlType" :key="index" :value="item.id">{{item?.name}}</option>
+            </select>
+          </div>
+
+          <div class="basis-1/2 px-3 space-y-2 mb-3">
+            <label for="productType">หน่วยนับ</label><br />
+            <select
+              required
+              name="productType"
+              id="productType"
+              class="h-8 w-full focus:outline-red-400 rounded bg-red-100 px-3"
+              v-model="formModal.in_unit"
+            >
+              <option value="กิโลกรัม">กิโลกรัม</option>
+              <option value="กล่อง">กล่อง</option>
+            </select>
           </div>
           
         </div>
