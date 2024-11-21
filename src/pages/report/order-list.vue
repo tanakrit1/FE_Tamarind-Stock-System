@@ -127,11 +127,11 @@ const exportToExcelActive = ref(false);
 const formSearch = ref({
     product_name: "",
     producttype_name: "",
-    importDate: {
+    exportDate: {
         startDate: "",
         endDate: "",
     },
-    periodDate: {
+    importDeposit_periodDate: {
         startDate: "",
         endDate: "",
     }
@@ -231,7 +231,7 @@ const onLoadTable = async () => {
     let filterModel = []
     let errorMassage = "";
     for (const key in formSearch.value) {
-        if (key == "importDate" || key == "periodDate") {
+        if (key == "exportDate" ||(key == "importDeposit_periodDate" && fromDepositActive.value)) {
             if ((formSearch.value[key].startDate != "" && formSearch.value[key].startDate != null) || (formSearch.value[key].endDate != "" && formSearch.value[key].endDate != null)) {
                 if (formSearch.value[key].startDate != "" && formSearch.value[key].startDate != null && formSearch.value[key].endDate != "" && formSearch.value[key].endDate != null) {
                     filterModel.push({
@@ -244,7 +244,7 @@ const onLoadTable = async () => {
                 }
             }
         } else {
-            if (formSearch.value[key] != "" && formSearch.value[key] != null) {
+            if ((formSearch.value[key] != "" && formSearch.value[key] != null ) && key !== 'exportDate' && key !== 'importDeposit_periodDate') {
                 filterModel.push({
                     field: key,
                     operator: "equals",
@@ -415,11 +415,11 @@ const clearData = () => {
     formSearch.value = {
         product_name: "",
         producttype_name: "",
-        importDate: {
+        exportDate: {
             startDate: "",
             endDate: "",
         },
-        periodDate: {
+        importDeposit_periodDate: {
             startDate: "",
             endDate: "",
         }
@@ -670,22 +670,22 @@ const onExportExcel = async () => {
                         <div class="flex flex-col">
                             <span class="text-red-800 font-semibold">วันที่เริ่มต้น</span>
                             <input class="h-8 w-50 focus:outline-red-400 rounded bg-red-100 px-3" type="date"
-                                v-model="formSearch.importDate.startDate" />
+                                v-model="formSearch.exportDate.startDate" />
                         </div>
                         <div class="flex flex-col">
                             <span class="text-red-800 font-semibold">วันที่สิ้นสุด</span>
                             <input class="h-8 w-50 focus:outline-red-400 rounded bg-red-100 px-3" type="date"
-                                v-model="formSearch.importDate.endDate" />
+                                v-model="formSearch.exportDate.endDate" />
                         </div>
                         <div class="flex flex-col" v-if="fromDepositActive">
                             <span class="text-red-800 font-semibold">วันที่เลิกฝากเริ่มต้น</span>
                             <input class="h-8 w-50 focus:outline-red-400 rounded bg-red-100 px-3" type="date"
-                                v-model="formSearch.periodDate.startDate" />
+                                v-model="formSearch.importDeposit_periodDate.startDate" />
                         </div>
                         <div class="flex flex-col" v-if="fromDepositActive">
                             <span class="text-red-800 font-semibold">วันที่เลิกฝากสิ้นสุด</span>
                             <input class="h-8 w-50 focus:outline-red-400 rounded bg-red-100 px-3" type="date"
-                                v-model="formSearch.periodDate.endDate" />
+                                v-model="formSearch.importDeposit_periodDate.endDate" />
                         </div>
 
                         <div class="flex flex-col">

@@ -80,7 +80,7 @@ const onLogin = async () => {
                         <button type="submit"
                             class="bg-white rounded-full px-8 py-1 text-orange-700 hover:bg-orange-100">เข้าสู่ระบบ</button>
                     </div>
-                    <span class="text-white font-semibold pl-2 ">version 0.0.1</span>
+                    <span class="text-white font-semibold pl-2 ">version 0.0.2</span>
                 </div>
             </div>
         </form>

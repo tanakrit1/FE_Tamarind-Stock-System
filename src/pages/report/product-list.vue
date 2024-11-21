@@ -188,7 +188,7 @@ const onLoadTable = async () => {
     let filterModel = []
     let errorMassage = "";
     for (const key in formSearch.value) {
-        if (key == "importDate" || key == "periodDate") {
+        if (key == "importDate" || (key == "periodDate" && fromDepositActive.value) ) {
             if ((formSearch.value[key].startDate != "" && formSearch.value[key].startDate != null) || (formSearch.value[key].endDate != "" && formSearch.value[key].endDate != null)) {
                 if (formSearch.value[key].startDate != "" && formSearch.value[key].startDate != null && formSearch.value[key].endDate != "" && formSearch.value[key].endDate != null) {
                     filterModel.push({
@@ -201,7 +201,7 @@ const onLoadTable = async () => {
                 }
             }
         } else {
-            if (formSearch.value[key] != "" && formSearch.value[key] != null) {
+            if ((formSearch.value[key] != "" && formSearch.value[key] != null) && key !== 'importDate' && key !== 'periodDate') {
                 filterModel.push({
                     field: key,
                     operator: "equals",

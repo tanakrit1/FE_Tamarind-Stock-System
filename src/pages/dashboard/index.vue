@@ -73,11 +73,10 @@ const setChart = async () => {
         },
         yAxis: {
             type: 'category',
-            data: valueChart1.value.name
+            data: valueChart1.value.name,
         },
         series: [
             {
-                // name: '',
                 type: 'bar',
                 data: valueChart1.value.data,
                 color: "#FFFFFF"
@@ -163,10 +162,8 @@ const onChangeTabStock = (value) => {
 onMounted(async () => {
     store.commit("setStatusLoading", true);
     await _apiDashboard.getData({}, async ({ data }) => {
-        // const option1 = { name: [], value: [] }
-        console.log("data--> ", data)
         for (let i = 0; i < data.remaining.length; i++) {
-            valueChart1.value.name.push(data.remaining[i].name)
+            valueChart1.value.name.push(data.remaining[i].name  +" (ราคาซื้อเฉลี่ย "+ data.remaining[i].import_ซื้อขาย_average+" บาท)")
             // valueChart1.value.data.push(data.remaining[i].remaining_ซื้อขาย + " (ราคาซื้อเฉลี่ย "+ data.remaining[i].import_ซื้อขาย_average+" บาท)")
             valueChart1.value.data.push(data.remaining[i].remaining_ซื้อขาย)
 
